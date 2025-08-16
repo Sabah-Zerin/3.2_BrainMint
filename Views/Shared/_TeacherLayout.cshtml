@@ -1,0 +1,300 @@
+@{
+    string userName = Session["UserName"] as string;
+    string userEmail = Session["UserEmail"] as string;
+    string userRole = Session["UserRole"] as string;
+    bool isTeacher = userRole == "Teacher";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Teacher Dashboard | Brain Mint</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --mint-light: #a2d9ce;
+            --mint-medium: #48c9b0;
+            --mint-dark: #16a085;
+            --mint-bg: #e8f6f3;
+            --text-dark: #2c3e50;
+            --sidebar-width: 250px;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--mint-bg);
+            color: var(--text-dark);
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .teacher-sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(to bottom, var(--mint-medium), var(--mint-dark));
+            color: white;
+            padding: 20px 0;
+            box-shadow: 3px 0 15px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 20px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .user-info {
+            margin-top: 15px;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .user-email {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .nav-item {
+            margin: 8px 15px;
+        }
+
+        .nav-link-teacher {
+            color: white;
+            padding: 12px 20px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+            .nav-link-teacher:hover,
+            .nav-link-teacher.active {
+                background: rgba(255,255,255,0.2);
+                transform: translateX(5px);
+            }
+
+            .nav-link-teacher i {
+                margin-right: 12px;
+                width: 24px;
+                text-align: center;
+                font-size: 1.2rem;
+            }
+
+        /* Main Content */
+        .teacher-main-content {
+            margin-left: var(--sidebar-width);
+            padding: 30px;
+            min-height: 100vh;
+        }
+
+        /* Dashboard Cards */
+        .dashboard-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            padding: 25px;
+            margin-bottom: 25px;
+            border-top: 4px solid var(--mint-medium);
+        }
+
+        .card-title {
+            color: var(--mint-dark);
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Buttons */
+        .btn-mint {
+            background-color: var(--mint-medium);
+            color: white;
+            border: none;
+            transition: all 0.3s;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+            .btn-mint:hover {
+                background-color: var(--mint-dark);
+                color: white;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(72, 201, 176, 0.4);
+            }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Responsive adjustments */
+        @@media (max-width: 992px) {
+            .teacher-sidebar {
+                width: 80px;
+            }
+
+            .teacher-main-content {
+                margin-left: 80px;
+            }
+
+            .sidebar-header {
+                padding: 15px 5px;
+            }
+
+            .user-info,
+            .nav-link-text {
+                display: none;
+            }
+
+            .nav-item {
+                margin: 8px 5px;
+                text-align: center;
+            }
+
+            .nav-link-teacher {
+                padding: 12px 10px;
+                justify-content: center;
+            }
+
+                .nav-link-teacher i {
+                    margin-right: 0;
+                    font-size: 1.4rem;
+                }
+        }
+
+        @@media (max-width: 768px) {
+            .teacher-sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            .teacher-main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .user-info,
+            .nav-link-text {
+                display: block;
+            }
+        }
+    </style>
+
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+    <!-- TEACHER DASHBOARD LAYOUT -->
+    <div class="teacher-sidebar">
+        <div class="sidebar-header">
+            <h4>Teacher Dashboard</h4>
+            <div class="user-info">
+                <div class="user-name">@userName</div>
+                <div class="user-email">@userEmail</div>
+            </div>
+        </div>
+
+        <nav class="nav flex-column mt-4">
+            <div class="nav-item">
+                <a href="@Url.Action("TeacherDashboard", "Teacher")" class="nav-link-teacher active">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span class="nav-link-text">Dashboard</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="@Url.Action("QuizManagement", "Teacher")" class="nav-link-teacher">
+                    <i class="fas fa-tasks"></i>
+                    <span class="nav-link-text">Quiz Management</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="@Url.Action("AssignmentManagement", "Teacher")" class="nav-link-teacher">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span class="nav-link-text">Assignment Management</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="@Url.Action("QuizParticipation", "Teacher")" class="nav-link-teacher">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <span class="nav-link-text">Quiz Participation</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="@Url.Action("AssignmentDetails", "Teacher")" class="nav-link-teacher">
+                    <i class="fas fa-file-alt"></i>
+                    <span class="nav-link-text">Assignment Details</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="@Url.Action("ClassPerformance", "Teacher")" class="nav-link-teacher">
+                    <i class="fas fa-chart-line"></i>
+                    <span class="nav-link-text">Class Performance</span>
+                </a>
+            </div>
+            <div class="nav-item mt-4">
+                <a href="@Url.Action("Logout", "Account")" class="nav-link-teacher">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="nav-link-text">Logout</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <div class="teacher-main-content">
+        @RenderBody()
+    </div>
+
+    <!-- Bootstrap & jQuery Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    @RenderSection("scripts", required: false)
+
+    <script>
+        $(document).ready(function () {
+            // Add active class to current page
+            const currentPath = location.pathname + location.search;
+            $('.nav-link-teacher').each(function () {
+                if (this.href === currentPath || this.href.includes(currentPath)) {
+                    $(this).addClass('active');
+                    $(this).siblings().removeClass('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

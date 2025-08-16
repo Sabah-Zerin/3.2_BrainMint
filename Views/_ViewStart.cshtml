@@ -1,0 +1,10 @@
+﻿@{
+    if (Context.Session["UserName"] != null)
+    {
+        Layout = "~/Views/Shared/_AuthenticatedLayout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+}

@@ -1,0 +1,121 @@
+﻿/* Set padding to keep content from hitting the edges */
+.body-content {
+    margin-top: 15px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Override the default bootstrap behavior where horizontal description lists 
+   will truncate terms that are too long to fit in the left column 
+*/
+.dl-horizontal dt {
+    white-space: normal;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+/* Mint theme colors */
+.btn-mint {
+    background-color: #48c9b0;
+    color: white;
+}
+
+.btn-outline-mint {
+    color: #48c9b0;
+    border-color: #48c9b0;
+}
+
+    .btn-outline-mint:hover {
+        background-color: #48c9b0;
+        color: white;
+    }
+
+.bg-mint {
+    background-color: #a2d9ce;
+}
+
+.text-mint {
+    color: #48c9b0;
+}
+
+/* Quiz cards */
+.question-card {
+    background-color: rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
+}
+
+    .question-card:hover {
+        background-color: white;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+/* Form elements */
+.form-control:focus, .form-select:focus {
+    border-color: #48c9b0;
+    box-shadow: 0 0 0 0.25rem rgba(72, 201, 176, 0.25);
+}
+
+/* Progress bars */
+.progress-bar {
+    background-color: #48c9b0;
+}
+
+/* Ensure body takes full height */
+html, body {
+    height: 100%;
+}
+
+/* Main content styling */
+.main-content {
+    padding: 20px;
+    min-height: calc(100vh - 60px); /* Adjust footer height */
+}
+
+/* Sidebar styles */
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 1000;
+    transition: all 0.3s;
+}
+
+.main-content {
+    margin-left: 250px;
+    transition: all 0.3s;
+}
+
+.toggle-sidebar {
+    position: fixed;
+    left: 260px;
+    top: 10px;
+    z-index: 1001;
+}
+
+/* Collapsed state */
+body.sidebar-collapsed .sidebar {
+    width: 80px;
+}
+
+    body.sidebar-collapsed .sidebar .nav-link span {
+        display: none;
+    }
+
+body.sidebar-collapsed .main-content {
+    margin-left: 80px;
+}
+
+/* Nav link styles */
+.nav-link {
+    padding: 12px 20px;
+}
+
+    .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }

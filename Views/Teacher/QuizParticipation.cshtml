@@ -1,0 +1,90 @@
+@{
+    ViewBag.Title = "Quiz Participation";
+    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+}
+
+<div class="dashboard-card">
+    <h2 class="card-title">Quiz Participation</h2>
+
+    <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4>Active Quizzes</h4>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-mint">
+                    <i class="fas fa-sync-alt me-1"></i> Refresh
+                </button>
+                <button class="btn btn-mint">
+                    <i class="fas fa-play me-1"></i> Start New Session
+                </button>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-4 mb-3">
+                <div class="card border-mint h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Math Challenge</h5>
+                        <p class="card-text">Basic algebra and geometry questions</p>
+                        <div class="d-flex justify-content-between">
+                            <span class="badge bg-mint">Active</span>
+                            <span>12 participants</span>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <button class="btn btn-sm btn-mint w-100">
+                            <i class="fas fa-eye me-1"></i> Monitor
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="card border-mint h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Science Quiz</h5>
+                        <p class="card-text">Physics and chemistry fundamentals</p>
+                        <div class="d-flex justify-content-between">
+                            <span class="badge bg-mint">Active</span>
+                            <span>8 participants</span>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <button class="btn btn-sm btn-mint w-100">
+                            <i class="fas fa-eye me-1"></i> Monitor
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-5">
+        <h4>Recent Sessions</h4>
+        <div class="list-group mt-3">
+            <a href="#" class="list-group-item list-group-item-action">
+                <div class="d-flex justify-content-between">
+                    <h5 class="mb-1">History Quiz - May 10</h5>
+                    <small>Completed</small>
+                </div>
+                <p class="mb-1">28 participants • Average score: 76%</p>
+            </a>
+            <a href="#" class="list-group-item list-group-item-action">
+                <div class="d-flex justify-content-between">
+                    <h5 class="mb-1">English Grammar - May 5</h5>
+                    <small>Completed</small>
+                </div>
+                <p class="mb-1">32 participants • Average score: 82%</p>
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .border-mint {
+        border-color: var(--mint-medium) !important;
+    }
+
+    .bg-mint {
+        background-color: var(--mint-medium);
+    }
+</style>

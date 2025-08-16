@@ -1,0 +1,49 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+
+namespace Brain_Mint.Views.Quiz
+{
+	public class Result
+	{
+<h2>Quiz Result</h2>
+<p>You scored @ViewBag.Score out of @ViewBag.Total</p>
+<a href="/Quiz">Try Again</a>
+@{
+    ViewBag.Title = "Quiz Result";
+}
+
+<div class="text-center">
+    <div class="card mx-auto" style="max-width: 500px;">
+        <div class="card-body">
+            <h2 class="card-title"><i class="bi bi-trophy"></i> Quiz Result</h2>
+
+            @{
+                double percentage = (double)ViewBag.Score / (double)ViewBag.Total * 100;
+                string resultClass = percentage >= 70 ? "text-success" : percentage >= 50 ? "text-warning" : "text-danger";
+            }
+
+            <div class="result-display my-4">
+                <div class="display-4 @resultClass">@ViewBag.Score / @ViewBag.Total</div>
+                <div class="progress mt-3" style="height: 20px;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: @percentage%"
+                         aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <p class="mt-2">@percentage.ToString("0.##")% Correct</p>
+            </div>
+
+            <div class="d-grid gap-2">
+                <a href="/Quiz" class="btn btn-mint">
+                    <i class="bi bi-arrow-repeat"></i> Try Again
+                </a>
+                <a href="/Home" class="btn btn-outline-secondary">
+                    <i class="bi bi-house"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+	}
+}

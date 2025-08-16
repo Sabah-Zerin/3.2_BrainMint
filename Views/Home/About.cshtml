@@ -1,0 +1,157 @@
+﻿@{
+    ViewBag.Title = "About Brainmint";
+}
+
+<div class="container about-page">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="text-center mb-4">About Brainmint</h1>
+
+            <div class="jumbotron">
+                <p class="lead text-center">
+                    Brainmint is an innovative educational platform designed to enhance learning through interactive quizzes and assignments,
+                    connecting teachers and students in a seamless digital environment.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <div class="card feature-card">
+                <div class="card-header bg-primary text-white">
+                    <h3>For Students</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="feature-list">
+                        <li>Take interactive quizzes with immediate results</li>
+                        <li>Track your performance with detailed analytics</li>
+                        <li>Complete assignments with our built-in text editor</li>
+                        <li>View your last 5 quiz scores at a glance</li>
+                        <li>Practice by category and difficulty level</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card feature-card">
+                <div class="card-header bg-success text-white">
+                    <h3>For Teachers</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="feature-list">
+                        <li>Create and manage quizzes with multiple question types</li>
+                        <li>Organize content by categories and levels</li>
+                        <li>Monitor student performance with detailed reports</li>
+                        <li>Create and grade assignments with deadlines</li>
+                        <li>Edit or remove questions as needed</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-12">
+            <h2 class="text-center mb-4">Key Features</h2>
+
+            <div class="row">
+                <div class="col-md-4 feature-item">
+                    <div class="text-center">
+                        <i class="fas fa-user-shield feature-icon"></i>
+                        <h4>Secure Authentication</h4>
+                        <p>Separate login for teachers and students with role-based access control</p>
+                    </div>
+                </div>
+
+                <div class="col-md-4 feature-item">
+                    <div class="text-center">
+                        <i class="fas fa-tasks feature-icon"></i>
+                        <h4>Quiz Management</h4>
+                        <p>Create timed quizzes with various question types and automatic scoring</p>
+                    </div>
+                </div>
+
+                <div class="col-md-4 feature-item">
+                    <div class="text-center">
+                        <i class="fas fa-project-diagram feature-icon"></i>
+                        <h4>Assignment System</h4>
+                        <p>Teachers can create assignments with deadlines, students can submit via text editor</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-4 feature-item">
+                    <div class="text-center">
+                        <i class="fas fa-chart-line feature-icon"></i>
+                        <h4>Performance Tracking</h4>
+                        <p>Visual progress tracking with historical score data</p>
+                    </div>
+                </div>
+
+                <div class="col-md-4 feature-item">
+                    <div class="text-center">
+                        <i class="fas fa-filter feature-icon"></i>
+                        <h4>Category & Level System</h4>
+                        <p>Organize content by subject categories and difficulty levels</p>
+                    </div>
+                </div>
+
+                <div class="col-md-4 feature-item">
+                    <div class="text-center">
+                        <i class="fas fa-lock feature-icon"></i>
+                        <h4>Access Control</h4>
+                        <p>Users can only manage their own content and data</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-12 text-center">
+            <h2>Ready to Get Started?</h2>
+            <div class="cta-buttons mt-3">
+                <a href="@Url.Action("Signup", "Account")" class="btn btn-primary btn-lg mr-3">Sign Up Now</a>
+                <a href="@Url.Action("Contact", "Home")" class="btn btn-outline-secondary btn-lg">Contact Us</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .about-page {
+            padding: 2rem 0;
+        }
+
+        .feature-card {
+            height: 100%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .feature-list {
+            padding-left: 20px;
+        }
+
+            .feature-list li {
+                margin-bottom: 10px;
+            }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: #4e73df;
+            margin-bottom: 1rem;
+        }
+
+        .feature-item {
+            margin-bottom: 2rem;
+        }
+
+        .cta-buttons {
+            margin: 2rem 0;
+        }
+    </style>
+}

@@ -1,0 +1,81 @@
+@{
+    var userName = Session["UserName"] as string;
+    var userEmail = Session["UserEmail"] as string;
+    var userRole = Session["UserRole"] as string;
+}
+
+<div class="sidebar bg-dark text-white">
+    <div class="sidebar-header p-3">
+        <h5 class="text-center">@userRole Dashboard</h5>
+        <div class="user-info text-center mt-3">
+            <div class="fw-bold">@userName</div>
+            <div class="small text-muted">@userEmail</div>
+        </div>
+    </div>
+
+    <hr class="my-2 bg-light">
+
+    <ul class="nav flex-column">
+        @if (userRole == "Teacher")
+        {
+            <li class="nav-item">
+                <a class="nav-link text-white" href="@Url.Action("CreateQuiz", "Teacher")">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    <span>Create Quiz</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white" href="@Url.Action("ViewQuizzes", "Teacher")">
+                    <i class="fas fa-list me-2"></i>
+                    <span>View Quizzes</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white" href="@Url.Action("StudentDetails", "Teacher")">
+                    <i class="fas fa-users me-2"></i>
+                    <span>Students</span>
+                </a>
+            </li>
+        }
+        else
+        {
+            <li class="nav-item">
+                <a class="nav-link text-white" href="@Url.Action("AvailableQuizzes", "Student")">
+                    <i class="fas fa-list me-2"></i>
+                    <span>Available Quizzes</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white" href="@Url.Action("Results", "Student")">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    <span>Results</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white" href="@Url.Action("Teachers", "Student")">
+                    <i class="fas fa-chalkboard-teacher me-2"></i>
+                    <span>Teachers</span>
+                </a>
+            </li>
+        }
+
+        <li class="nav-item">
+            <a class="nav-link text-white" href="@Url.Action("About", "Home")">
+                <i class="fas fa-info-circle me-2"></i>
+                <span>About</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-white" href="@Url.Action("Contact", "Home")">
+                <i class="fas fa-envelope me-2"></i>
+                <span>Contact</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-white" href="@Url.Action("Logout", "Account")">
+                <i class="fas fa-sign-out-alt me-2"></i>
+                <span>Logout</span>
+            </a>
+        </li>
+    </ul>
+</div>

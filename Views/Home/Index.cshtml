@@ -1,0 +1,58 @@
+﻿@{
+    ViewBag.Title = "Dashboard";
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Welcome, @Session["UserName"]!</h1>
+</div>
+
+@if (Session["UserRole"]?.ToString() == "Teacher")
+{
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-journal-text"></i> Create New Quiz</h5>
+                    <p class="card-text">Design a new quiz for your students with multiple questions and options.</p>
+                    <a href="/Quiz/Create" class="btn btn-mint">Create Quiz</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-list-check"></i> Manage Quizzes</h5>
+                    <p class="card-text">View, edit, or delete existing quizzes you've created.</p>
+                    <a href="/Quiz" class="btn btn-mint">View Quizzes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-8 mx-auto text-center">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title"><i class="bi bi-question-circle"></i> Available Quizzes</h3>
+                    <p class="card-text">Test your knowledge with our interactive quizzes.</p>
+                    <a href="/Quiz" class="btn btn-mint btn-lg">Browse Quizzes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-graph-up"></i> Your Activity</h5>
+                <div class="text-center py-4">
+                    <img src="https://via.placeholder.com/600x200?text=Activity+Chart" alt="Activity chart" class="img-fluid" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

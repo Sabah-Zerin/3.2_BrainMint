@@ -1,0 +1,115 @@
+@{
+    ViewBag.Title = "Assignment Details";
+    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+}
+
+<div class="dashboard-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="card-title mb-0">Algebra Homework</h2>
+            <p class="mb-0 text-muted">Mathematics • Due: May 15, 2023</p>
+        </div>
+        <div>
+            <button class="btn btn-outline-mint me-2">
+                <i class="fas fa-download me-1"></i> Export
+            </button>
+            <button class="btn btn-mint">
+                <i class="fas fa-edit me-1"></i> Edit
+            </button>
+        </div>
+    </div>
+
+    <div class="mb-5">
+        <h4>Instructions</h4>
+        <p>Solve the following algebraic equations and show your work. Submit your solutions in PDF format by the due date.</p>
+        <ol>
+            <li>Solve for x: 2x + 5 = 15</li>
+            <li>Simplify: 3(x + 4) - 2(2x - 1)</li>
+            <li>Find the slope of the line passing through points (2,3) and (5,11)</li>
+        </ol>
+    </div>
+
+    <div class="mb-4">
+        <h4 class="d-flex justify-content-between">
+            Submissions (24/30)
+            <div class="d-flex gap-2">
+                <div class="input-group" style="width: 250px;">
+                    <input type="text" class="form-control" placeholder="Search students...">
+                    <button class="btn btn-outline-mint">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <button class="btn btn-outline-mint">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+            </div>
+        </h4>
+
+        <div class="table-responsive mt-3">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Submission Date</th>
+                        <th>Status</th>
+                        <th>Grade</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>John Smith</td>
+                        <td>May 14, 2023</td>
+                        <td><span class="badge bg-success">Submitted</span></td>
+                        <td>A-</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-mint">
+                                <i class="fas fa-eye"></i> Review
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Emma Johnson</td>
+                        <td>May 13, 2023</td>
+                        <td><span class="badge bg-success">Submitted</span></td>
+                        <td>B+</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-mint">
+                                <i class="fas fa-eye"></i> Review
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Michael Brown</td>
+                        <td>-</td>
+                        <td><span class="badge bg-warning">Pending</span></td>
+                        <td>-</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-mint" disabled>
+                                <i class="fas fa-eye"></i> Review
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end mt-4">
+        <nav>
+            <ul class="pagination">
+                <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item"><a class="page-link" href="#">Next</a></li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<style>
+    .badge.bg-success {
+        background-color: var(--mint-medium) !important;
+    }
+</style>

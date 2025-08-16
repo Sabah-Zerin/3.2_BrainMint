@@ -1,0 +1,63 @@
+@{
+    ViewBag.Title = "Quiz Management";
+    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+}
+
+<div class="dashboard-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="card-title mb-0">Quiz Management</h2>
+        <a href="@Url.Action("Create", "Quiz")" class="btn btn-mint">
+            <i class="fas fa-plus"></i> New Quiz
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="bg-mint text-white">
+                <tr>
+                    <th>Quiz Name</th>
+                    <th>Category</th>
+                    <th>Questions</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Math Midterm Exam</td>
+                    <td>Mathematics</td>
+                    <td>25</td>
+                    <td><span class="badge bg-success">Active</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-mint">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Science Quiz 1</td>
+                    <td>Science</td>
+                    <td>15</td>
+                    <td><span class="badge bg-warning">Draft</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-mint">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .bg-mint {
+        background-color: var(--mint-medium);
+    }
+</style>

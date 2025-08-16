@@ -1,0 +1,171 @@
+@{
+    ViewBag.Title = "Teacher Dashboard";
+    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+}
+
+<div class="dashboard-card">
+    <h2 class="card-title">Welcome, @Session["UserName"]!</h2>
+
+    <!-- Notifications Section -->
+    <div class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3><i class="fas fa-bell me-2 text-mint"></i> Notifications</h3>
+            <span class="badge bg-danger">3 new</span>
+        </div>
+
+        <div class="alert alert-light">
+            <ul class="mb-0">
+                <li class="mb-2">
+                    <i class="fas fa-exclamation-circle me-2 text-danger"></i>
+                    <strong>3 new assignments</strong> to review
+                </li>
+                <li class="mb-2">
+                    <i class="fas fa-check-circle me-2 text-success"></i>
+                    Your results for <strong>"Science Midterm"</strong> are ready
+                </li>
+                <li>
+                    <i class="fas fa-question-circle me-2 text-warning"></i>
+                    <strong>2 students</strong> need help with assignments
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Stats and Activity Section -->
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Recent Activity -->
+            <div class="mb-5">
+                <h3 class="mb-3"><i class="fas fa-history me-2 text-mint"></i> Recent Activity</h3>
+
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex">
+                            <div class="flex-shrink-0">
+                                <div class="bg-mint text-white rounded-circle p-2" style="width: 40px; height: 40px;">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5 class="mb-1">Math Quiz Results</h5>
+                                <p class="mb-0">Class average: 78% • 5 students need review</p>
+                                <small class="text-muted">2 hours ago</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex">
+                            <div class="flex-shrink-0">
+                                <div class="bg-mint text-white rounded-circle p-2" style="width: 40px; height: 40px;">
+                                    <i class="fas fa-file-upload"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5 class="mb-1">Science Assignment Submitted</h5>
+                                <p class="mb-0">12 new submissions to grade</p>
+                                <small class="text-muted">Yesterday</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Quick Stats -->
+            <div class="card border-mint h-100">
+                <div class="card-header bg-mint text-white">
+                    <h4 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i> Quick Stats</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Active Quizzes
+                            <span class="badge bg-mint rounded-pill">5</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Pending Assignments
+                            <span class="badge bg-warning rounded-pill">12</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Class Average
+                            <span class="badge bg-success rounded-pill">84%</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Unread Messages
+                            <span class="badge bg-danger rounded-pill">3</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="mt-5">
+        <h3 class="mb-4"><i class="fas fa-bolt me-2 text-mint"></i> Quick Actions</h3>
+
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-mint">
+                    <div class="card-body text-center">
+                        <div class="bg-mint text-white rounded-circle p-3 d-inline-block mb-3">
+                            <i class="fas fa-plus fa-2x"></i>
+                        </div>
+                        <h5 class="card-title">Create New Quiz</h5>
+                        <p class="card-text">Design a new quiz for your students with multiple questions and options.</p>
+                        <a href="@Url.Action("QuizManagement", "Teacher")" class="btn btn-mint">Create Quiz</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-mint">
+                    <div class="card-body text-center">
+                        <div class="bg-mint text-white rounded-circle p-3 d-inline-block mb-3">
+                            <i class="fas fa-tasks fa-2x"></i>
+                        </div>
+                        <h5 class="card-title">Manage Quizzes</h5>
+                        <p class="card-text">View, edit, or delete existing quizzes you've created.</p>
+                        <a href="@Url.Action("QuizManagement", "Teacher")" class="btn btn-outline-mint">View Quizzes</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-mint">
+                    <div class="card-body text-center">
+                        <div class="bg-mint text-white rounded-circle p-3 d-inline-block mb-3">
+                            <i class="fas fa-chart-line fa-2x"></i>
+                        </div>
+                        <h5 class="card-title">View Performance</h5>
+                        <p class="card-text">Analyze class and student performance with detailed reports.</p>
+                        <a href="@Url.Action("ClassPerformance", "Teacher")" class="btn btn-outline-mint">View Reports</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .text-mint {
+        color: var(--mint-medium);
+    }
+
+    .bg-mint {
+        background-color: var(--mint-medium) !important;
+    }
+
+    .border-mint {
+        border-color: var(--mint-medium) !important;
+    }
+
+    .alert-light {
+        background-color: rgba(72, 201, 176, 0.1);
+        border-left: 4px solid var(--mint-medium);
+    }
+</style>

@@ -1,0 +1,128 @@
+﻿@{
+    ViewBag.Title = "Contact Brainmint";
+}
+
+<div class="container contact-page">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="contact-header text-center mb-5">
+                <h1 class="display-4">Get in Touch</h1>
+                <p class="lead">We'd love to hear from you! Whether you have questions about Brainmint or want to provide feedback, our team is ready to help.</p>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card contact-card h-100">
+                        <div class="card-body">
+                            <div class="text-center mb-4">
+                                <i class="fas fa-map-marker-alt contact-icon"></i>
+                            </div>
+                            <h3 class="text-center mb-3">Our Headquarters</h3>
+                            <address>
+                                Brainmint Education Technologies<br />
+                                
+                                Dhaka<br />
+                                Bangladesh
+                            </address>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="card contact-card h-100">
+                        <div class="card-body">
+                            <div class="text-center mb-4">
+                                <i class="fas fa-envelope contact-icon"></i>
+                            </div>
+                            <h3 class="text-center mb-3">Email Us</h3>
+                            <address>
+                                <strong>General Inquiries:</strong> <a href="mailto:info@brainmint.com">info@brainmint.com</a><br />
+                                <strong>Technical Support:</strong> <a href="mailto:support@brainmint.com">support@brainmint.com</a><br />
+                                <strong>Partnerships:</strong> <a href="mailto:partners@brainmint.com">partners@brainmint.com</a>
+                            </address>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-form mt-5">
+                <h2 class="text-center mb-4">Send Us a Message</h2>
+                <form>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="name" class="form-label">Your Name</label>
+                            <input type="text" class="form-control" id="name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="subject" class="form-label">Subject</label>
+                        <input type="text" class="form-control" id="subject" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Message</label>
+                        <textarea class="form-control" id="message" rows="5" required></textarea>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary btn-lg">Send Message</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .contact-page {
+            padding: 4rem 0;
+        }
+
+        .contact-header {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .contact-card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+            .contact-card:hover {
+                transform: translateY(-5px);
+            }
+
+        .contact-icon {
+            font-size: 2.5rem;
+            color: #48c9b0;
+        }
+
+        .contact-form {
+            background: #fff;
+            padding: 2.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .form-control {
+            padding: 10px 15px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .btn-primary {
+            background-color: #48c9b0;
+            border-color: #48c9b0;
+            padding: 10px 30px;
+        }
+
+            .btn-primary:hover {
+                background-color: #16a085;
+                border-color: #16a085;
+            }
+    </style>
+}

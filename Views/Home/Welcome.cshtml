@@ -1,0 +1,159 @@
+﻿@*
+
+    @{
+        ViewBag.Title = "Welcome to Brainmint";
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+
+    <!-- All Sections Wrapped in One Division -->
+    <div class="container-fluid p-0">
+
+        <!-- Hero Section -->
+        <div class="text-center bg-light py-5">
+            <h1 class="display-3 fw-bold text-primary" style="font-family: 'Poppins', sans-serif;">
+                Brainmint
+            </h1>
+            <p class="lead text-muted">
+                Learn smarter. Teach better. Grow together.
+            </p>
+
+            <div class="my-4">
+                <img src="~/Content/Images/welcome.jpg"
+                     class="img-fluid rounded shadow-lg"
+                     alt="Brainmint Welcome Image"
+                     style="width: 100%; max-width: 900px; height: 230px; object-fit: cover; object-position: center; opacity: 0.8;">
+            </div>
+        </div>
+
+        <!-- About Section -->
+        <div class="my-5 text-center">
+            <h2 class="fw-bold text-dark mb-3">Why Choose Brainmint?</h2>
+            <p class="text-muted fs-5">
+                Brainmint is a smart platform designed to make learning and teaching interactive,
+                engaging, and efficient. Whether you’re a student or a teacher,
+                we provide tools that help you grow and succeed.
+            </p>
+        </div>
+
+        <!-- Features Section -->
+        <div class="my-5">
+            <div class="row text-center">
+                <div class="col-md-4">
+                    <h4 class="fw-bold text-primary">📘 For Students</h4>
+                    <p class="text-muted">
+                        Take quizzes, track your progress, and challenge yourself with different levels
+                        of difficulty to sharpen your knowledge.
+                    </p>
+                </div>
+                <div class="col-md-4">
+                    <h4 class="fw-bold text-success">👩‍🏫 For Teachers</h4>
+                    <p class="text-muted">
+                        Create and manage quizzes, assign tasks, and analyze student performance
+                        with powerful tools at your fingertips.
+                    </p>
+                </div>
+                <div class="col-md-4">
+                    <h4 class="fw-bold text-warning">🌐 Easy Access</h4>
+                    <p class="text-muted">
+                        Log in anytime, anywhere. A user-friendly platform built with simplicity,
+                        flexibility, and efficiency in mind.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Call-to-Action Section -->
+        <div class="bg-primary text-white text-center py-5">
+            <h2 class="fw-bold">Start Your Journey with Brainmint Today</h2>
+            <p class="fs-5">Log in if you already have an account, or sign up and join our growing community.</p>
+            <div class="mt-3">
+                <a href="@Url.Action("Login", "Account")" class="btn btn-light btn-lg px-4 me-3">
+                    Log In
+                </a>
+                <a href="@Url.Action("Signup", "Account")" class="btn btn-outline-light btn-lg px-4">
+                    Sign Up
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+*@
+
+@{
+    ViewBag.Title = "Welcome to Brainmint";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- All Sections Wrapped in One Division -->
+<div class="container-fluid p-0">
+
+    <!-- Hero Section -->
+    <div class="text-center bg-light py-5">
+        <h1 class="display-3 fw-bold text-primary" style="font-family: 'Poppins', sans-serif;">
+            Brainmint
+        </h1>
+        <p class="lead text-muted">
+            Learn smarter. Teach better. Grow together.
+        </p>
+
+        <div class="my-4">
+            <img src="~/Content/Images/welcome.jpg"
+                 class="img-fluid rounded shadow-lg"
+                 alt="Brainmint Welcome Image"
+                 style="width: 100%; max-width: 900px; height: 230px; object-fit: cover; object-position: center; opacity: 0.8;">
+        </div>
+    </div>
+
+    <!-- About Section -->
+    <div class="my-5 text-center">
+        <h2 class="fw-bold text-dark mb-3">Why Choose Brainmint?</h2>
+        <p class="text-muted fs-5">
+            Brainmint is a smart platform designed to make learning and teaching interactive,
+            engaging, and efficient. Whether you're a student or a teacher,
+            we provide tools that help you grow and succeed.
+        </p>
+    </div>
+
+    <!-- Features Section -->
+    <div class="my-5">
+        <div class="row text-center">
+            <div class="col-md-4">
+                <h4 class="fw-bold text-primary">📘 For Students</h4>
+                <p class="text-muted">
+                    Take quizzes, track your progress, and challenge yourself with different levels
+                    of difficulty to sharpen your knowledge.
+                </p>
+            </div>
+            <div class="col-md-4">
+                <h4 class="fw-bold text-success">👩‍🏫 For Teachers</h4>
+                <p class="text-muted">
+                    Create and manage quizzes, assign tasks, and analyze student performance
+                    with powerful tools at your fingertips.
+                </p>
+            </div>
+            <div class="col-md-4">
+                <h4 class="fw-bold text-warning">🌐 Easy Access</h4>
+                <p class="text-muted">
+                    Log in anytime, anywhere. A user-friendly platform built with simplicity,
+                    flexibility, and efficiency in mind.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call-to-Action Section -->
+    <div class="bg-primary text-white text-center py-5">
+        <h2 class="fw-bold">Start Your Journey with Brainmint Today</h2>
+        <p class="fs-5">Log in if you already have an account, or sign up and join our growing community.</p>
+        <div class="mt-3">
+            <a href="@Url.Action("Login", "Account")" class="btn btn-light btn-lg px-4 me-3">
+                Log In
+            </a>
+            <a href="@Url.Action("Signup", "Account")" class="btn btn-outline-light btn-lg px-4">
+                Sign Up
+            </a>
+        </div>
+    </div>
+
+</div>

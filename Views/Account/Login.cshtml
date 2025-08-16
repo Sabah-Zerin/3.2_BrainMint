@@ -1,0 +1,118 @@
+<div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1 class="auth-title">Welcome to Brainmint</h1>
+            <p class="mb-0 text-white-50">Please login to continue</p>
+        </div>
+        <div class="auth-body">
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger mb-3">@ViewBag.Error</div>
+            }
+
+            @if (ViewBag.Success != null)
+            {
+                <div class="alert alert-success mb-3">@ViewBag.Success</div>
+            }
+
+            <form method="post" action="/Account/Login">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Username</label>
+                    <input type="text" name="name" class="form-control form-control-lg" placeholder="Enter your username" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Password</label>
+                    <input type="password" name="password" class="form-control form-control-lg" placeholder="Enter your password" required>
+                    <div class="text-end mt-2">
+                        <a href="#" class="text-decoration-none" style="color: var(--mint-medium);">Forgot password?</a>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold d-block mb-2">Select Role</label>
+                    <div class="d-flex justify-content-between gap-3">
+                        <div class="form-check flex-grow-1">
+                            <input class="form-check-input" type="radio" name="role" id="studentRole" value="Student" checked>
+                            <label class="form-check-label fw-normal" for="studentRole">
+                                <i class="fas fa-user-graduate me-2"></i>Student
+                            </label>
+                        </div>
+                        <div class="form-check flex-grow-1">
+                            <input class="form-check-input" type="radio" name="role" id="teacherRole" value="Teacher">
+                            <label class="form-check-label fw-normal" for="teacherRole">
+                                <i class="fas fa-chalkboard-teacher me-2"></i>Teacher
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-auth w-100 text-white py-2 mb-3" style="font-size: 1rem;">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                </button>
+
+                <div class="auth-footer text-center pt-3 border-top">
+                    Don't have an account? <a href="/Account/Signup" class="auth-link fw-bold" style="color: var(--mint-dark);">Create one</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .auth-card {
+            width: 100%;
+            max-width: 650px; /* wider */
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .auth-header {
+            background: linear-gradient(to right, var(--mint-medium), var(--sky-dark));
+            color: white;
+            padding: 1.5rem; /* less vertical padding */
+            text-align: center;
+        }
+
+        .auth-title {
+            font-size: 1.7rem;
+            margin-bottom: 0.3rem;
+            font-weight: 600;
+        }
+
+        .auth-body {
+            background: #fff;
+            padding: 1.5rem 2.5rem; /* more horizontal padding */
+        }
+
+        .btn-auth {
+            background: linear-gradient(to right, var(--mint-medium), var(--sky-dark));
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+            .btn-auth:hover {
+                background: linear-gradient(to right, var(--mint-dark), var(--sky-dark));
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(72, 201, 176, 0.4);
+            }
+
+        .form-control-lg {
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+            .form-control-lg:focus {
+                border-color: var(--mint-medium);
+                box-shadow: 0 0 0 0.25rem rgba(72, 201, 176, 0.25);
+            }
+
+        .form-check-input:checked {
+            background-color: var(--mint-medium);
+            border-color: var(--mint-medium);
+        }
+    </style>
+}
