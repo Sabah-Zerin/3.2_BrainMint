@@ -1,0 +1,53 @@
+@model List<Brain_Mint.Controllers.Assignment>
+@{
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+}
+
+<h2>Assignment Participation</h2>
+<table class="table table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>Assignment Title</th>
+            <th>Due Date</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var assignment in Model)
+        {
+            string statusClass = "";
+            if (assignment.Status == "Submitted")
+            {
+                statusClass = "success";
+            }
+            else if (assignment.Status == "Missed")
+            {
+                statusClass = "danger";
+            }
+            else
+            {
+                statusClass = "warning";
+            }
+
+            <tr>
+                <td>@assignment.Title</td>
+                <td>@assignment.DueDate.ToString("dd MMM yyyy")</td>
+                <td><span class="badge bg-@statusClass @(statusClass == "warning" ? "text-dark" : "")">@assignment.Status</span></td>
+
+                <td>
+
+                    @if (assignment.Status == "Pending")
+                    {
+                        <button class="btn btn-sm btn-primary">Submit</button>
+                        <button class="btn btn-sm btn-info">View</button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-sm btn-info">View Details</button>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

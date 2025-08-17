@@ -1,0 +1,58 @@
+@model List<Brain_Mint.Controllers.Quiz>
+@{
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+}
+
+<h2>Quiz Participation</h2>
+<table class="table table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>Quiz Title</th>
+            <th>Category</th>
+            <th>Level</th>
+            <th>Status</th>
+            <th>Score</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var quiz in Model)
+        {
+            <tr>
+                <td>@quiz.Title</td>
+                <td>@quiz.Category</td>
+                <td>@quiz.Level</td>
+                <td>
+                    @if (quiz.Attended)
+                    {
+                        <span class="badge bg-success">Attended</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning text-dark">Not Attended</span> <!-- Added text-dark -->
+                    }
+                </td>
+                <td>
+                    @if (quiz.Score.HasValue)
+                    {
+                        <span class="badge bg-primary">@quiz.Score.Value%</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">N/A</span>
+                    }
+                </td>
+                <td>
+                    @if (quiz.Attended)
+                    {
+                        <button class="btn btn-sm btn-info">View Details</button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-sm btn-primary">Attend Quiz</button>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

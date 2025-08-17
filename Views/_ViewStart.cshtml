@@ -1,7 +1,15 @@
 ﻿@{
     if (Context.Session["UserName"] != null)
     {
-        Layout = "~/Views/Shared/_AuthenticatedLayout.cshtml";
+        string role = Session["UserRole"] as string;
+        if (role == "Student")
+        {
+            Layout = "~/Views/Shared/_StudentLayout.cshtml";
+        }
+        else if (role == "Teacher")
+        {
+            Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+        }
     }
     else
     {

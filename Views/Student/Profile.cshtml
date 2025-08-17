@@ -1,0 +1,86 @@
+@model Brain_Mint.Models.User
+@{
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+    ViewBag.Title = "Student Profile";
+}
+
+<div class="dashboard-card">
+    <h2 class="card-title">Student Profile</h2>
+
+    @if (ViewBag.SuccessMessage != null)
+    {
+        <div class="alert alert-success">@ViewBag.SuccessMessage</div>
+    }
+
+    @using (Html.BeginForm("Profile", "Student", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="fw-bold">Name</label>
+                    <div class="input-group">
+                        @Html.TextBoxFor(m => m.Name, new { @class = "form-control form-control-lg", @readonly = "readonly" })
+                        <button class="btn btn-outline-secondary" type="button" disabled>
+                            <i class="fas fa-pen"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="fw-bold">Role</label>
+                    <div class="input-group">
+                        @Html.TextBoxFor(m => m.Role, new { @class = "form-control form-control-lg", @readonly = "readonly" })
+                        <button class="btn btn-outline-secondary" type="button" disabled>
+                            <i class="fas fa-pen"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group mb-4">
+            <label class="fw-bold">Email Address</label>
+            <div class="input-group">
+                @Html.TextBoxFor(m => m.Email, new { @class = "form-control form-control-lg", @readonly = "readonly" })
+                <button class="btn btn-outline-secondary" type="button" onclick="enableField(this)">
+                    <i class="fas fa-pen"></i>
+                </button>
+            </div>
+            @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group mb-4">
+            <label class="fw-bold">New Password</label>
+            <div class="input-group">
+                @Html.PasswordFor(m => m.Password, new
+                {
+                    @class = "form-control form-control-lg",
+                    placeholder = "Leave blank to keep current",
+                    @readonly = "readonly"
+                })
+                <button class="btn btn-outline-secondary" type="button" onclick="enableField(this)">
+                    <i class="fas fa-pen"></i>
+                </button>
+            </div>
+            @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg">
+            <i class="fas fa-save me-2"></i>Update Profile
+        </button>
+    }
+</div>
+
+@section scripts {
+    <script>
+        function enableField(button) {
+            const input = button.previousElementSibling;
+            input.removeAttribute('readonly');
+            input.focus();
+        }
+    </script>
+}

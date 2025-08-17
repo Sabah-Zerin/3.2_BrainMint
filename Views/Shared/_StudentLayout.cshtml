@@ -1,0 +1,203 @@
+@{
+    if (Session["UserRole"]?.ToString() != "Student")
+    {
+        Context.Response.Redirect(Url.Action("Login", "Account"));
+    }
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - @ViewBag.Title</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Add Styles section renderer -->
+    @RenderSection("Styles", required: false)
+
+    <style>
+        :root {
+            --mint-light: #a2d9ce;
+            --mint-medium: #48c9b0;
+            --mint-dark: #16a085;
+            --mint-bg: #e8f6f3;
+            --text-dark: #2c3e50;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--mint-bg);
+            color: var(--text-dark);
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background: linear-gradient(to bottom, var(--mint-medium), var(--mint-dark));
+            color: white;
+            height: 100vh;
+            position: fixed;
+            width: 250px;
+            padding-top: 20px;
+            box-shadow: 3px 0 15px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 20px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .sidebar a {
+            color: rgba(255,255,255,0.85);
+            padding: 12px 20px;
+            display: block;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 8px 15px;
+            transition: all 0.3s;
+        }
+
+            .sidebar a:hover {
+                background: rgba(255,255,255,0.2);
+                transform: translateX(5px);
+            }
+
+        .sidebar i {
+            margin-right: 12px;
+            width: 24px;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 30px;
+            min-height: 100vh;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            padding: 25px;
+            margin-bottom: 25px;
+            border-top: 4px solid var(--mint-medium);
+        }
+
+        /* Responsive styles */
+        @@media (max-width: 992px) {
+            .sidebar {
+                width: 80px;
+            }
+
+            .sidebar-header h4,
+            .sidebar-header p {
+                display: none;
+            }
+
+            .sidebar a span {
+                display: none;
+            }
+
+            .sidebar i {
+                margin-right: 0;
+                font-size: 1.4rem;
+            }
+
+            .main-content {
+                margin-left: 80px;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+                .sidebar-header h4,
+                .sidebar-header p,
+                .sidebar a span {
+                    display: block;
+                }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h4>Welcome Student</h4>
+            <p>@Session["UserName"]</p>
+            <p>@Session["UserEmail"]</p>
+        </div>
+        <nav>
+            <a href="@Url.Action("StudentDashboard", "Student")">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="@Url.Action("QuizParticipation", "Student")">
+                <i class="fas fa-question-circle"></i>
+                <span>Quiz Participation</span>
+            </a>
+            <a href="@Url.Action("AssignmentParticipation", "Student")">
+                <i class="fas fa-tasks"></i>
+                <span>Assignment Participation</span>
+            </a>
+            <a href="@Url.Action("Performance", "Student")">
+                <i class="fas fa-chart-line"></i>
+                <span>Performance</span>
+            </a>
+            <a href="@Url.Action("Profile", "Student")">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+            <a href="@Url.Action("Logout", "Account")">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        @RenderBody()
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Uncomment scripts render section -->
+    @RenderSection("scripts", required: false)
+
+    <script>
+        $(document).ready(function () {
+            // Add active class to current page
+            var currentUrl = window.location.href.split('?')[0];
+            $('.sidebar a').each(function () {
+                if (this.href === currentUrl) {
+                    $(this).addClass('active');
+                    $(this).css({
+                        'background': 'rgba(255,255,255,0.3)',
+                        'font-weight': 'bold'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -129,6 +129,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Answer.cs" />
+    <Compile Include="Models\FakeDB.cs" />
     <Compile Include="Models\Question.cs" />
     <Compile Include="Models\quiz.cs" />
     <Compile Include="Models\User.cs" />
@@ -190,7 +191,6 @@
     <Content Include="Views\Account\Login.cshtml" />
     <Content Include="Views\Account\Signup.cshtml" />
     <Content Include="Views\Quiz\Create.cshtml" />
-    <Content Include="Views\Shared\_AuthenticatedLayout.cshtml" />
     <Content Include="Views\Home\Welcome.cshtml" />
     <None Include="Views\Shared\.editorconfig" />
     <Content Include="Views\Shared\_Sidebar.cshtml" />
@@ -201,11 +201,16 @@
     <Content Include="Views\Teacher\QuizParticipation.cshtml" />
     <Content Include="Views\Teacher\AssignmentDetails.cshtml" />
     <Content Include="Views\Teacher\ClassPerformance.cshtml" />
+    <Content Include="Views\Shared\_StudentLayout.cshtml" />
+    <Content Include="Views\Student\StudentDashboard.cshtml" />
+    <Content Include="Views\Student\QuizParticipation.cshtml" />
+    <Content Include="Views\Student\AssignmentParticipation.cshtml" />
+    <Content Include="Views\Student\Performance.cshtml" />
+    <Content Include="Views\Student\Profile.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Content\App_LocalResources\" />
-    <Folder Include="Views\Student\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />

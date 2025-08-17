@@ -176,13 +176,6 @@
         </nav>
     }
 
-    <!-- Sidebar (if logged in) -->
-    @if (isLoggedIn && !isAuthPage)
-    {
-        @Html.Partial("_Sidebar")
-        <button class="toggle-sidebar"><i class="fas fa-bars"></i></button>
-    }
-
     <!-- Page Body -->
     <div class="@(isLoggedIn && !isAuthPage ? "main-content" : "container body-content mt-4")">
         @RenderBody()

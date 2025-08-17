@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using Brain_Mint.Models;
 
 namespace Brain_Mint.Controllers
 {
@@ -79,9 +80,10 @@ namespace Brain_Mint.Controllers
             // Redirect to appropriate dashboard
             if (user.Role == "Teacher")
                 return RedirectToAction("TeacherDashboard", "Teacher");
+            else if (user.Role == "Student")
+                return RedirectToAction("StudentDashboard", "Student"); 
             else
                 return RedirectToAction("Index", "Home");
-        
         }
 
         public ActionResult Logout()

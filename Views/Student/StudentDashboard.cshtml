@@ -1,0 +1,38 @@
+@{
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+}
+
+<h2>Student Dashboard</h2>
+<div class="alert alert-info">
+    Welcome to your student dashboard! Here you can manage your quizzes, assignments, and track your performance.
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Quizzes</h5>
+                <p class="card-text">View available quizzes and track your participation</p>
+                <a href="@Url.Action("QuizParticipation", "Student")" class="btn btn-light">Go to Quizzes</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Assignments</h5>
+                <p class="card-text">Submit assignments and track deadlines</p>
+                <a href="@Url.Action("AssignmentParticipation", "Student")" class="btn btn-light">Go to Assignments</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Performance</h5>
+                <p class="card-text">View your quiz and assignment scores</p>
+                <a href="@Url.Action("Performance", "Student")" class="btn btn-light">View Performance</a>
+            </div>
+        </div>
+    </div>
+</div>
