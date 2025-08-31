@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Brain_Mint.Models;
+using System.Data.Entity;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
-using Brain_Mint.Models;
 
 namespace Brain_Mint.Controllers
 {
     public class AccountController : Controller
     {
-        // Simulated in-memory user list for testing
-        private static List<User> users = new List<User>();
+        private BrainMintDbContext db = new BrainMintDbContext();
 
         public ActionResult Signup()
         {
@@ -18,31 +15,27 @@ namespace Brain_Mint.Controllers
         }
 
         [HttpPost]
-        public ActionResult Signup(string name, string email, string password, string role)
+        public ActionResult Signup(User user)
         {
-            if (users.Any(u => u.Name == name))
+            if (ModelState.IsValid)
             {
-                ViewBag.Error = "User already exists.";
-                return View();
+                // Check if user already exists
+                if (db.Users.Any(u => u.Name == user.Name))
+                {
+                    ViewBag.Error = "User already exists.";
+                    return View();
+                }
+
+                // Add user to database
+                db.Users.Add(user);
+                db.SaveChanges();
+
+                TempData["SignupSuccess"] = "Signup is successful! Please login.";
+                return RedirectToAction("Login");
             }
 
-            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(email) ||
-                string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(role))
-            {
-                ViewBag.Error = "All fields are required.";
-                return View();
-            }
-
-            users.Add(new User
-            {
-                Name = name,
-                Email = email,
-                Password = password,
-                Role = role
-            });
-
-            TempData["SignupSuccess"] = "Signup is successful! Please login.";
-            return RedirectToAction("Login");
+            ViewBag.Error = "All fields are required.";
+            return View();
         }
 
         public ActionResult Login()
@@ -57,7 +50,7 @@ namespace Brain_Mint.Controllers
         [HttpPost]
         public ActionResult Login(string name, string password, string role)
         {
-            var user = users.FirstOrDefault(u => u.Name == name && u.Role == role);
+            var user = db.Users.FirstOrDefault(u => u.Name == name && u.Role == role);
 
             if (user == null)
             {
@@ -71,17 +64,18 @@ namespace Brain_Mint.Controllers
                 return View();
             }
 
+            Session["UserId"] = user.Id;
             Session["UserName"] = user.Name;
             Session["UserEmail"] = user.Email;
             Session["UserRole"] = user.Role;
 
-            TempData["LoginSuccess"] = "Login successful!";;
+            TempData["LoginSuccess"] = "Login successful!";
 
             // Redirect to appropriate dashboard
             if (user.Role == "Teacher")
                 return RedirectToAction("TeacherDashboard", "Teacher");
             else if (user.Role == "Student")
-                return RedirectToAction("StudentDashboard", "Student"); 
+                return RedirectToAction("StudentDashboard", "Student");
             else
                 return RedirectToAction("Index", "Home");
         }
@@ -92,13 +86,5 @@ namespace Brain_Mint.Controllers
             Session.Abandon();
             return RedirectToAction("Login");
         }
-    }
-
-    public class User
-    {
-        public string Name { get; set; }
-        public string Email { get; set; }
-        public string Password { get; set; }
-        public string Role { get; set; }
     }
 }

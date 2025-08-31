@@ -180,12 +180,6 @@
     <div class="@(isLoggedIn && !isAuthPage ? "main-content" : "container body-content mt-4")">
         @RenderBody()
 
-        @if (!isAuthPage)
-        {
-            <footer>
-                <p>&copy; @DateTime.Now.Year - Brainmint</p>
-            </footer>
-        }
     </div>
 
     <!-- Scripts -->

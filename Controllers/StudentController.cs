@@ -10,7 +10,8 @@ namespace Brain_Mint.Controllers
 {
     public class StudentController : Controller
     {
-        // Student Dashboard
+        private BrainMintDbContext db = new BrainMintDbContext();
+        
         public ActionResult StudentDashboard()
         {
             if (Session["UserRole"]?.ToString() != "Student")
@@ -87,8 +88,8 @@ namespace Brain_Mint.Controllers
             if (Session["UserRole"]?.ToString() != "Student")
                 return RedirectToAction("Login", "Account");
 
-            string userName = Session["UserName"] as string;
-            var user = FakeDB.Users.FirstOrDefault(u => u.Name == userName);
+            int userId = Convert.ToInt32(Session["UserId"]);
+            var user = db.Users.Find(userId);
 
             if (user == null)
                 return RedirectToAction("Login", "Account");
@@ -105,7 +106,7 @@ namespace Brain_Mint.Controllers
 
             if (ModelState.IsValid)
             {
-                var user = FakeDB.Users.FirstOrDefault(u => u.Name == model.Name);
+                var user = db.Users.Find(model.Id);
                 if (user != null)
                 {
                     user.Email = model.Email;
@@ -114,6 +115,7 @@ namespace Brain_Mint.Controllers
                     {
                         user.Password = model.Password;
                     }
+                    db.SaveChanges();
                     ViewBag.SuccessMessage = "Profile updated successfully!";
                 }
             }
@@ -122,8 +124,9 @@ namespace Brain_Mint.Controllers
         }
     }
 
-    // Helper classes (move to Models folder later)
-    public class Quiz
+
+// Helper classes (move to Models folder later)
+public class Quiz
     {
         public int Id { get; set; }
         public string Title { get; set; }
