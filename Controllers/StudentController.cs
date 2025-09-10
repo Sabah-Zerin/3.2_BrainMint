@@ -22,18 +22,14 @@ namespace Brain_Mint.Controllers
         }
 
         // Quiz Participation
+        // In StudentController QuizParticipation method, change to:
         public ActionResult QuizParticipation()
         {
             if (Session["UserRole"]?.ToString() != "Student")
                 return RedirectToAction("Login", "Account");
 
-            // Sample quiz data - replace with database logic
-            var quizzes = new List<Quiz>
-            {
-                new Quiz { Id = 1, Title = "Mathematics Quiz", Category = "Math", Level = "Beginner", Attended = true, Score = 85 },
-                new Quiz { Id = 2, Title = "Science Quiz", Category = "Science", Level = "Intermediate", Attended = false },
-                new Quiz { Id = 3, Title = "History Quiz", Category = "History", Level = "Advanced" }
-            };
+            // Get available quizzes from database
+            var quizzes = db.Quizzes.Where(q => q.Status == "Active").ToList();
 
             ViewBag.Title = "Quiz Participation";
             return View(quizzes);
@@ -122,37 +118,5 @@ namespace Brain_Mint.Controllers
 
             return View(model);
         }
-    }
-
-
-// Helper classes (move to Models folder later)
-public class Quiz
-    {
-        public int Id { get; set; }
-        public string Title { get; set; }
-        public string Category { get; set; }
-        public string Level { get; set; }
-        public bool Attended { get; set; }
-        public int? Score { get; set; }
-    }
-
-    public class Assignment
-    {
-        public int Id { get; set; }
-        public string Title { get; set; }
-        public DateTime DueDate { get; set; }
-        public string Status { get; set; }
-    }
-
-    public class StudentPerformance
-    {
-        public List<ScoreRecord> QuizScores { get; set; }
-        public List<ScoreRecord> AssignmentScores { get; set; }
-    }
-
-    public class ScoreRecord
-    {
-        public string Name { get; set; }
-        public int Score { get; set; }
     }
 }

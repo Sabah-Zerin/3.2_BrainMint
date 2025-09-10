@@ -142,12 +142,21 @@
     <Compile Include="Migrations\202509102155139_AddLoginLog.Designer.cs">
       <DependentUpon>202509102155139_AddLoginLog.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202509102238015_AddQuizTables.cs" />
+    <Compile Include="Migrations\202509102238015_AddQuizTables.Designer.cs">
+      <DependentUpon>202509102238015_AddQuizTables.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202509102255049_AddQuizTables1.cs" />
+    <Compile Include="Migrations\202509102255049_AddQuizTables1.Designer.cs">
+      <DependentUpon>202509102255049_AddQuizTables1.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Answer.cs" />
     <Compile Include="Models\DbContext.cs" />
     <Compile Include="Models\Login-log-model.cs" />
     <Compile Include="Models\Question.cs" />
-    <Compile Include="Models\quiz.cs" />
+    <Compile Include="Models\Quiz.cs" />
+    <Compile Include="Models\StudentModels.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -223,6 +232,7 @@
     <Content Include="Views\Student\AssignmentParticipation.cshtml" />
     <Content Include="Views\Student\Performance.cshtml" />
     <Content Include="Views\Student\Profile.cshtml" />
+    <Content Include="Views\Teacher\QuizCreate.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -262,6 +272,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202509102155139_AddLoginLog.resx">
       <DependentUpon>202509102155139_AddLoginLog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202509102238015_AddQuizTables.resx">
+      <DependentUpon>202509102238015_AddQuizTables.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202509102255049_AddQuizTables1.resx">
+      <DependentUpon>202509102255049_AddQuizTables1.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

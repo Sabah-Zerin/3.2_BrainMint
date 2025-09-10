@@ -1,0 +1,85 @@
+@{
+    ViewBag.Title = "Create New Quiz";
+}
+
+<h2>Create New Quiz</h2>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">
+        @ViewBag.Error
+    </div>
+}
+
+<form method="post" action="@Url.Action("QuizCreate", "Teacher")">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Quiz Details</h3>
+        </div>
+        <div class="panel-body">
+            <div class="form-group">
+                <label for="title">Quiz Title <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="title" name="title" placeholder="Enter quiz title" required>
+            </div>
+
+            <div class="form-group">
+                <label for="category">Category <span class="text-danger">*</span></label>
+                <select class="form-control" id="category" name="category" required>
+                    <option value="">Select Category</option>
+                    <option value="Mathematics">Mathematics</option>
+                    <option value="Science">Science</option>
+                    <option value="History">History</option>
+                    <option value="English">English</option>
+                    <option value="Geography">Geography</option>
+                    <option value="Computer Science">Computer Science</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea class="form-control" id="description" name="description" rows="3" placeholder="Enter quiz description (optional)"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="difficulty">Difficulty Level</label>
+                <select class="form-control" id="difficulty" name="difficulty">
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Advanced">Advanced</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="timeLimit">Time Limit (minutes)</label>
+                <input type="number" class="form-control" id="timeLimit" name="timeLimit" min="5" max="180" value="30">
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-success">
+            <i class="glyphicon glyphicon-plus"></i> Create Quiz
+        </button>
+        <a href="@Url.Action("QuizManagement", "Teacher")" class="btn btn-default">
+            <i class="glyphicon glyphicon-arrow-left"></i> Back to Quiz Management
+        </a>
+    </div>
+</form>
+
+<style>
+    .text-danger {
+        color: #d9534f;
+    }
+
+    .panel {
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .btn {
+        margin-right: 10px;
+    }
+</style>
