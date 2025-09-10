@@ -138,9 +138,14 @@
     <Compile Include="Migrations\202508312045329_InitialCreate.Designer.cs">
       <DependentUpon>202508312045329_InitialCreate.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202509102155139_AddLoginLog.cs" />
+    <Compile Include="Migrations\202509102155139_AddLoginLog.Designer.cs">
+      <DependentUpon>202509102155139_AddLoginLog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Answer.cs" />
     <Compile Include="Models\DbContext.cs" />
+    <Compile Include="Models\Login-log-model.cs" />
     <Compile Include="Models\Question.cs" />
     <Compile Include="Models\quiz.cs" />
     <Compile Include="Models\User.cs" />
@@ -222,6 +227,7 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Content\App_LocalResources\" />
+    <Folder Include="Views\Admin\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />
@@ -253,6 +259,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\202508312045329_InitialCreate.resx">
       <DependentUpon>202508312045329_InitialCreate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202509102155139_AddLoginLog.resx">
+      <DependentUpon>202509102155139_AddLoginLog.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

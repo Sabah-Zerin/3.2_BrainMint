@@ -14,9 +14,9 @@ namespace Brain_Mint.Models
         }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<LoginLog> LoginLogs { get; set; }
         // Add other DbSets as needed (Quiz, Question, etc.)
 
-        // You can add this method to configure your model
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
