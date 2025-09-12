@@ -1,140 +1,243 @@
-@model IEnumerable<Brain_Mint.Models.Quiz>
-
+@model List<Brain_Mint.Models.Quiz>
 @{
     ViewBag.Title = "Quiz Management";
+    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
 }
 
-<h2>Quiz Management</h2>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Quiz Management</h2>
+                <a href="@Url.Action("QuizCreate", "Teacher")" class="btn btn-success">
+                    <i class="fas fa-plus"></i> New Quiz
+                </a>
+            </div>
 
-@if (TempData["QuizCreateSuccess"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["QuizCreateSuccess"]
-    </div>
-}
+            <!-- Display Messages -->
+            @if (TempData["QuizCreateSuccess"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show">
+                    @TempData["QuizCreateSuccess"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
 
-<div class="row">
-    <div class="col-md-12">
-        <div class="pull-right" style="margin-bottom: 20px;">
-            <a href="@Url.Action("QuizCreate", "Teacher")" class="btn btn-success">
-                <i class="glyphicon glyphicon-plus"></i> New Quiz
-            </a>
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show">
+                    @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show">
+                    @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">All Quizzes</h4>
+                </div>
+                <div class="card-body">
+                    @if (Model != null && Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th width="25%">Quiz Name</th>
+                                        <th width="15%">Category</th>
+                                        <th width="10%">Questions</th>
+                                        <th width="10%">Status</th>
+                                        <th width="15%">Created</th>
+                                        <th width="25%">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var quiz in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="fw-bold">@quiz.Title</div>
+                                                @if (!string.IsNullOrEmpty(quiz.Description))
+                                                {
+                                                    <small class="text-muted">@quiz.Description</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">@quiz.Category</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info text-dark">
+                                                    @(quiz.Questions?.Count ?? 0)
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if (quiz.Status == "Active")
+                                                {
+                                                    <span class="badge bg-success">Active</span>
+                                                }
+                                                else if (quiz.Status == "Draft")
+                                                {
+                                                    <span class="badge bg-warning text-dark">Draft</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">@quiz.Status</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <small>
+                                                    @quiz.CreatedDate.ToString("MMM dd, yyyy")<br />
+                                                    <span class="text-muted">@quiz.Difficulty</span> •
+                                                    <span class="text-muted">@quiz.TimeLimit min</span>
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <a href="@Url.Action("QuizEdit", "Teacher", new { id = quiz.Id })"
+                                                       class="btn btn-outline-primary" title="Edit Quiz & Questions">
+                                                        <i class="fas fa-edit"></i> Edit
+                                                    </a>
+
+                                                    @if (quiz.Status == "Draft")
+                                                    {
+                                                        if (quiz.Questions?.Any() == true)
+                                                        {
+                                                            <form method="post" action="@Url.Action("PublishQuiz", "Teacher")" class="d-inline">
+                                                                <input type="hidden" name="id" value="@quiz.Id" />
+                                                                <button type="submit" class="btn btn-outline-success"
+                                                                        onclick="return confirm('Are you sure you want to publish this quiz?')"
+                                                                        title="Publish Quiz">
+                                                                    <i class="fas fa-upload"></i> Publish
+                                                                </button>
+                                                            </form>
+                                                        }
+                                                        else
+                                                        {
+                                                            <button type="button" class="btn btn-outline-secondary" disabled
+                                                                    title="Add questions before publishing">
+                                                                <i class="fas fa-upload"></i> Publish
+                                                            </button>
+                                                        }
+                                                    }
+
+                                                    <a href="@Url.Action("AddQuestion", "Teacher", new { quizId = quiz.Id })"
+                                                       class="btn btn-outline-info" title="Add Question">
+                                                        <i class="fas fa-plus"></i> Question
+                                                    </a>
+
+                                                    <button type="button" class="btn btn-outline-danger"
+                                                            onclick="deleteQuiz(@quiz.Id, '@quiz.Title')" title="Delete Quiz">
+                                                        <i class="fas fa-trash"></i> Delete
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="fas fa-clipboard-list fa-3x mb-3"></i>
+                                <h5>No quizzes created yet</h5>
+                                <p>Create your first quiz to get started.</p>
+                                <a href="@Url.Action("QuizCreate", "Teacher")" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> Create Your First Quiz
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <a href="@Url.Action("TeacherDashboard", "Teacher")" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="panel panel-default">
-    <div class="panel-heading">
-        <h3 class="panel-title">All Quizzes</h3>
-    </div>
-    <div class="panel-body">
-        <table class="table table-striped table-hover">
-            <thead>
-                <tr>
-                    <th>Quiz Name</th>
-                    <th>Category</th>
-                    <th>Questions</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model != null && Model.Any())
-                {
-                    foreach (var quiz in Model)
-                    {
-                        <tr>
-                            <td>@quiz.Title</td>
-                            <td>@quiz.Category</td>
-                            <td>@(quiz.Questions != null ? quiz.Questions.Count : 0)</td>
-                            <td>
-                                @if (quiz.Status == "Active")
-                                {
-                                    <span class="label label-success">@quiz.Status</span>
-                                }
-                                else if (quiz.Status == "Draft")
-                                {
-                                    <span class="label label-warning">@quiz.Status</span>
-                                }
-                                else
-                                {
-                                    <span class="label label-default">@quiz.Status</span>
-                                }
-                            </td>
-                            <td>
-                                <a href="@Url.Action("QuizEdit", "Teacher", new { id = quiz.Id })" class="btn btn-sm btn-primary">
-                                    <i class="glyphicon glyphicon-edit"></i> Edit
-                                </a>
-                                <button class="btn btn-sm btn-danger" onclick="deleteQuiz(@quiz.Id)">
-                                    <i class="glyphicon glyphicon-trash"></i> Delete
-                                </button>
-                            </td>
-                        </tr>
-                    }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="5" class="text-center text-muted">
-                            <em>No quizzes created yet. Click "New Quiz" to create your first quiz!</em>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteQuizModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the quiz "<span id="quizNameToDelete"></span>"?</p>
+                <p class="text-danger"><strong>This action cannot be undone and will delete all questions in this quiz.</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="@Url.Action("DeleteQuiz", "Teacher")" class="d-inline">
+                    <input type="hidden" name="id" id="quizIdToDelete" />
+                    <button type="submit" class="btn btn-danger">Delete Quiz</button>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-12">
-        <a href="@Url.Action("TeacherDashboard", "Teacher")" class="btn btn-default">
-            <i class="glyphicon glyphicon-arrow-left"></i> Back to Dashboard
-        </a>
-    </div>
-</div>
+<script>
+    function deleteQuiz(quizId, quizTitle) {
+        document.getElementById('quizIdToDelete').value = quizId;
+        document.getElementById('quizNameToDelete').textContent = quizTitle;
+
+        var deleteModal = new bootstrap.Modal(document.getElementById('deleteQuizModal'));
+        deleteModal.show();
+    }
+</script>
 
 <style>
-    .pull-right {
-        float: right;
+    .fw-bold {
+        font-weight: 600 !important;
     }
 
-    .label {
-        padding: 4px 8px;
-        font-size: 11px;
-        border-radius: 3px;
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        background-color: #f8f9fa;
     }
 
-    .label-success {
-        background-color: #5cb85c;
+    .btn-group-sm .btn {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        margin-right: 2px;
     }
 
-    .label-warning {
-        background-color: #f0ad4e;
+    .badge {
+        font-size: 0.75em;
     }
 
-    .label-default {
-        background-color: #777;
+    .card-header {
+        background-color: #fff;
+        border-bottom: 1px solid #dee2e6;
     }
 
-    .btn-sm {
-        padding: 5px 10px;
-        font-size: 12px;
-        margin-right: 5px;
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.075);
     }
 
-    .text-center {
-        text-align: center;
+    .alert {
+        border: none;
+        border-radius: 8px;
     }
 
     .text-muted {
-        color: #777;
+        font-size: 0.875em;
     }
 </style>
-
-<script>
-    function deleteQuiz(quizId) {
-        if (confirm('Are you sure you want to delete this quiz? This action cannot be undone.')) {
-            alert('Delete functionality will be implemented later');
-        }
-    }
-</script>

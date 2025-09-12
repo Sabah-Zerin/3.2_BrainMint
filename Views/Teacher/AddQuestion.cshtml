@@ -1,0 +1,151 @@
+@{
+    ViewBag.Title = "Add Question";
+    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Add Question to: @ViewBag.QuizTitle</h3>
+                    <a href="@Url.Action("QuizEdit", "Teacher", new { id = ViewBag.QuizId })" class="btn btn-secondary btn-sm">
+                        Back to Quiz
+                    </a>
+                </div>
+
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(ViewBag.Error))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show">
+                            @ViewBag.Error
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form method="post" action="@Url.Action("AddQuestion", "Teacher")">
+                        <input type="hidden" name="quizId" value="@ViewBag.QuizId" />
+                        <input type="hidden" name="questionOrder" value="@ViewBag.NextQuestionOrder" />
+
+                        <!-- Question Type Selection -->
+                        <div class="form-group mb-3">
+                            <label for="questionType" class="form-label">Question Type <span class="text-danger">*</span></label>
+                            <select class="form-control" id="questionType" name="questionType" onchange="toggleQuestionType()">
+                                <option value="MultipleChoice">Multiple Choice</option>
+                                <option value="ShortAnswer">Short Answer</option>
+                            </select>
+                        </div>
+
+                        <!-- Question Text -->
+                        <div class="form-group mb-3">
+                            <label for="questionText" class="form-label">Question <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="questionText" name="questionText" rows="3"
+                                      placeholder="Enter your question here..." required></textarea>
+                        </div>
+
+                        <!-- Multiple Choice Options -->
+                        <div id="multipleChoiceOptions">
+                            <h5 class="mb-3">Answer Options</h5>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="optionA" class="form-label">Option A <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="optionA" name="optionA"
+                                           placeholder="Enter option A" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="optionB" class="form-label">Option B <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="optionB" name="optionB"
+                                           placeholder="Enter option B" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="optionC" class="form-label">Option C <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="optionC" name="optionC"
+                                           placeholder="Enter option C" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="optionD" class="form-label">Option D <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="optionD" name="optionD"
+                                           placeholder="Enter option D" />
+                                </div>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="correctAnswer" class="form-label">Correct Answer <span class="text-danger">*</span></label>
+                                <select class="form-control" id="correctAnswer" name="correctAnswer">
+                                    <option value="">Select the correct answer</option>
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                    <option value="C">C</option>
+                                    <option value="D">D</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Short Answer Section -->
+                        <div id="shortAnswerSection" style="display: none;">
+                            <div class="form-group mb-3">
+                                <label for="correctAnswerText" class="form-label">Sample/Expected Answer</label>
+                                <textarea class="form-control" id="correctAnswerText" name="correctAnswer" rows="2"
+                                          placeholder="Enter a sample correct answer or key points (optional)"></textarea>
+                                <small class="form-text text-muted">
+                                    This will help you when grading. Students won't see this.
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Preview Section -->
+                        <div class="card mb-3" style="display: none;" id="questionPreview">
+                            <div class="card-header">
+                                <h6 class="mb-0">Question Preview</h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="previewContent"></div>
+                            </div>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Add Question</button>
+                            <button type="button" class="btn btn-info" onclick="previewQuestion()">Preview</button>
+                            <a href="@Url.Action("QuizEdit", "Teacher", new { id = ViewBag.QuizId })"
+                               class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleQuestionType() {
+        var questionType = document.getElementById('questionType').value;
+        var multipleChoiceDiv = document.getElementById('multipleChoiceOptions');
+        var shortAnswerDiv = document.getElementById('shortAnswerSection');
+
+        if (questionType === 'MultipleChoice') {
+            multipleChoiceDiv.style.display = 'block';
+            shortAnswerDiv.style.display = 'none';
+
+            // Make multiple choice fields required
+            document.getElementById('optionA').required = true;
+            document.getElementById('optionB').required = true;
+            document.getElementById('optionC').required = true;
+            document.getElementById('optionD').required = true;
+            document.getElementById('correctAnswer').required = true;
+
+            // Clear short answer field
+            document.getElementById('correctAnswerText').value = '';
+        } else {
+            multipleChoiceDiv.style.display = 'none';
+            shortAnswerDiv.style.display = 'block';
+
+            // Remove required from multiple choice fields
+            document.getElementById('optionA').required = false;
+            document.getElementById('optionB').required = false;
+            document.getElementById('optionC').required = false;
+            document.getElementById('optionD').required = false;
