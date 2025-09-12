@@ -1,0 +1,14 @@
+﻿@model Brain_Mint.Models.QuizQuestion
+
+<div class="form-group mb-3">
+    @Html.LabelFor(m => m.CorrectAnswer, "Sample/Expected Answer", new { @class = "form-label" })
+    @Html.TextAreaFor(m => m.CorrectAnswer, new
+    {
+        @class = "form-control",
+        rows = 2,
+        placeholder = "Enter a sample correct answer or key points (optional)"
+    })
+    <small class="form-text text-muted">
+        This will help you when grading. Students won't see this.
+    </small>
+</div>

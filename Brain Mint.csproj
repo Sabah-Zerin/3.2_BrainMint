@@ -231,6 +231,8 @@
     <Content Include="Views\Teacher\QuizEdit.cshtml" />
     <Content Include="Views\Teacher\AddQuestion.cshtml" />
     <Content Include="Views\Teacher\EditQuestion.cshtml" />
+    <Content Include="Views\Teacher\MultipleChoiceOptions.cshtml" />
+    <Content Include="Views\Teacher\ShortAnswerPartial.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
