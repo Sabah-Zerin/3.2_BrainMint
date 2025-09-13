@@ -5,243 +5,283 @@
 }
 
 <div class="dashboard-card">
-    <div class="text-center mb-4">
-        <h2 class="card-title">Quiz Result: @Model.Quiz.Title</h2>
-
-        @if (Model.GradingStatus == "AutoGraded")
-        {
-            <div class="result-display my-4">
-                <div class="display-4 @(Model.PercentageScore >= 70 ? "text-success" : Model.PercentageScore >= 50 ? "text-warning" : "text-danger")">
-                    @Model.TotalScore / @Model.MaximumScore
-                </div>
-                <div class="progress mt-3" style="height: 20px;">
-                    <div class="progress-bar @(Model.PercentageScore >= 70 ? "bg-success" : Model.PercentageScore >= 50 ? "bg-warning" : "bg-danger")"
-                         role="progressbar" style="width: @Model.PercentageScore%">
-                    </div>
-                </div>
-                <p class="mt-2">@Model.PercentageScore.Value.ToString("F1")% Correct</p>
-            </div>
-        }
-        else
-        {
-            <div class="alert alert-info">
-                <h5>Quiz Under Review</h5>
-                <p>Your quiz contains short answer questions that require manual grading. You will be notified when results are available.</p>
-            </div>
-        }
-    </div>
-
-    <div class="quiz-summary mb-4 p-3 bg-light rounded">
-        <div class="row">
-            <div class="col-md-6">
-                <strong>Completed:</strong> @Model.EndTime.Value.ToString("MMM dd, yyyy HH:mm")
-            </div>
-            <div class="col-md-6">
-                <strong>Duration:</strong> @((Model.EndTime.Value - Model.StartTime).TotalMinutes.ToString("F0")) minutes
+    @* Check if the quiz attempt is actually completed *@
+    @if (Model.Status != "Completed" || !Model.EndTime.HasValue)
+    {
+        <div class="text-center mb-4">
+            <div class="alert alert-warning">
+                <h4><i class="fas fa-exclamation-triangle me-2"></i>Quiz Not Completed</h4>
+                <p>This quiz attempt was not finished. You may retake the quiz if it's still available.</p>
+                <a href="@Url.Action("Index", "Quiz")" class="btn btn-primary">
+                    <i class="fas fa-arrow-left"></i> Back to Available Quizzes
+                </a>
             </div>
         </div>
-    </div>
-
-    <!-- Detailed Question Review Section -->
-    @if (Model.Responses != null && Model.Responses.Any())
+    }
+    else
     {
-        <div class="question-review-section mt-5">
-            <h3 class="mb-4">
-                <i class="fas fa-clipboard-check me-2"></i>
-                Question Review
-            </h3>
+        <div class="text-center mb-4">
+            <h2 class="card-title">Quiz Result: @Model.Quiz.Title</h2>
 
-            @foreach (var response in Model.Responses.OrderBy(r => r.Question.QuestionOrder))
+            @if (Model.GradingStatus == "AutoGraded")
             {
-                <div class="question-review-card mb-4 p-4 border rounded @(response.IsCorrect == true ? "border-success" : response.IsCorrect == false ? "border-danger" : "border-warning")">
-
-                    <!-- Question Header -->
-                    <div class="question-header mb-3 d-flex justify-content-between align-items-start">
-                        <h5 class="question-number mb-0">
-                            Question @response.Question.QuestionOrder
-                            <span class="badge @(response.Question.QuestionType == "MultipleChoice" ? "bg-primary" : "bg-info") ms-2">
-                                @(response.Question.QuestionType == "MultipleChoice" ? "Multiple Choice" : "Short Answer")
-                            </span>
-                        </h5>
-
-                        @if (response.IsCorrect.HasValue)
-                        {
-                            <span class="badge @(response.IsCorrect.Value ? "bg-success" : "bg-danger") fs-6">
-                                @(response.IsCorrect.Value ? "Correct" : "Incorrect")
-                                @if (response.PointsAwarded.HasValue)
-                                {
-                                    <span>(@response.PointsAwarded/@(response.IsCorrect.Value ? 1 : 1) point@(response.PointsAwarded == 1 ? "" : "s"))</span>
-                                }
-                            </span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-warning text-dark fs-6">Pending Review</span>
-                        }
+                <div class="result-display my-4">
+                    <div class="display-4 @(Model.PercentageScore >= 70 ? "text-success" : Model.PercentageScore >= 50 ? "text-warning" : "text-danger")">
+                        @Model.TotalScore / @Model.MaximumScore
                     </div>
-
-                    <!-- Question Text -->
-                    <div class="question-text mb-4">
-                        <p class="lead fw-medium">@response.Question.QuestionText</p>
+                    <div class="progress mt-3" style="height: 20px;">
+                        <div class="progress-bar @(Model.PercentageScore >= 70 ? "bg-success" : Model.PercentageScore >= 50 ? "bg-warning" : "bg-danger")"
+                             role="progressbar" style="width: @Model.PercentageScore%">
+                        </div>
                     </div>
-
-                    @if (response.Question.QuestionType == "MultipleChoice" || !string.IsNullOrEmpty(response.Question.OptionA))
-                    {
-                        <!-- Multiple Choice Question -->
-                        <div class="options-review mb-3">
-                            <h6 class="fw-bold mb-3">Answer Options:</h6>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="option-item mb-2 p-2 rounded @(response.Question.CorrectAnswer == "A" ? "bg-success-subtle border border-success" : response.StudentAnswer == "A" && response.IsCorrect == false ? "bg-danger-subtle border border-danger" : "")">
-                                        <div class="d-flex align-items-center">
-                                            <span class="badge bg-secondary me-2">A</span>
-                                            <span>@response.Question.OptionA</span>
-                                            @if (response.Question.CorrectAnswer == "A")
-                                            {
-                                                <i class="fas fa-check text-success ms-auto"></i>
-                                            }
-                                            @if (response.StudentAnswer == "A" && response.IsCorrect == false)
-                                            {
-                                                <i class="fas fa-times text-danger ms-auto"></i>
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="option-item mb-2 p-2 rounded @(response.Question.CorrectAnswer == "B" ? "bg-success-subtle border border-success" : response.StudentAnswer == "B" && response.IsCorrect == false ? "bg-danger-subtle border border-danger" : "")">
-                                        <div class="d-flex align-items-center">
-                                            <span class="badge bg-secondary me-2">B</span>
-                                            <span>@response.Question.OptionB</span>
-                                            @if (response.Question.CorrectAnswer == "B")
-                                            {
-                                                <i class="fas fa-check text-success ms-auto"></i>
-                                            }
-                                            @if (response.StudentAnswer == "B" && response.IsCorrect == false)
-                                            {
-                                                <i class="fas fa-times text-danger ms-auto"></i>
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="option-item mb-2 p-2 rounded @(response.Question.CorrectAnswer == "C" ? "bg-success-subtle border border-success" : response.StudentAnswer == "C" && response.IsCorrect == false ? "bg-danger-subtle border border-danger" : "")">
-                                        <div class="d-flex align-items-center">
-                                            <span class="badge bg-secondary me-2">C</span>
-                                            <span>@response.Question.OptionC</span>
-                                            @if (response.Question.CorrectAnswer == "C")
-                                            {
-                                                <i class="fas fa-check text-success ms-auto"></i>
-                                            }
-                                            @if (response.StudentAnswer == "C" && response.IsCorrect == false)
-                                            {
-                                                <i class="fas fa-times text-danger ms-auto"></i>
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="option-item mb-2 p-2 rounded @(response.Question.CorrectAnswer == "D" ? "bg-success-subtle border border-success" : response.StudentAnswer == "D" && response.IsCorrect == false ? "bg-danger-subtle border border-danger" : "")">
-                                        <div class="d-flex align-items-center">
-                                            <span class="badge bg-secondary me-2">D</span>
-                                            <span>@response.Question.OptionD</span>
-                                            @if (response.Question.CorrectAnswer == "D")
-                                            {
-                                                <i class="fas fa-check text-success ms-auto"></i>
-                                            }
-                                            @if (response.StudentAnswer == "D" && response.IsCorrect == false)
-                                            {
-                                                <i class="fas fa-times text-danger ms-auto"></i>
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Answer Summary for Multiple Choice -->
-                        <div class="answer-summary">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="summary-item">
-                                        <strong>Your Answer:</strong>
-                                        <span class="badge @(response.IsCorrect == true ? "bg-success" : response.IsCorrect == false ? "bg-danger" : "bg-warning") ms-2">
-                                            @(string.IsNullOrEmpty(response.StudentAnswer) ? "No Answer" : response.StudentAnswer)
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="summary-item">
-                                        <strong>Correct Answer:</strong>
-                                        <span class="badge bg-success ms-2">@response.Question.CorrectAnswer</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                    else
-                    {
-                        <!-- Short Answer Question -->
-                        <div class="short-answer-review">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <h6 class="fw-bold">Your Answer:</h6>
-                                    <div class="p-3 border rounded bg-light">
-                                        @if (string.IsNullOrEmpty(response.StudentAnswer))
-                                        {
-                                            <em class="text-muted">No answer provided</em>
-                                        }
-                                        else
-                                        {
-                                            @response.StudentAnswer
-                                        }
-                                    </div>
-                                </div>
-
-                                @if (!string.IsNullOrEmpty(response.Question.CorrectAnswer))
-                                {
-                                    <div class="col-md-6">
-                                        <h6 class="fw-bold">Sample Answer:</h6>
-                                        <div class="p-3 border rounded bg-success-subtle">
-                                            @response.Question.CorrectAnswer
-                                        </div>
-                                    </div>
-                                }
-                            </div>
-
-                            @if (!string.IsNullOrEmpty(response.TeacherFeedback))
-                            {
-                                <div class="mt-3">
-                                    <h6 class="fw-bold">Teacher Feedback:</h6>
-                                    <div class="p-3 border rounded bg-info-subtle">
-                                        @response.TeacherFeedback
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    }
+                    <p class="mt-2">@Model.PercentageScore.Value.ToString("F1")% Correct</p>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <h5>Quiz Under Review</h5>
+                    <p>Your quiz contains short answer questions that require manual grading. You will be notified when results are available.</p>
                 </div>
             }
         </div>
-    }
 
-    <div class="text-center mt-5">
-        <a href="@Url.Action("Index", "Quiz")" class="btn btn-primary btn-lg">
-            <i class="fas fa-arrow-left"></i> Back to Quiz List
-        </a>
+        <div class="quiz-summary mb-4 p-3 bg-light rounded">
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>Completed:</strong> @Model.EndTime.Value.ToString("MMM dd, yyyy HH:mm")
+                </div>
+                <div class="col-md-6">
+                    <strong>Duration:</strong> @((Model.EndTime.Value - Model.StartTime).TotalMinutes.ToString("F0")) minutes
+                </div>
+            </div>
+        </div>
 
-        @if (Model.GradingStatus == "AutoGraded")
+        <!-- Detailed Question Review Section -->
+        if (Model.Responses != null && Model.Responses.Any())
         {
-            <button class="btn btn-outline-secondary btn-lg ms-3" onclick="window.print()">
-                <i class="fas fa-print"></i> Print Results
-            </button>
+            <div class="question-review-section mt-5">
+                <h3 class="mb-4">
+                    <i class="fas fa-clipboard-check me-2"></i>
+                    Question Review
+                </h3>
+
+                @foreach (var response in Model.Responses.OrderBy(r => r.Question.QuestionOrder))
+                {
+                   
+                        // FIXED: Correct logic to determine if it's multiple choice
+                        bool isMultipleChoice = response.Question.QuestionType == "MultipleChoice" ||
+                                               (!string.IsNullOrEmpty(response.Question.OptionA) &&
+                                                !string.IsNullOrEmpty(response.Question.OptionB) &&
+                                                !string.IsNullOrEmpty(response.Question.OptionC) &&
+                                                !string.IsNullOrEmpty(response.Question.OptionD));
+                    
+
+                    <div class="question-review-card mb-4 p-4 border rounded @(response.IsCorrect == true ? "border-success" : response.IsCorrect == false ? "border-danger" : "border-warning")">
+
+                        <!-- Question Header -->
+                        <div class="question-header mb-3 d-flex justify-content-between align-items-start">
+                            <h5 class="question-number mb-0">
+                                Question @response.Question.QuestionOrder
+                                <span class="badge @(isMultipleChoice ? "bg-primary" : "bg-info") ms-2">
+                                    @(isMultipleChoice ? "Multiple Choice" : "Short Answer")
+                                </span>
+                            </h5>
+
+                            @if (isMultipleChoice)
+                            {
+                                @* Multiple choice questions are always auto-graded *@
+                                <span class="badge @(response.IsCorrect == true ? "bg-success" : "bg-danger") fs-6">
+                                    @(response.IsCorrect == true ? "Correct" : "Incorrect")
+                                    @if (response.PointsAwarded.HasValue)
+                                    {
+                                        <span>(@response.PointsAwarded/1 point)</span>
+                                    }
+                                </span>
+                            }
+                            else
+                            {
+                                @* Only short answer questions can be pending review *@
+                                if (response.IsCorrect.HasValue)
+                                {
+                                    <span class="badge @(response.IsCorrect.Value ? "bg-success" : "bg-danger") fs-6">
+                                        @(response.IsCorrect.Value ? "Correct" : "Incorrect")
+                                        @if (response.PointsAwarded.HasValue)
+                                        {
+                                            <span>(@response.PointsAwarded/1 point)</span>
+                                        }
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark fs-6">Pending Review</span>
+                                }
+                            }
+                        </div>
+
+                        <!-- Question Text -->
+                        <div class="question-text mb-4">
+                            <p class="lead fw-medium">@response.Question.QuestionText</p>
+                        </div>
+
+                        @if (isMultipleChoice)
+                        {
+                            <!-- Multiple Choice Question -->
+                            <div class="options-review mb-3">
+                                <h6 class="fw-bold mb-3">Answer Options:</h6>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="option-item mb-2 p-2 rounded @(response.Question.CorrectAnswer == "A" ? "bg-success-subtle border border-success" : response.StudentAnswer == "A" && response.IsCorrect == false ? "bg-danger-subtle border border-danger" : "")">
+                                            <div class="d-flex align-items-center">
+                                                <span class="badge bg-secondary me-2">A</span>
+                                                <span>@response.Question.OptionA</span>
+                                                @if (response.Question.CorrectAnswer == "A")
+                                                {
+                                                    <i class="fas fa-check text-success ms-auto"></i>
+                                                }
+                                                @if (response.StudentAnswer == "A" && response.IsCorrect == false)
+                                                {
+                                                    <i class="fas fa-times text-danger ms-auto"></i>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="option-item mb-2 p-2 rounded @(response.Question.CorrectAnswer == "B" ? "bg-success-subtle border border-success" : response.StudentAnswer == "B" && response.IsCorrect == false ? "bg-danger-subtle border border-danger" : "")">
+                                            <div class="d-flex align-items-center">
+                                                <span class="badge bg-secondary me-2">B</span>
+                                                <span>@response.Question.OptionB</span>
+                                                @if (response.Question.CorrectAnswer == "B")
+                                                {
+                                                    <i class="fas fa-check text-success ms-auto"></i>
+                                                }
+                                                @if (response.StudentAnswer == "B" && response.IsCorrect == false)
+                                                {
+                                                    <i class="fas fa-times text-danger ms-auto"></i>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="option-item mb-2 p-2 rounded @(response.Question.CorrectAnswer == "C" ? "bg-success-subtle border border-success" : response.StudentAnswer == "C" && response.IsCorrect == false ? "bg-danger-subtle border border-danger" : "")">
+                                            <div class="d-flex align-items-center">
+                                                <span class="badge bg-secondary me-2">C</span>
+                                                <span>@response.Question.OptionC</span>
+                                                @if (response.Question.CorrectAnswer == "C")
+                                                {
+                                                    <i class="fas fa-check text-success ms-auto"></i>
+                                                }
+                                                @if (response.StudentAnswer == "C" && response.IsCorrect == false)
+                                                {
+                                                    <i class="fas fa-times text-danger ms-auto"></i>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="option-item mb-2 p-2 rounded @(response.Question.CorrectAnswer == "D" ? "bg-success-subtle border border-success" : response.StudentAnswer == "D" && response.IsCorrect == false ? "bg-danger-subtle border border-danger" : "")">
+                                            <div class="d-flex align-items-center">
+                                                <span class="badge bg-secondary me-2">D</span>
+                                                <span>@response.Question.OptionD</span>
+                                                @if (response.Question.CorrectAnswer == "D")
+                                                {
+                                                    <i class="fas fa-check text-success ms-auto"></i>
+                                                }
+                                                @if (response.StudentAnswer == "D" && response.IsCorrect == false)
+                                                {
+                                                    <i class="fas fa-times text-danger ms-auto"></i>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Answer Summary for Multiple Choice -->
+                            <div class="answer-summary">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="summary-item">
+                                            <strong>Your Answer:</strong>
+                                            <span class="badge @(response.IsCorrect == true ? "bg-success" : response.IsCorrect == false ? "bg-danger" : "bg-warning") ms-2">
+                                                @(string.IsNullOrEmpty(response.StudentAnswer) ? "No Answer" : response.StudentAnswer)
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="summary-item">
+                                            <strong>Correct Answer:</strong>
+                                            <span class="badge bg-success ms-2">@response.Question.CorrectAnswer</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <!-- Short Answer Question -->
+                            <div class="short-answer-review">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="fw-bold">Your Answer:</h6>
+                                        <div class="p-3 border rounded bg-light">
+                                            @if (string.IsNullOrEmpty(response.StudentAnswer))
+                                            {
+                                                <em class="text-muted">No answer provided</em>
+                                            }
+                                            else
+                                            {
+                                                @response.StudentAnswer
+                                            }
+                                        </div>
+                                    </div>
+
+                                    @if (!string.IsNullOrEmpty(response.Question.CorrectAnswer))
+                                    {
+                                        <div class="col-md-6">
+                                            <h6 class="fw-bold">Sample Answer:</h6>
+                                            <div class="p-3 border rounded bg-success-subtle">
+                                                @response.Question.CorrectAnswer
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(response.TeacherFeedback))
+                                {
+                                    <div class="mt-3">
+                                        <h6 class="fw-bold">Teacher Feedback:</h6>
+                                        <div class="p-3 border rounded bg-info-subtle">
+                                            @response.TeacherFeedback
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
         }
-    </div>
+
+        <div class="text-center mt-5">
+            <a href="@Url.Action("Index", "Quiz")" class="btn btn-primary btn-lg">
+                <i class="fas fa-arrow-left"></i> Back to Quiz List
+            </a>
+
+            @if (Model.GradingStatus == "AutoGraded")
+            {
+                <button class="btn btn-outline-secondary btn-lg ms-3" onclick="window.print()">
+                    <i class="fas fa-print"></i> Print Results
+                </button>
+            }
+        </div>
+    }
 </div>
 
 <style>

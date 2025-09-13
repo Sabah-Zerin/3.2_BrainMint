@@ -49,7 +49,8 @@ namespace Brain_Mint.Controllers
         }
 
 
-        // Add Question to Quiz - POST
+        
+
         [HttpPost]
         public ActionResult AddQuestion(int quizId, string questionText, string optionA, string optionB,
             string optionC, string optionD, string correctAnswer, int questionOrder, string questionType = "MultipleChoice")
@@ -75,18 +76,15 @@ namespace Brain_Mint.Controllers
                 return View();
             }
 
-            // Validate based on question type
-            if (questionType == "MultipleChoice")
-            {
-                if (string.IsNullOrEmpty(optionA) || string.IsNullOrEmpty(optionB) ||
-                    string.IsNullOrEmpty(optionC) || string.IsNullOrEmpty(optionD))
-                {
-                    ViewBag.Error = "All options are required for multiple choice questions.";
-                    ViewBag.QuizId = quizId;
-                    ViewBag.QuizTitle = quiz.Title;
-                    return View();
-                }
+            // FIXED: Determine question type based on whether all options are provided
+            bool hasAllOptions = !string.IsNullOrEmpty(optionA) && !string.IsNullOrEmpty(optionB) &&
+                                !string.IsNullOrEmpty(optionC) && !string.IsNullOrEmpty(optionD);
 
+            if (hasAllOptions)
+            {
+                questionType = "MultipleChoice";
+
+                // Validate multiple choice
                 if (string.IsNullOrEmpty(correctAnswer) || !"ABCD".Contains(correctAnswer.ToUpper()))
                 {
                     ViewBag.Error = "Please select a valid correct answer (A, B, C, or D).";
@@ -94,6 +92,10 @@ namespace Brain_Mint.Controllers
                     ViewBag.QuizTitle = quiz.Title;
                     return View();
                 }
+            }
+            else
+            {
+                questionType = "ShortAnswer";
             }
 
             try

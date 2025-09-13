@@ -12,7 +12,6 @@ namespace Brain_Mint.Controllers
     {
         private BrainMintDbContext db = new BrainMintDbContext();
 
-        // For students to view available quizzes
         public ActionResult Index()
         {
             if (Session["UserRole"]?.ToString() != "Student")
@@ -28,9 +27,9 @@ namespace Brain_Mint.Controllers
                 .Select(q => new QuizViewModel
                 {
                     Quiz = q,
-                    HasAttempted = db.QuizAttempts.Any(qa => qa.QuizId == q.Id && qa.StudentId == studentId),
+                    HasAttempted = db.QuizAttempts.Any(qa => qa.QuizId == q.Id && qa.StudentId == studentId && qa.Status == "Completed"),
                     LastAttempt = db.QuizAttempts
-                        .Where(qa => qa.QuizId == q.Id && qa.StudentId == studentId)
+                        .Where(qa => qa.QuizId == q.Id && qa.StudentId == studentId && qa.Status == "Completed")
                         .OrderByDescending(qa => qa.StartTime)
                         .FirstOrDefault()
                 })
@@ -127,7 +126,7 @@ namespace Brain_Mint.Controllers
                 // Get the student's answer from the form
                 if (form[questionKey] != null)
                 {
-                    studentAnswer = form[questionKey].ToString();
+                    studentAnswer = form[questionKey].ToString().Trim();
                 }
 
                 var response = new QuizResponse
@@ -138,11 +137,19 @@ namespace Brain_Mint.Controllers
                     ResponseTime = DateTime.Now
                 };
 
-                // Auto-grade multiple choice questions
-                if (question.QuestionType == "MultipleChoice" || !string.IsNullOrEmpty(question.OptionA))
+                // FIXED: Better logic to determine if it's multiple choice
+                bool isMultipleChoice = question.QuestionType == "MultipleChoice" ||
+                                       (!string.IsNullOrEmpty(question.OptionA) &&
+                                        !string.IsNullOrEmpty(question.OptionB) &&
+                                        !string.IsNullOrEmpty(question.OptionC) &&
+                                        !string.IsNullOrEmpty(question.OptionD));
+
+                if (isMultipleChoice)
                 {
+                    // Multiple Choice - Auto grade immediately
                     if (!string.IsNullOrEmpty(studentAnswer) &&
-                        studentAnswer.ToUpper().Trim() == question.CorrectAnswer.ToUpper().Trim())
+                        !string.IsNullOrEmpty(question.CorrectAnswer) &&
+                        studentAnswer.ToUpper() == question.CorrectAnswer.ToUpper())
                     {
                         response.IsCorrect = true;
                         response.PointsAwarded = 1;
@@ -165,7 +172,7 @@ namespace Brain_Mint.Controllers
                 db.QuizResponses.Add(response);
             }
 
-            // Set grading status
+            // Set grading status based on whether there are actual short answer questions
             if (hasShortAnswers)
             {
                 quizAttempt.GradingStatus = "PendingReview";
@@ -182,6 +189,7 @@ namespace Brain_Mint.Controllers
 
             return RedirectToAction("ViewResult", new { attemptId = attemptId });
         }
+
 
 
         // Add this debug action to your QuizController for testing
@@ -259,6 +267,14 @@ namespace Brain_Mint.Controllers
             if (quizAttempt == null)
             {
                 TempData["Error"] = "Quiz result not found.";
+                return RedirectToAction("Index");
+            }
+
+            // Check if the quiz attempt is incomplete
+            if (quizAttempt.Status != "Completed" || !quizAttempt.EndTime.HasValue)
+            {
+                // Handle incomplete quiz attempts
+                TempData["Info"] = "This quiz was not completed. You can retake it if it's still available.";
                 return RedirectToAction("Index");
             }
 
