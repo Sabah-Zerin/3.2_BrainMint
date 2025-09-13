@@ -42,9 +42,271 @@
         </div>
     </div>
 
-    <div class="text-center">
-        <a href="@Url.Action("Index", "Quiz")" class="btn btn-primary">
+    <!-- Detailed Question Review Section -->
+    @if (Model.Responses != null && Model.Responses.Any())
+    {
+        <div class="question-review-section mt-5">
+            <h3 class="mb-4">
+                <i class="fas fa-clipboard-check me-2"></i>
+                Question Review
+            </h3>
+
+            @foreach (var response in Model.Responses.OrderBy(r => r.Question.QuestionOrder))
+            {
+                <div class="question-review-card mb-4 p-4 border rounded @(response.IsCorrect == true ? "border-success" : response.IsCorrect == false ? "border-danger" : "border-warning")">
+
+                    <!-- Question Header -->
+                    <div class="question-header mb-3 d-flex justify-content-between align-items-start">
+                        <h5 class="question-number mb-0">
+                            Question @response.Question.QuestionOrder
+                            <span class="badge @(response.Question.QuestionType == "MultipleChoice" ? "bg-primary" : "bg-info") ms-2">
+                                @(response.Question.QuestionType == "MultipleChoice" ? "Multiple Choice" : "Short Answer")
+                            </span>
+                        </h5>
+
+                        @if (response.IsCorrect.HasValue)
+                        {
+                            <span class="badge @(response.IsCorrect.Value ? "bg-success" : "bg-danger") fs-6">
+                                @(response.IsCorrect.Value ? "Correct" : "Incorrect")
+                                @if (response.PointsAwarded.HasValue)
+                                {
+                                    <span>(@response.PointsAwarded/@(response.IsCorrect.Value ? 1 : 1) point@(response.PointsAwarded == 1 ? "" : "s"))</span>
+                                }
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning text-dark fs-6">Pending Review</span>
+                        }
+                    </div>
+
+                    <!-- Question Text -->
+                    <div class="question-text mb-4">
+                        <p class="lead fw-medium">@response.Question.QuestionText</p>
+                    </div>
+
+                    @if (response.Question.QuestionType == "MultipleChoice" || !string.IsNullOrEmpty(response.Question.OptionA))
+                    {
+                        <!-- Multiple Choice Question -->
+                        <div class="options-review mb-3">
+                            <h6 class="fw-bold mb-3">Answer Options:</h6>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="option-item mb-2 p-2 rounded @(response.Question.CorrectAnswer == "A" ? "bg-success-subtle border border-success" : response.StudentAnswer == "A" && response.IsCorrect == false ? "bg-danger-subtle border border-danger" : "")">
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge bg-secondary me-2">A</span>
+                                            <span>@response.Question.OptionA</span>
+                                            @if (response.Question.CorrectAnswer == "A")
+                                            {
+                                                <i class="fas fa-check text-success ms-auto"></i>
+                                            }
+                                            @if (response.StudentAnswer == "A" && response.IsCorrect == false)
+                                            {
+                                                <i class="fas fa-times text-danger ms-auto"></i>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="option-item mb-2 p-2 rounded @(response.Question.CorrectAnswer == "B" ? "bg-success-subtle border border-success" : response.StudentAnswer == "B" && response.IsCorrect == false ? "bg-danger-subtle border border-danger" : "")">
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge bg-secondary me-2">B</span>
+                                            <span>@response.Question.OptionB</span>
+                                            @if (response.Question.CorrectAnswer == "B")
+                                            {
+                                                <i class="fas fa-check text-success ms-auto"></i>
+                                            }
+                                            @if (response.StudentAnswer == "B" && response.IsCorrect == false)
+                                            {
+                                                <i class="fas fa-times text-danger ms-auto"></i>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="option-item mb-2 p-2 rounded @(response.Question.CorrectAnswer == "C" ? "bg-success-subtle border border-success" : response.StudentAnswer == "C" && response.IsCorrect == false ? "bg-danger-subtle border border-danger" : "")">
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge bg-secondary me-2">C</span>
+                                            <span>@response.Question.OptionC</span>
+                                            @if (response.Question.CorrectAnswer == "C")
+                                            {
+                                                <i class="fas fa-check text-success ms-auto"></i>
+                                            }
+                                            @if (response.StudentAnswer == "C" && response.IsCorrect == false)
+                                            {
+                                                <i class="fas fa-times text-danger ms-auto"></i>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="option-item mb-2 p-2 rounded @(response.Question.CorrectAnswer == "D" ? "bg-success-subtle border border-success" : response.StudentAnswer == "D" && response.IsCorrect == false ? "bg-danger-subtle border border-danger" : "")">
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge bg-secondary me-2">D</span>
+                                            <span>@response.Question.OptionD</span>
+                                            @if (response.Question.CorrectAnswer == "D")
+                                            {
+                                                <i class="fas fa-check text-success ms-auto"></i>
+                                            }
+                                            @if (response.StudentAnswer == "D" && response.IsCorrect == false)
+                                            {
+                                                <i class="fas fa-times text-danger ms-auto"></i>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Answer Summary for Multiple Choice -->
+                        <div class="answer-summary">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="summary-item">
+                                        <strong>Your Answer:</strong>
+                                        <span class="badge @(response.IsCorrect == true ? "bg-success" : response.IsCorrect == false ? "bg-danger" : "bg-warning") ms-2">
+                                            @(string.IsNullOrEmpty(response.StudentAnswer) ? "No Answer" : response.StudentAnswer)
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="summary-item">
+                                        <strong>Correct Answer:</strong>
+                                        <span class="badge bg-success ms-2">@response.Question.CorrectAnswer</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Short Answer Question -->
+                        <div class="short-answer-review">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Your Answer:</h6>
+                                    <div class="p-3 border rounded bg-light">
+                                        @if (string.IsNullOrEmpty(response.StudentAnswer))
+                                        {
+                                            <em class="text-muted">No answer provided</em>
+                                        }
+                                        else
+                                        {
+                                            @response.StudentAnswer
+                                        }
+                                    </div>
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(response.Question.CorrectAnswer))
+                                {
+                                    <div class="col-md-6">
+                                        <h6 class="fw-bold">Sample Answer:</h6>
+                                        <div class="p-3 border rounded bg-success-subtle">
+                                            @response.Question.CorrectAnswer
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(response.TeacherFeedback))
+                            {
+                                <div class="mt-3">
+                                    <h6 class="fw-bold">Teacher Feedback:</h6>
+                                    <div class="p-3 border rounded bg-info-subtle">
+                                        @response.TeacherFeedback
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+
+    <div class="text-center mt-5">
+        <a href="@Url.Action("Index", "Quiz")" class="btn btn-primary btn-lg">
             <i class="fas fa-arrow-left"></i> Back to Quiz List
         </a>
+
+        @if (Model.GradingStatus == "AutoGraded")
+        {
+            <button class="btn btn-outline-secondary btn-lg ms-3" onclick="window.print()">
+                <i class="fas fa-print"></i> Print Results
+            </button>
+        }
     </div>
 </div>
+
+<style>
+    .question-review-card {
+        background: #ffffff;
+        transition: all 0.3s ease;
+    }
+
+    .question-review-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .border-success {
+        border-color: #198754 !important;
+    }
+
+    .border-danger {
+        border-color: #dc3545 !important;
+    }
+
+    .border-warning {
+        border-color: #ffc107 !important;
+    }
+
+    .bg-success-subtle {
+        background-color: rgba(25, 135, 84, 0.1) !important;
+    }
+
+    .bg-danger-subtle {
+        background-color: rgba(220, 53, 69, 0.1) !important;
+    }
+
+    .bg-info-subtle {
+        background-color: rgba(13, 202, 240, 0.1) !important;
+    }
+
+    .option-item {
+        transition: all 0.2s ease;
+    }
+
+    .summary-item {
+        padding: 10px 0;
+    }
+
+    .question-number {
+        color: var(--mint-dark);
+    }
+
+    .progress {
+        border-radius: 10px;
+        background-color: #e9ecef;
+    }
+
+    .progress-bar {
+        border-radius: 10px;
+    }
+
+    media print {
+        .btn, .card-title {
+            display: none !important;
+        }
+
+        .question-review-card {
+            break-inside: avoid;
+            margin-bottom: 20px;
+        }
+    }
+</style>

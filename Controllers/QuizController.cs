@@ -90,8 +90,9 @@ namespace Brain_Mint.Controllers
             return View(viewModel);
         }
 
+
         [HttpPost]
-        public ActionResult SubmitQuiz(int attemptId, Dictionary<string, string> answers)
+        public ActionResult SubmitQuiz(int attemptId, FormCollection form)
         {
             if (Session["UserRole"]?.ToString() != "Student")
                 return RedirectToAction("Login", "Account");
@@ -121,7 +122,13 @@ namespace Brain_Mint.Controllers
             foreach (var question in quizAttempt.Quiz.Questions)
             {
                 string questionKey = "question_" + question.Id;
-                string studentAnswer = answers.ContainsKey(questionKey) ? answers[questionKey] : "";
+                string studentAnswer = "";
+
+                // Get the student's answer from the form
+                if (form[questionKey] != null)
+                {
+                    studentAnswer = form[questionKey].ToString();
+                }
 
                 var response = new QuizResponse
                 {
@@ -132,10 +139,10 @@ namespace Brain_Mint.Controllers
                 };
 
                 // Auto-grade multiple choice questions
-                if (question.QuestionType == "MultipleChoice")
+                if (question.QuestionType == "MultipleChoice" || !string.IsNullOrEmpty(question.OptionA))
                 {
                     if (!string.IsNullOrEmpty(studentAnswer) &&
-                        studentAnswer.ToUpper() == question.CorrectAnswer.ToUpper())
+                        studentAnswer.ToUpper().Trim() == question.CorrectAnswer.ToUpper().Trim())
                     {
                         response.IsCorrect = true;
                         response.PointsAwarded = 1;
@@ -257,6 +264,30 @@ namespace Brain_Mint.Controllers
 
             return View(quizAttempt);
         }
+
+
+        // Add this temporary method to QuizController for debugging
+        [HttpPost]
+        public ActionResult DebugFormData(int attemptId, FormCollection form)
+        {
+            var debugInfo = new List<string>();
+            debugInfo.Add("=== FORM DEBUG INFO ===");
+            debugInfo.Add($"Attempt ID: {attemptId}");
+            debugInfo.Add($"Total Form Keys: {form.AllKeys.Length}");
+            debugInfo.Add("");
+
+            foreach (string key in form.AllKeys)
+            {
+                debugInfo.Add($"Key: {key} = Value: '{form[key]}'");
+            }
+
+            ViewBag.DebugInfo = debugInfo;
+            return View("DebugResult");
+        }
+
+        // You can temporarily change your form action to test:
+        // action="@Url.Action("DebugFormData", "Quiz")"
+
 
         protected override void Dispose(bool disposing)
         {
