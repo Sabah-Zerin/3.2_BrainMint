@@ -150,11 +150,18 @@
     <Compile Include="Migrations\202509130249158_InitialCreate1.Designer.cs">
       <DependentUpon>202509130249158_InitialCreate1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202509130446106_AddQuizAttemptTables.cs" />
+    <Compile Include="Migrations\202509130446106_AddQuizAttemptTables.Designer.cs">
+      <DependentUpon>202509130446106_AddQuizAttemptTables.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\DbContext.cs" />
     <Compile Include="Models\Login-log-model.cs" />
     <Compile Include="Models\Question.cs" />
     <Compile Include="Models\Quiz.cs" />
+    <Compile Include="Models\QuizAttempt.cs" />
+    <Compile Include="Models\QuizResponse.cs" />
+    <Compile Include="Models\QuizViewModels.cs" />
     <Compile Include="Models\StudentModels.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -210,10 +217,12 @@
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
-    <Content Include="Views\Quiz\Index.cshtml" />
     <Content Include="Views\Account\Login.cshtml" />
     <Content Include="Views\Account\Signup.cshtml" />
     <Content Include="Views\Home\Welcome.cshtml" />
+    <Content Include="Views\Quiz\Index.cshtml" />
+    <Content Include="Views\Quiz\Take.cshtml" />
+    <Content Include="Views\Quiz\ViewResult.cshtml" />
     <None Include="Views\Shared\.editorconfig" />
     <Content Include="Views\Shared\_Sidebar.cshtml" />
     <Content Include="Views\Shared\_TeacherLayout.cshtml" />
@@ -280,6 +289,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202509130249158_InitialCreate1.resx">
       <DependentUpon>202509130249158_InitialCreate1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202509130446106_AddQuizAttemptTables.resx">
+      <DependentUpon>202509130446106_AddQuizAttemptTables.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

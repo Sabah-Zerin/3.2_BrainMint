@@ -1,0 +1,50 @@
+@model Brain_Mint.Models.QuizAttempt
+@{
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+    ViewBag.Title = "Quiz Result - " + Model.Quiz.Title;
+}
+
+<div class="dashboard-card">
+    <div class="text-center mb-4">
+        <h2 class="card-title">Quiz Result: @Model.Quiz.Title</h2>
+
+        @if (Model.GradingStatus == "AutoGraded")
+        {
+            <div class="result-display my-4">
+                <div class="display-4 @(Model.PercentageScore >= 70 ? "text-success" : Model.PercentageScore >= 50 ? "text-warning" : "text-danger")">
+                    @Model.TotalScore / @Model.MaximumScore
+                </div>
+                <div class="progress mt-3" style="height: 20px;">
+                    <div class="progress-bar @(Model.PercentageScore >= 70 ? "bg-success" : Model.PercentageScore >= 50 ? "bg-warning" : "bg-danger")"
+                         role="progressbar" style="width: @Model.PercentageScore%">
+                    </div>
+                </div>
+                <p class="mt-2">@Model.PercentageScore.Value.ToString("F1")% Correct</p>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                <h5>Quiz Under Review</h5>
+                <p>Your quiz contains short answer questions that require manual grading. You will be notified when results are available.</p>
+            </div>
+        }
+    </div>
+
+    <div class="quiz-summary mb-4 p-3 bg-light rounded">
+        <div class="row">
+            <div class="col-md-6">
+                <strong>Completed:</strong> @Model.EndTime.Value.ToString("MMM dd, yyyy HH:mm")
+            </div>
+            <div class="col-md-6">
+                <strong>Duration:</strong> @((Model.EndTime.Value - Model.StartTime).TotalMinutes.ToString("F0")) minutes
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center">
+        <a href="@Url.Action("Index", "Quiz")" class="btn btn-primary">
+            <i class="fas fa-arrow-left"></i> Back to Quiz List
+        </a>
+    </div>
+</div>

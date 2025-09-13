@@ -22,17 +22,13 @@ namespace Brain_Mint.Controllers
         }
 
         // Quiz Participation
-        // In StudentController QuizParticipation method, change to:
         public ActionResult QuizParticipation()
         {
             if (Session["UserRole"]?.ToString() != "Student")
                 return RedirectToAction("Login", "Account");
 
-            // Get available quizzes from database
-            var quizzes = db.Quizzes.Where(q => q.Status == "Active").ToList();
-
-            ViewBag.Title = "Quiz Participation";
-            return View(quizzes);
+            // Redirect to the Quiz controller's Index action
+            return RedirectToAction("Index", "Quiz");
         }
 
         // Assignment Participation
