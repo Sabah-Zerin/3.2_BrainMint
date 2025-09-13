@@ -1,4 +1,4 @@
-﻿@model Brain_Mint.Models.QuizQuestion
+@model Brain_Mint.Models.QuizQuestion
 
 <div class="form-group mb-3">
     @Html.LabelFor(m => m.CorrectAnswer, "Sample/Expected Answer", new { @class = "form-label" })
@@ -11,4 +11,5 @@
     <small class="form-text text-muted">
         This will help you when grading. Students won't see this.
     </small>
+    @Html.ValidationMessageFor(m => m.CorrectAnswer, "", new { @class = "text-danger" })
 </div>

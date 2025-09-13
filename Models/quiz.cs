@@ -63,28 +63,29 @@ namespace Brain_Mint.Models
         [StringLength(500)]
         public string QuestionText { get; set; }
 
-        [Required]
+        // Make these optional for short answer questions
         [StringLength(200)]
         public string OptionA { get; set; }
 
-        [Required]
         [StringLength(200)]
         public string OptionB { get; set; }
 
-        [Required]
         [StringLength(200)]
         public string OptionC { get; set; }
 
-        [Required]
         [StringLength(200)]
         public string OptionD { get; set; }
 
-        [Required]
-        [StringLength(1)]
-        public string CorrectAnswer { get; set; } // A, B, C, or D
+        // This can be A,B,C,D for multiple choice or text for short answer
+        [StringLength(1000)]
+        public string CorrectAnswer { get; set; }
 
         [Required]
         public int QuestionOrder { get; set; }
+
+        // Add question type field
+        [StringLength(20)]
+        public string QuestionType { get; set; } = "MultipleChoice"; // MultipleChoice or ShortAnswer
 
         // Navigation property
         [ForeignKey("QuizId")]

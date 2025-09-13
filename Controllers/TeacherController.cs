@@ -48,7 +48,197 @@ namespace Brain_Mint.Controllers
             return View();
         }
 
-        // Create Quiz POST action
+
+        // Add Question to Quiz - POST
+        [HttpPost]
+        public ActionResult AddQuestion(int quizId, string questionText, string optionA, string optionB,
+            string optionC, string optionD, string correctAnswer, int questionOrder, string questionType = "MultipleChoice")
+        {
+            if (Session["UserRole"]?.ToString() != "Teacher")
+                return RedirectToAction("Login", "Account");
+
+            int teacherId = Convert.ToInt32(Session["UserId"]);
+
+            var quiz = db.Quizzes.FirstOrDefault(q => q.Id == quizId && q.CreatedByUserId == teacherId);
+            if (quiz == null)
+            {
+                TempData["Error"] = "Quiz not found or you don't have permission to edit it.";
+                return RedirectToAction("QuizManagement");
+            }
+
+            // Validate input
+            if (string.IsNullOrEmpty(questionText))
+            {
+                ViewBag.Error = "Question text is required.";
+                ViewBag.QuizId = quizId;
+                ViewBag.QuizTitle = quiz.Title;
+                return View();
+            }
+
+            // Validate based on question type
+            if (questionType == "MultipleChoice")
+            {
+                if (string.IsNullOrEmpty(optionA) || string.IsNullOrEmpty(optionB) ||
+                    string.IsNullOrEmpty(optionC) || string.IsNullOrEmpty(optionD))
+                {
+                    ViewBag.Error = "All options are required for multiple choice questions.";
+                    ViewBag.QuizId = quizId;
+                    ViewBag.QuizTitle = quiz.Title;
+                    return View();
+                }
+
+                if (string.IsNullOrEmpty(correctAnswer) || !"ABCD".Contains(correctAnswer.ToUpper()))
+                {
+                    ViewBag.Error = "Please select a valid correct answer (A, B, C, or D).";
+                    ViewBag.QuizId = quizId;
+                    ViewBag.QuizTitle = quiz.Title;
+                    return View();
+                }
+            }
+
+            try
+            {
+                var question = new QuizQuestion
+                {
+                    QuizId = quizId,
+                    QuestionText = questionText,
+                    QuestionType = questionType,
+                    QuestionOrder = questionOrder
+                };
+
+                if (questionType == "MultipleChoice")
+                {
+                    question.OptionA = optionA ?? "";
+                    question.OptionB = optionB ?? "";
+                    question.OptionC = optionC ?? "";
+                    question.OptionD = optionD ?? "";
+                    question.CorrectAnswer = correctAnswer?.ToUpper() ?? "";
+                }
+                else
+                {
+                    // For short answer questions, clear the options and store the sample answer
+                    question.OptionA = "";
+                    question.OptionB = "";
+                    question.OptionC = "";
+                    question.OptionD = "";
+                    question.CorrectAnswer = correctAnswer ?? ""; // This will be the sample answer
+                }
+
+                db.QuizQuestions.Add(question);
+                db.SaveChanges();
+
+                TempData["Success"] = "Question added successfully!";
+                return RedirectToAction("QuizEdit", new { id = quizId });
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Error adding question: " + ex.Message;
+                ViewBag.QuizId = quizId;
+                ViewBag.QuizTitle = quiz.Title;
+                return View();
+            }
+        }
+
+        // Edit Question - GET
+        public ActionResult EditQuestion(int id)
+        {
+            if (Session["UserRole"]?.ToString() != "Teacher")
+                return RedirectToAction("Login", "Account");
+
+            int teacherId = Convert.ToInt32(Session["UserId"]);
+
+            var question = db.QuizQuestions
+                .Include(q => q.Quiz)
+                .FirstOrDefault(q => q.Id == id && q.Quiz.CreatedByUserId == teacherId);
+
+            if (question == null)
+            {
+                TempData["Error"] = "Question not found or you don't have permission to edit it.";
+                return RedirectToAction("QuizManagement");
+            }
+
+            return View(question);
+        }
+
+        // Edit Question - POST - REPLACE YOUR EXISTING EditQuestion POST METHOD
+        [HttpPost]
+        public ActionResult EditQuestion(int id, string questionText, string optionA, string optionB,
+            string optionC, string optionD, string correctAnswer, int questionOrder)
+        {
+            if (Session["UserRole"]?.ToString() != "Teacher")
+                return RedirectToAction("Login", "Account");
+
+            int teacherId = Convert.ToInt32(Session["UserId"]);
+
+            var question = db.QuizQuestions
+                .Include(q => q.Quiz)
+                .FirstOrDefault(q => q.Id == id && q.Quiz.CreatedByUserId == teacherId);
+
+            if (question == null)
+            {
+                TempData["Error"] = "Question not found or you don't have permission to edit it.";
+                return RedirectToAction("QuizManagement");
+            }
+
+            // Validate input
+            if (string.IsNullOrEmpty(questionText))
+            {
+                ViewBag.Error = "Question text is required.";
+                return View(question);
+            }
+
+            // Determine question type based on whether options are provided
+            string questionType = "ShortAnswer";
+            if (!string.IsNullOrEmpty(optionA) && !string.IsNullOrEmpty(optionB) &&
+                !string.IsNullOrEmpty(optionC) && !string.IsNullOrEmpty(optionD))
+            {
+                questionType = "MultipleChoice";
+
+                // Validate multiple choice
+                if (string.IsNullOrEmpty(correctAnswer) || !"ABCD".Contains(correctAnswer.ToUpper()))
+                {
+                    ViewBag.Error = "Please select a valid correct answer (A, B, C, or D).";
+                    return View(question);
+                }
+            }
+
+            try
+            {
+                question.QuestionText = questionText;
+                question.QuestionType = questionType;
+                question.QuestionOrder = questionOrder;
+
+                if (questionType == "MultipleChoice")
+                {
+                    question.OptionA = optionA ?? "";
+                    question.OptionB = optionB ?? "";
+                    question.OptionC = optionC ?? "";
+                    question.OptionD = optionD ?? "";
+                    question.CorrectAnswer = correctAnswer?.ToUpper() ?? "";
+                }
+                else
+                {
+                    // For short answer questions
+                    question.OptionA = "";
+                    question.OptionB = "";
+                    question.OptionC = "";
+                    question.OptionD = "";
+                    question.CorrectAnswer = correctAnswer ?? ""; // This is the sample answer
+                }
+
+                db.SaveChanges();
+
+                TempData["Success"] = "Question updated successfully!";
+                return RedirectToAction("QuizEdit", new { id = question.QuizId });
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Error updating question: " + ex.Message;
+                return View(question);
+            }
+        }
+
+        // Create Quiz POST action - ADD THIS TO YOUR TeacherController
         [HttpPost]
         public ActionResult QuizCreate(string title, string category, string description, string difficulty, int timeLimit)
         {
@@ -90,7 +280,7 @@ namespace Brain_Mint.Controllers
             }
         }
 
-        // Edit Quiz - shows quiz details and questions
+        // Edit Quiz - shows quiz details and questions - ADD THIS TO YOUR TeacherController
         public ActionResult QuizEdit(int id)
         {
             if (Session["UserRole"]?.ToString() != "Teacher")
@@ -111,7 +301,7 @@ namespace Brain_Mint.Controllers
             return View(quiz);
         }
 
-        // Add Question to Quiz - GET
+        // Add Question to Quiz - GET - ADD THIS TO YOUR TeacherController
         public ActionResult AddQuestion(int quizId)
         {
             if (Session["UserRole"]?.ToString() != "Teacher")
@@ -134,161 +324,6 @@ namespace Brain_Mint.Controllers
             ViewBag.NextQuestionOrder = maxOrder + 1;
 
             return View();
-        }
-
-        // Add Question to Quiz - POST
-        [HttpPost]
-        public ActionResult AddQuestion(int quizId, string questionText, string optionA, string optionB,
-            string optionC, string optionD, string correctAnswer, int questionOrder, string questionType = "MultipleChoice")
-        {
-            if (Session["UserRole"]?.ToString() != "Teacher")
-                return RedirectToAction("Login", "Account");
-
-            int teacherId = Convert.ToInt32(Session["UserId"]);
-
-            var quiz = db.Quizzes.FirstOrDefault(q => q.Id == quizId && q.CreatedByUserId == teacherId);
-            if (quiz == null)
-            {
-                TempData["Error"] = "Quiz not found or you don't have permission to edit it.";
-                return RedirectToAction("QuizManagement");
-            }
-
-            // Validate input
-            if (string.IsNullOrEmpty(questionText))
-            {
-                ViewBag.Error = "Question text is required.";
-                ViewBag.QuizId = quizId;
-                ViewBag.QuizTitle = quiz.Title;
-                return View();
-            }
-
-            if (questionType == "MultipleChoice")
-            {
-                if (string.IsNullOrEmpty(optionA) || string.IsNullOrEmpty(optionB) ||
-                    string.IsNullOrEmpty(optionC) || string.IsNullOrEmpty(optionD))
-                {
-                    ViewBag.Error = "All options are required for multiple choice questions.";
-                    ViewBag.QuizId = quizId;
-                    ViewBag.QuizTitle = quiz.Title;
-                    return View();
-                }
-
-                if (string.IsNullOrEmpty(correctAnswer) || !"ABCD".Contains(correctAnswer.ToUpper()))
-                {
-                    ViewBag.Error = "Please select a valid correct answer (A, B, C, or D).";
-                    ViewBag.QuizId = quizId;
-                    ViewBag.QuizTitle = quiz.Title;
-                    return View();
-                }
-            }
-
-            try
-            {
-                var question = new QuizQuestion
-                {
-                    QuizId = quizId,
-                    QuestionText = questionText,
-                    OptionA = optionA ?? "",
-                    OptionB = optionB ?? "",
-                    OptionC = optionC ?? "",
-                    OptionD = optionD ?? "",
-                    CorrectAnswer = correctAnswer?.ToUpper() ?? "",
-                    QuestionOrder = questionOrder
-                };
-
-                db.QuizQuestions.Add(question);
-                db.SaveChanges();
-
-                TempData["Success"] = "Question added successfully!";
-                return RedirectToAction("QuizEdit", new { id = quizId });
-            }
-            catch (Exception ex)
-            {
-                ViewBag.Error = "Error adding question: " + ex.Message;
-                ViewBag.QuizId = quizId;
-                ViewBag.QuizTitle = quiz.Title;
-                return View();
-            }
-        }
-
-        // Edit Question - GET
-        public ActionResult EditQuestion(int id)
-        {
-            if (Session["UserRole"]?.ToString() != "Teacher")
-                return RedirectToAction("Login", "Account");
-
-            int teacherId = Convert.ToInt32(Session["UserId"]);
-
-            var question = db.QuizQuestions
-                .Include(q => q.Quiz)
-                .FirstOrDefault(q => q.Id == id && q.Quiz.CreatedByUserId == teacherId);
-
-            if (question == null)
-            {
-                TempData["Error"] = "Question not found or you don't have permission to edit it.";
-                return RedirectToAction("QuizManagement");
-            }
-
-            return View(question);
-        }
-
-        // Edit Question - POST
-        [HttpPost]
-        public ActionResult EditQuestion(int id, string questionText, string optionA, string optionB,
-            string optionC, string optionD, string correctAnswer, int questionOrder)
-        {
-            if (Session["UserRole"]?.ToString() != "Teacher")
-                return RedirectToAction("Login", "Account");
-
-            int teacherId = Convert.ToInt32(Session["UserId"]);
-
-            var question = db.QuizQuestions
-                .Include(q => q.Quiz)
-                .FirstOrDefault(q => q.Id == id && q.Quiz.CreatedByUserId == teacherId);
-
-            if (question == null)
-            {
-                TempData["Error"] = "Question not found or you don't have permission to edit it.";
-                return RedirectToAction("QuizManagement");
-            }
-
-            // Validate input
-            if (string.IsNullOrEmpty(questionText))
-            {
-                ViewBag.Error = "Question text is required.";
-                return View(question);
-            }
-
-            if (!string.IsNullOrEmpty(optionA) && !string.IsNullOrEmpty(optionB) &&
-                !string.IsNullOrEmpty(optionC) && !string.IsNullOrEmpty(optionD))
-            {
-                if (string.IsNullOrEmpty(correctAnswer) || !"ABCD".Contains(correctAnswer.ToUpper()))
-                {
-                    ViewBag.Error = "Please select a valid correct answer (A, B, C, or D).";
-                    return View(question);
-                }
-            }
-
-            try
-            {
-                question.QuestionText = questionText;
-                question.OptionA = optionA ?? "";
-                question.OptionB = optionB ?? "";
-                question.OptionC = optionC ?? "";
-                question.OptionD = optionD ?? "";
-                question.CorrectAnswer = correctAnswer?.ToUpper() ?? "";
-                question.QuestionOrder = questionOrder;
-
-                db.SaveChanges();
-
-                TempData["Success"] = "Question updated successfully!";
-                return RedirectToAction("QuizEdit", new { id = question.QuizId });
-            }
-            catch (Exception ex)
-            {
-                ViewBag.Error = "Error updating question: " + ex.Message;
-                return View(question);
-            }
         }
 
         // Delete Question
@@ -365,6 +400,47 @@ namespace Brain_Mint.Controllers
                 return RedirectToAction("QuizEdit", new { id = id });
             }
         }
+
+        // Add this to your TeacherController
+        [HttpPost]
+        public ActionResult DeleteQuiz(int id)
+        {
+            if (Session["UserRole"]?.ToString() != "Teacher")
+                return RedirectToAction("Login", "Account");
+
+            int teacherId = Convert.ToInt32(Session["UserId"]);
+
+            var quiz = db.Quizzes
+                .Include(q => q.Questions)
+                .FirstOrDefault(q => q.Id == id && q.CreatedByUserId == teacherId);
+
+            if (quiz == null)
+            {
+                TempData["Error"] = "Quiz not found or you don't have permission to delete it.";
+                return RedirectToAction("QuizManagement");
+            }
+
+            try
+            {
+                // Delete all questions first (should cascade automatically, but being explicit)
+                var questions = db.QuizQuestions.Where(q => q.QuizId == id).ToList();
+                db.QuizQuestions.RemoveRange(questions);
+
+                // Delete the quiz
+                db.Quizzes.Remove(quiz);
+                db.SaveChanges();
+
+                TempData["Success"] = $"Quiz '{quiz.Title}' and all its questions have been deleted successfully.";
+                return RedirectToAction("QuizManagement");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error deleting quiz: " + ex.Message;
+                return RedirectToAction("QuizManagement");
+            }
+        }
+
+
 
         public ActionResult AssignmentManagement()
         {

@@ -146,6 +146,10 @@
     <Compile Include="Migrations\202509102238015_AddQuizTables.Designer.cs">
       <DependentUpon>202509102238015_AddQuizTables.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202509130249158_InitialCreate1.cs" />
+    <Compile Include="Migrations\202509130249158_InitialCreate1.Designer.cs">
+      <DependentUpon>202509130249158_InitialCreate1.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\DbContext.cs" />
     <Compile Include="Models\Login-log-model.cs" />
@@ -207,10 +211,8 @@
     <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Quiz\Index.cshtml" />
-    <Content Include="Views\Quiz\Result.cshtml" />
     <Content Include="Views\Account\Login.cshtml" />
     <Content Include="Views\Account\Signup.cshtml" />
-    <Content Include="Views\Quiz\Create.cshtml" />
     <Content Include="Views\Home\Welcome.cshtml" />
     <None Include="Views\Shared\.editorconfig" />
     <Content Include="Views\Shared\_Sidebar.cshtml" />
@@ -232,12 +234,12 @@
     <Content Include="Views\Teacher\AddQuestion.cshtml" />
     <Content Include="Views\Teacher\EditQuestion.cshtml" />
     <Content Include="Views\Teacher\MultipleChoiceOptions.cshtml" />
-    <Content Include="Views\Teacher\ShortAnswerPartial.cshtml" />
+    <Content Include="Views\Shared\_MultipleChoiceOptions.cshtml" />
+    <Content Include="Views\Shared\_ShortAnswerPartial.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Content\App_LocalResources\" />
-    <Folder Include="Views\Admin\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />
@@ -275,6 +277,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202509102238015_AddQuizTables.resx">
       <DependentUpon>202509102238015_AddQuizTables.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202509130249158_InitialCreate1.resx">
+      <DependentUpon>202509130249158_InitialCreate1.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

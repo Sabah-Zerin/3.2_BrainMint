@@ -149,3 +149,62 @@
             document.getElementById('optionB').required = false;
             document.getElementById('optionC').required = false;
             document.getElementById('optionD').required = false;
+            document.getElementById('correctAnswer').required = false;
+
+            // Clear multiple choice fields
+            document.getElementById('optionA').value = '';
+            document.getElementById('optionB').value = '';
+            document.getElementById('optionC').value = '';
+            document.getElementById('optionD').value = '';
+            document.getElementById('correctAnswer').value = '';
+        }
+    }
+
+    function previewQuestion() {
+        var questionText = document.getElementById('questionText').value;
+        var questionType = document.getElementById('questionType').value;
+        var previewDiv = document.getElementById('questionPreview');
+        var previewContent = document.getElementById('previewContent');
+
+        if (!questionText.trim()) {
+            alert('Please enter a question first.');
+            return;
+        }
+
+        var previewHTML = '<h6>Question: ' + questionText + '</h6>';
+
+        if (questionType === 'MultipleChoice') {
+            var optionA = document.getElementById('optionA').value;
+            var optionB = document.getElementById('optionB').value;
+            var optionC = document.getElementById('optionC').value;
+            var optionD = document.getElementById('optionD').value;
+            var correctAnswer = document.getElementById('correctAnswer').value;
+
+            if (!optionA || !optionB || !optionC || !optionD) {
+                alert('Please fill in all options for multiple choice question.');
+                return;
+            }
+
+            previewHTML += '<div class="mt-3">';
+            previewHTML += '<div class="form-check"><input class="form-check-input" type="radio" disabled><label class="form-check-label">A) ' + optionA + '</label></div>';
+            previewHTML += '<div class="form-check"><input class="form-check-input" type="radio" disabled><label class="form-check-label">B) ' + optionB + '</label></div>';
+            previewHTML += '<div class="form-check"><input class="form-check-input" type="radio" disabled><label class="form-check-label">C) ' + optionC + '</label></div>';
+            previewHTML += '<div class="form-check"><input class="form-check-input" type="radio" disabled><label class="form-check-label">D) ' + optionD + '</label></div>';
+            if (correctAnswer) {
+                previewHTML += '<div class="mt-2"><small class="text-success"><strong>Correct Answer: ' + correctAnswer + '</strong></small></div>';
+            }
+            previewHTML += '</div>';
+        } else {
+            var expectedAnswer = document.getElementById('correctAnswerText').value;
+            previewHTML += '<div class="mt-3">';
+            previewHTML += '<textarea class="form-control" rows="3" placeholder="Student will type here..." disabled></textarea>';
+            if (expectedAnswer) {
+                previewHTML += '<div class="mt-2"><small class="text-info"><strong>Expected Answer: </strong>' + expectedAnswer + '</small></div>';
+            }
+            previewHTML += '</div>';
+        }
+
+        previewContent.innerHTML = previewHTML;
+        previewDiv.style.display = 'block';
+    }
+   </script>

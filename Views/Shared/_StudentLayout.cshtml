@@ -1,10 +1,3 @@
-@{
-    if (Session["UserRole"]?.ToString() != "Student")
-    {
-        Context.Response.Redirect(Url.Action("Login", "Account"));
-    }
-}
-
 <!DOCTYPE html>
 <html>
 <head>

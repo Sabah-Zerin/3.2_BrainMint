@@ -11,23 +11,30 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h3 class="mb-0">Edit Question</h3>
                     <a href="@Url.Action("QuizEdit", "Teacher", new { id = Model.QuizId })" class="btn btn-secondary btn-sm">
-                        <i class="bi bi-arrow-left"></i> Back to Quiz
+                        <i class="fas fa-arrow-left"></i> Back to Quiz
                     </a>
                 </div>
 
                 <div class="card-body">
-                    @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+                    @if (!string.IsNullOrEmpty(ViewBag.Error))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show">
+                            @ViewBag.Error
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
 
                     @using (Html.BeginForm("EditQuestion", "Teacher", FormMethod.Post))
                     {
                         @Html.HiddenFor(m => m.Id)
                         @Html.HiddenFor(m => m.QuestionOrder)
+                        @Html.HiddenFor(m => m.QuizId)
 
                         <!-- Question Type Display -->
                         <div class="form-group mb-3">
                             <label class="form-label">Question Type</label>
                             <div class="form-control-plaintext">
-                                @if (string.IsNullOrEmpty(Model.OptionA))
+                                @if (Model.QuestionType == "ShortAnswer" || string.IsNullOrEmpty(Model.OptionA))
                                 {
                                     <span class="badge bg-info">Short Answer</span>
                                 }
@@ -50,14 +57,64 @@
                             @Html.ValidationMessageFor(m => m.QuestionText, "", new { @class = "text-danger" })
                         </div>
 
-                        <!-- Multiple Choice or Short Answer -->
-                        if (!string.IsNullOrEmpty(Model.OptionA))
+                        <!-- Multiple Choice or Short Answer Fields -->
+                        if (Model.QuestionType == "MultipleChoice" || !string.IsNullOrEmpty(Model.OptionA))
                         {
-                            @Html.Partial("_MultipleChoiceOptions", Model)
+                            <!-- Multiple Choice Options -->
+                            <h5 class="mb-3">Answer Options</h5>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    @Html.LabelFor(m => m.OptionA, "Option A", new { @class = "form-label" })
+                                    @Html.TextBoxFor(m => m.OptionA, new { @class = "form-control", placeholder = "Enter option A" })
+                                    @Html.ValidationMessageFor(m => m.OptionA, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-md-6">
+                                    @Html.LabelFor(m => m.OptionB, "Option B", new { @class = "form-label" })
+                                    @Html.TextBoxFor(m => m.OptionB, new { @class = "form-control", placeholder = "Enter option B" })
+                                    @Html.ValidationMessageFor(m => m.OptionB, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    @Html.LabelFor(m => m.OptionC, "Option C", new { @class = "form-label" })
+                                    @Html.TextBoxFor(m => m.OptionC, new { @class = "form-control", placeholder = "Enter option C" })
+                                    @Html.ValidationMessageFor(m => m.OptionC, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-md-6">
+                                    @Html.LabelFor(m => m.OptionD, "Option D", new { @class = "form-label" })
+                                    @Html.TextBoxFor(m => m.OptionD, new { @class = "form-control", placeholder = "Enter option D" })
+                                    @Html.ValidationMessageFor(m => m.OptionD, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group mb-3">
+                                @Html.LabelFor(m => m.CorrectAnswer, "Correct Answer", new { @class = "form-label" })
+                                @Html.DropDownListFor(m => m.CorrectAnswer, new SelectList(new[] {
+                                    new { Value = "", Text = "Select the correct answer" },
+                                    new { Value = "A", Text = "A" },
+                                    new { Value = "B", Text = "B" },
+                                    new { Value = "C", Text = "C" },
+                                    new { Value = "D", Text = "D" }
+                                }, "Value", "Text", Model.CorrectAnswer),
+                                    new { @class = "form-control" })
+                                @Html.ValidationMessageFor(m => m.CorrectAnswer, "", new { @class = "text-danger" })
+                            </div>
                         }
                         else
                         {
-                            @Html.Partial("_ShortAnswerPartial", Model)
+                            <!-- Short Answer Section -->
+                            <div class="form-group mb-3">
+                                @Html.LabelFor(m => m.CorrectAnswer, "Sample/Expected Answer", new { @class = "form-label" })
+                                @Html.TextAreaFor(m => m.CorrectAnswer, new
+                                {
+                                    @class = "form-control",
+                                    rows = 2,
+                                    placeholder = "Enter a sample correct answer or key points (optional)"
+                                })
+                                <small class="form-text text-muted">
+                                    This will help you when grading. Students won't see this.
+                                </small>
+                                @Html.ValidationMessageFor(m => m.CorrectAnswer, "", new { @class = "text-danger" })
+                            </div>
                         }
 
                         <!-- Current Preview -->
@@ -68,7 +125,7 @@
                             <div class="card-body">
                                 <h6>Question: @Model.QuestionText</h6>
 
-                                @if (!string.IsNullOrEmpty(Model.OptionA))
+                                @if (Model.QuestionType == "MultipleChoice" || !string.IsNullOrEmpty(Model.OptionA))
                                 {
                                     <div class="mt-3">
                                         <div class="form-check">
@@ -117,11 +174,11 @@
                         <!-- Buttons -->
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-save"></i> Update Question
+                                <i class="fas fa-save"></i> Update Question
                             </button>
                             <a href="@Url.Action("QuizEdit", "Teacher", new { id = Model.QuizId })"
                                class="btn btn-secondary">
-                                <i class="bi bi-x-circle"></i> Cancel
+                                <i class="fas fa-times"></i> Cancel
                             </a>
                         </div>
                     }
