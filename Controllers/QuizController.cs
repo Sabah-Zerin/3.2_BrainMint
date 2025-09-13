@@ -12,20 +12,7 @@ namespace Brain_Mint.Controllers
     {
         private static List<Question> questions = new List<Question>
         {
-            new Question
-            {
-                Id = 1,
-                Text = "What is the capital of France?",
-                Options = new List<string> { "Paris", "London", "Berlin", "Madrid" },
-                CorrectOptionIndex = 0
-            },
-            new Question
-            {
-                Id = 2,
-                Text = "Which planet is known as the Red Planet?",
-                Options = new List<string> { "Earth", "Mars", "Jupiter", "Venus" },
-                CorrectOptionIndex = 1
-            }
+           
         };
 
         [Authorize]

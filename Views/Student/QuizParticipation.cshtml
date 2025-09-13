@@ -1,4 +1,4 @@
-@model List<Brain_Mint.Controllers.Quiz>
+@model List<Brain_Mint.Models.Quiz>
 @{
     Layout = "~/Views/Shared/_StudentLayout.cshtml";
 }
@@ -9,9 +9,9 @@
         <tr>
             <th>Quiz Title</th>
             <th>Category</th>
-            <th>Level</th>
+            <th>Difficulty</th>
+            <th>Time Limit</th>
             <th>Status</th>
-            <th>Score</th>
             <th>Action</th>
         </tr>
     </thead>
@@ -21,36 +21,13 @@
             <tr>
                 <td>@quiz.Title</td>
                 <td>@quiz.Category</td>
-                <td>@quiz.Level</td>
+                <td>@quiz.Difficulty</td>
+                <td>@quiz.TimeLimit minutes</td>
                 <td>
-                    @if (quiz.Attended)
-                    {
-                        <span class="badge bg-success">Attended</span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-warning text-dark">Not Attended</span> <!-- Added text-dark -->
-                    }
+                    <span class="badge bg-success">@quiz.Status</span>
                 </td>
                 <td>
-                    @if (quiz.Score.HasValue)
-                    {
-                        <span class="badge bg-primary">@quiz.Score.Value%</span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-secondary">N/A</span>
-                    }
-                </td>
-                <td>
-                    @if (quiz.Attended)
-                    {
-                        <button class="btn btn-sm btn-info">View Details</button>
-                    }
-                    else
-                    {
-                        <button class="btn btn-sm btn-primary">Attend Quiz</button>
-                    }
+                    <a href="#" class="btn btn-sm btn-primary">Take Quiz</a>
                 </td>
             </tr>
         }
