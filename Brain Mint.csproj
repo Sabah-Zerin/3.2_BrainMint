@@ -260,6 +260,7 @@
     <Content Include="Views\Student\ViewAssignment.cshtml" />
     <Content Include="Views\Student\AssignmentDetails.cshtml" />
     <Content Include="Views\Student\ReviewSubmission.cshtml" />
+    <Content Include="Views\Teacher\EditAssignment.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

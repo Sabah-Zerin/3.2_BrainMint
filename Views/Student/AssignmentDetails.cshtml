@@ -281,7 +281,8 @@
                 <h5 class="modal-title">Edit Assignment</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form method="post" action="@Url.Action("UpdateAssignment", "Teacher")">
+            <form method="post" action="@Url.Action("EditAssignment", "Teacher", new { id = Model.Assignment.Id })">
+
                 <div class="modal-body">
                     <input type="hidden" name="id" value="@Model.Assignment.Id" />
 

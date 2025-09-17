@@ -534,6 +534,78 @@ namespace Brain_Mint.Controllers
             return View(viewModel);
         }
 
+        // GET: Teacher/EditAssignment/5
+        public ActionResult EditAssignment(int id)
+        {
+            if (Session["UserRole"]?.ToString() != "Teacher")
+                return RedirectToAction("Login", "Account");
+
+            int teacherId = Convert.ToInt32(Session["UserId"]);
+
+            var assignment = db.Assignments.Find(id);
+            if (assignment == null || assignment.CreatedByUserId != teacherId)
+            {
+                TempData["Error"] = "Assignment not found or you don't have permission to edit it.";
+                return RedirectToAction("AssignmentManagement");
+            }
+
+            var model = new CreateAssignmentViewModel
+            {
+                Title = assignment.Title,
+                Description = assignment.Description,
+                Subject = assignment.Subject,
+                DueDate = assignment.DueDate,
+                MaxPoints = assignment.MaxPoints,
+                SubmissionType = assignment.SubmissionType
+            };
+
+            ViewBag.AssignmentId = id;
+            return View(model);
+        }
+
+        // POST: Teacher/EditAssignment/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EditAssignment(int id, CreateAssignmentViewModel model)
+        {
+            if (Session["UserRole"]?.ToString() != "Teacher")
+                return RedirectToAction("Login", "Account");
+
+            int teacherId = Convert.ToInt32(Session["UserId"]);
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var assignment = db.Assignments.Find(id);
+                    if (assignment == null || assignment.CreatedByUserId != teacherId)
+                    {
+                        TempData["Error"] = "Assignment not found or you don't have permission to edit it.";
+                        return RedirectToAction("AssignmentManagement");
+                    }
+
+                    assignment.Title = model.Title;
+                    assignment.Description = model.Description;
+                    assignment.Subject = model.Subject;
+                    assignment.DueDate = model.DueDate;
+                    assignment.MaxPoints = model.MaxPoints;
+                    assignment.SubmissionType = model.SubmissionType;
+
+                    db.SaveChanges();
+
+                    TempData["Success"] = "Assignment updated successfully!";
+                    return RedirectToAction("AssignmentDetails", new { id = id });
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "Error updating assignment: " + ex.Message);
+                }
+            }
+
+            ViewBag.AssignmentId = id;
+            return View(model);
+        }
+
         public ActionResult ReviewSubmission(int id)
         {
             if (Session["UserRole"]?.ToString() != "Teacher")

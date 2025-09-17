@@ -1,0 +1,111 @@
+@model Brain_Mint.Models.SubmitAssignmentViewModel
+@{
+    ViewBag.Title = "Assignment Submission";
+    Layout = "~/Views/Shared/_Layout.cshtml"; // Adjust based on your layout
+}
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h2>@Model.Assignment.Title</h2>
+            <p class="mb-0">Subject: @Model.Assignment.Subject</p>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <p><strong>Due Date:</strong> @Model.Assignment.DueDate.ToString("MMM dd, yyyy hh:mm tt")</p>
+                    <p>
+                        <strong>Status:</strong>
+                        @if (Model.HasExistingSubmission)
+                        {
+                            <span class="badge bg-success">Submitted</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning">Not Submitted</span>
+                        }
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Max Points:</strong> @Model.Assignment.MaxPoints</p>
+                    <p><strong>Submission Type:</strong> @Model.Assignment.SubmissionType</p>
+                </div>
+            </div>
+
+            <div class="assignment-description mb-4">
+                <h4>Description</h4>
+                <p>@Model.Assignment.Description</p>
+            </div>
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger">@TempData["Error"]</div>
+            }
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success">@TempData["Success"]</div>
+            }
+
+            @using (Html.BeginForm("SubmitAssignment", "Student", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.AssignmentId)
+
+                if (Model.Assignment.SubmissionType == "Text" || Model.Assignment.SubmissionType == "Both")
+                {
+                    <div class="form-group mb-3">
+                        <label for="TextSubmission">Your Submission</label>
+                        @Html.TextAreaFor(m => m.TextSubmission, new { @class = "form-control", rows = 5, placeholder = "Type your assignment here..." })
+                    </div>
+                }
+
+                if (Model.Assignment.SubmissionType == "Image" || Model.Assignment.SubmissionType == "Both")
+                {
+                    <div class="form-group mb-3">
+                        <label for="imageFile">Upload Image</label>
+                        <input type="file" name="imageFile" class="form-control" accept=".jpg,.jpeg,.png,.gif,.bmp" />
+                        <small class="form-text text-muted">Max file size: 5MB. Allowed formats: JPG, PNG, GIF, BMP</small>
+                    </div>
+                }
+
+                if (Model.HasExistingSubmission)
+                {
+                    <button type="submit" class="btn btn-warning">Update Submission</button>
+                }
+                else
+                {
+                    <button type="submit" class="btn btn-primary">Submit Assignment</button>
+                }
+            }
+
+            @if (Model.HasExistingSubmission)
+            {
+                <div class="mt-4">
+                    <h4>Current Submission</h4>
+                    @if (!string.IsNullOrEmpty(Model.ExistingSubmission.TextSubmission))
+                    {
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5>Text Submission:</h5>
+                                <p>@Model.ExistingSubmission.TextSubmission</p>
+                            </div>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.ExistingSubmission.ImagePath))
+                    {
+                        <div class="card">
+                            <div class="card-body">
+                                <h5>Image Submission:</h5>
+                                <img src="@Url.Content(Model.ExistingSubmission.ImagePath)"
+                                     alt="Submission Image"
+                                     class="img-fluid rounded"
+                                     style="max-height: 300px;" />
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

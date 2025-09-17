@@ -4,6 +4,15 @@
     ViewBag.Title = "Assignment - " + Model.Assignment.Title;
 }
 
+public class SubmitAssignmentViewModel
+{
+    public int AssignmentId { get; set; }
+    public Assignment Assignment { get; set; }
+    public bool HasExistingSubmission { get; set; }
+    public AssignmentSubmission ExistingSubmission { get; set; }
+    public string TextSubmission { get; set; }
+}
+
 <div class="dashboard-card">
     <div class="d-flex justify-content-between align-items-start mb-4">
         <div>
