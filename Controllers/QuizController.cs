@@ -27,9 +27,9 @@ namespace Brain_Mint.Controllers
                 .Select(q => new QuizViewModel
                 {
                     Quiz = q,
-                    HasAttempted = db.QuizAttempts.Any(qa => qa.QuizId == q.Id && qa.StudentId == studentId && qa.Status == "Completed"),
+                    HasAttempted = db.QuizAttempts.Any(qa => qa.QuizId == q.Id && qa.StudentId == studentId),
                     LastAttempt = db.QuizAttempts
-                        .Where(qa => qa.QuizId == q.Id && qa.StudentId == studentId && qa.Status == "Completed")
+                        .Where(qa => qa.QuizId == q.Id && qa.StudentId == studentId)
                         .OrderByDescending(qa => qa.StartTime)
                         .FirstOrDefault()
                 })

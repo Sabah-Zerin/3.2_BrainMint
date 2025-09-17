@@ -494,6 +494,8 @@ namespace Brain_Mint.Controllers
             var response = db.QuizResponses
                 .Include(r => r.QuizAttempt)
                 .Include(r => r.QuizAttempt.Quiz)
+                .Include(r => r.QuizAttempt.Responses)
+                .Include(r => r.QuizAttempt.Responses.Select(resp => resp.Question))
                 .FirstOrDefault(r => r.Id == responseId && r.QuizAttempt.Quiz.CreatedByUserId == teacherId);
 
             if (response == null)
@@ -511,18 +513,28 @@ namespace Brain_Mint.Controllers
 
                 // Update the attempt grading status
                 var attempt = response.QuizAttempt;
-                if (attempt.Responses.All(r => r.PointsAwarded.HasValue || r.Question.QuestionType != "ShortAnswer"))
+
+                // Check if all responses are graded
+                bool allGraded = attempt.Responses.All(r =>
+                    r.PointsAwarded.HasValue ||
+                    (r.Question.QuestionType == "MultipleChoice" && r.IsCorrect.HasValue));
+
+                if (allGraded)
                 {
                     attempt.GradingStatus = "Graded";
 
                     // Calculate total score
                     attempt.TotalScore = attempt.Responses
-                        .Where(r => r.PointsAwarded.HasValue)
-                        .Sum(r => r.PointsAwarded.Value);
+                        .Where(r => r.PointsAwarded.HasValue || r.IsCorrect.HasValue)
+                        .Sum(r => r.PointsAwarded ?? (r.IsCorrect == true ? 1 : 0));
 
                     attempt.MaximumScore = attempt.Responses.Count;
                     attempt.PercentageScore = attempt.MaximumScore > 0 ?
                         (decimal)attempt.TotalScore / attempt.MaximumScore * 100 : 0;
+                }
+                else
+                {
+                    attempt.GradingStatus = "PendingReview";
                 }
 
                 db.SaveChanges();

@@ -27,14 +27,16 @@ namespace Brain_Mint.Models
 
         [Required]
         [StringLength(20)]
-        public string Status { get; set; } // InProgress, Completed, Abandoned
-
-        public int? TotalScore { get; set; }
-        public int? MaximumScore { get; set; }
-        public decimal? PercentageScore { get; set; }
+        public string Status { get; set; } // InProgress, Completed
 
         [StringLength(20)]
-        public string GradingStatus { get; set; } // AutoGraded, PendingReview, Reviewed
+        public string GradingStatus { get; set; } // AutoGraded, PendingReview, Graded
+
+        public int? TotalScore { get; set; }
+
+        public int? MaximumScore { get; set; }
+
+        public decimal? PercentageScore { get; set; }
 
         // Navigation properties
         [ForeignKey("QuizId")]
