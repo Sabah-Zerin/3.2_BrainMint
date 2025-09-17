@@ -5,6 +5,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using System.IO;
 
 namespace Brain_Mint.Controllers
 {
@@ -21,6 +22,7 @@ namespace Brain_Mint.Controllers
             return View();
         }
 
+        #region Quiz Management
         public ActionResult QuizManagement()
         {
             if (Session["UserRole"]?.ToString() != "Teacher")
@@ -48,8 +50,92 @@ namespace Brain_Mint.Controllers
             return View();
         }
 
+        [HttpPost]
+        public ActionResult QuizCreate(string title, string category, string description, string difficulty, int timeLimit)
+        {
+            if (Session["UserRole"]?.ToString() != "Teacher")
+                return RedirectToAction("Login", "Account");
 
-        
+            if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(category))
+            {
+                ViewBag.Error = "Title and Category are required.";
+                return View();
+            }
+
+            try
+            {
+                // Create new quiz
+                var quiz = new Quiz
+                {
+                    Title = title,
+                    Category = category,
+                    Description = description ?? "",
+                    Difficulty = difficulty ?? "Beginner",
+                    TimeLimit = timeLimit > 0 ? timeLimit : 30,
+                    CreatedByUserId = Convert.ToInt32(Session["UserId"]),
+                    CreatedDate = DateTime.Now,
+                    Status = "Draft" // New quizzes start as Draft
+                };
+
+                // Save to database
+                db.Quizzes.Add(quiz);
+                db.SaveChanges();
+
+                TempData["QuizCreateSuccess"] = $"Quiz '{title}' created successfully!";
+                return RedirectToAction("QuizManagement");
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Error creating quiz: " + ex.Message;
+                return View();
+            }
+        }
+
+        // Edit Quiz - shows quiz details and questions
+        public ActionResult QuizEdit(int id)
+        {
+            if (Session["UserRole"]?.ToString() != "Teacher")
+                return RedirectToAction("Login", "Account");
+
+            int teacherId = Convert.ToInt32(Session["UserId"]);
+
+            var quiz = db.Quizzes
+                .Include(q => q.Questions)
+                .FirstOrDefault(q => q.Id == id && q.CreatedByUserId == teacherId);
+
+            if (quiz == null)
+            {
+                TempData["Error"] = "Quiz not found or you don't have permission to edit it.";
+                return RedirectToAction("QuizManagement");
+            }
+
+            return View(quiz);
+        }
+
+        // Add Question to Quiz - GET
+        public ActionResult AddQuestion(int quizId)
+        {
+            if (Session["UserRole"]?.ToString() != "Teacher")
+                return RedirectToAction("Login", "Account");
+
+            int teacherId = Convert.ToInt32(Session["UserId"]);
+
+            var quiz = db.Quizzes.FirstOrDefault(q => q.Id == quizId && q.CreatedByUserId == teacherId);
+            if (quiz == null)
+            {
+                TempData["Error"] = "Quiz not found or you don't have permission to edit it.";
+                return RedirectToAction("QuizManagement");
+            }
+
+            ViewBag.QuizId = quizId;
+            ViewBag.QuizTitle = quiz.Title;
+
+            // Get next question order
+            var maxOrder = db.QuizQuestions.Where(q => q.QuizId == quizId).Max(q => (int?)q.QuestionOrder) ?? 0;
+            ViewBag.NextQuestionOrder = maxOrder + 1;
+
+            return View();
+        }
 
         [HttpPost]
         public ActionResult AddQuestion(int quizId, string questionText, string optionA, string optionB,
@@ -76,7 +162,7 @@ namespace Brain_Mint.Controllers
                 return View();
             }
 
-            // FIXED: Determine question type based on whether all options are provided
+            // Determine question type based on whether all options are provided
             bool hasAllOptions = !string.IsNullOrEmpty(optionA) && !string.IsNullOrEmpty(optionB) &&
                                 !string.IsNullOrEmpty(optionC) && !string.IsNullOrEmpty(optionD);
 
@@ -118,12 +204,11 @@ namespace Brain_Mint.Controllers
                 }
                 else
                 {
-                    // For short answer questions, clear the options and store the sample answer
                     question.OptionA = "";
                     question.OptionB = "";
                     question.OptionC = "";
                     question.OptionD = "";
-                    question.CorrectAnswer = correctAnswer ?? ""; // This will be the sample answer
+                    question.CorrectAnswer = correctAnswer ?? "";
                 }
 
                 db.QuizQuestions.Add(question);
@@ -162,7 +247,6 @@ namespace Brain_Mint.Controllers
             return View(question);
         }
 
-        // Edit Question - POST - REPLACE YOUR EXISTING EditQuestion POST METHOD
         [HttpPost]
         public ActionResult EditQuestion(int id, string questionText, string optionA, string optionB,
             string optionC, string optionD, string correctAnswer, int questionOrder)
@@ -220,12 +304,11 @@ namespace Brain_Mint.Controllers
                 }
                 else
                 {
-                    // For short answer questions
                     question.OptionA = "";
                     question.OptionB = "";
                     question.OptionC = "";
                     question.OptionD = "";
-                    question.CorrectAnswer = correctAnswer ?? ""; // This is the sample answer
+                    question.CorrectAnswer = correctAnswer ?? "";
                 }
 
                 db.SaveChanges();
@@ -240,95 +323,6 @@ namespace Brain_Mint.Controllers
             }
         }
 
-        // Create Quiz POST action - ADD THIS TO YOUR TeacherController
-        [HttpPost]
-        public ActionResult QuizCreate(string title, string category, string description, string difficulty, int timeLimit)
-        {
-            if (Session["UserRole"]?.ToString() != "Teacher")
-                return RedirectToAction("Login", "Account");
-
-            if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(category))
-            {
-                ViewBag.Error = "Title and Category are required.";
-                return View();
-            }
-
-            try
-            {
-                // Create new quiz
-                var quiz = new Quiz
-                {
-                    Title = title,
-                    Category = category,
-                    Description = description ?? "",
-                    Difficulty = difficulty ?? "Beginner",
-                    TimeLimit = timeLimit > 0 ? timeLimit : 30,
-                    CreatedByUserId = Convert.ToInt32(Session["UserId"]),
-                    CreatedDate = DateTime.Now,
-                    Status = "Draft" // New quizzes start as Draft
-                };
-
-                // Save to database
-                db.Quizzes.Add(quiz);
-                db.SaveChanges();
-
-                TempData["QuizCreateSuccess"] = $"Quiz '{title}' created successfully!";
-                return RedirectToAction("QuizManagement");
-            }
-            catch (Exception ex)
-            {
-                ViewBag.Error = "Error creating quiz: " + ex.Message;
-                return View();
-            }
-        }
-
-        // Edit Quiz - shows quiz details and questions - ADD THIS TO YOUR TeacherController
-        public ActionResult QuizEdit(int id)
-        {
-            if (Session["UserRole"]?.ToString() != "Teacher")
-                return RedirectToAction("Login", "Account");
-
-            int teacherId = Convert.ToInt32(Session["UserId"]);
-
-            var quiz = db.Quizzes
-                .Include(q => q.Questions)
-                .FirstOrDefault(q => q.Id == id && q.CreatedByUserId == teacherId);
-
-            if (quiz == null)
-            {
-                TempData["Error"] = "Quiz not found or you don't have permission to edit it.";
-                return RedirectToAction("QuizManagement");
-            }
-
-            return View(quiz);
-        }
-
-        // Add Question to Quiz - GET - ADD THIS TO YOUR TeacherController
-        public ActionResult AddQuestion(int quizId)
-        {
-            if (Session["UserRole"]?.ToString() != "Teacher")
-                return RedirectToAction("Login", "Account");
-
-            int teacherId = Convert.ToInt32(Session["UserId"]);
-
-            var quiz = db.Quizzes.FirstOrDefault(q => q.Id == quizId && q.CreatedByUserId == teacherId);
-            if (quiz == null)
-            {
-                TempData["Error"] = "Quiz not found or you don't have permission to edit it.";
-                return RedirectToAction("QuizManagement");
-            }
-
-            ViewBag.QuizId = quizId;
-            ViewBag.QuizTitle = quiz.Title;
-
-            // Get next question order
-            var maxOrder = db.QuizQuestions.Where(q => q.QuizId == quizId).Max(q => (int?)q.QuestionOrder) ?? 0;
-            ViewBag.NextQuestionOrder = maxOrder + 1;
-
-            return View();
-        }
-
-        // Delete Question
         [HttpPost]
         public ActionResult DeleteQuestion(int id)
         {
@@ -363,7 +357,6 @@ namespace Brain_Mint.Controllers
             }
         }
 
-        // Publish Quiz (change status from Draft to Active)
         [HttpPost]
         public ActionResult PublishQuiz(int id)
         {
@@ -403,7 +396,6 @@ namespace Brain_Mint.Controllers
             }
         }
 
-        // Add this to your TeacherController
         [HttpPost]
         public ActionResult DeleteQuiz(int id)
         {
@@ -424,11 +416,8 @@ namespace Brain_Mint.Controllers
 
             try
             {
-                // Delete all questions first (should cascade automatically, but being explicit)
                 var questions = db.QuizQuestions.Where(q => q.QuizId == id).ToList();
                 db.QuizQuestions.RemoveRange(questions);
-
-                // Delete the quiz
                 db.Quizzes.Remove(quiz);
                 db.SaveChanges();
 
@@ -441,24 +430,241 @@ namespace Brain_Mint.Controllers
                 return RedirectToAction("QuizManagement");
             }
         }
+        #endregion
 
-
-
+        #region Assignment Management
         public ActionResult AssignmentManagement()
         {
             if (Session["UserRole"]?.ToString() != "Teacher")
                 return RedirectToAction("Login", "Account");
-            return View();
+
+            int teacherId = Convert.ToInt32(Session["UserId"]);
+
+            var assignments = db.Assignments
+                .Where(a => a.CreatedByUserId == teacherId)
+                .Include(a => a.Submissions)
+                .OrderByDescending(a => a.CreatedDate)
+                .ToList();
+
+            return View(assignments);
         }
 
-        public ActionResult QuizParticipation()
+        [HttpPost]
+        public ActionResult CreateAssignment(CreateAssignmentViewModel model)
         {
             if (Session["UserRole"]?.ToString() != "Teacher")
                 return RedirectToAction("Login", "Account");
-            return View();
+
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Please fill in all required fields.";
+                return RedirectToAction("AssignmentManagement");
+            }
+
+            try
+            {
+                var assignment = new Assignment
+                {
+                    Title = model.Title,
+                    Description = model.Description,
+                    Subject = model.Subject,
+                    DueDate = model.DueDate,
+                    CreatedDate = DateTime.Now,
+                    CreatedByUserId = Convert.ToInt32(Session["UserId"]),
+                    Status = "Active",
+                    MaxPoints = model.MaxPoints,
+                    SubmissionType = model.SubmissionType
+                };
+
+                db.Assignments.Add(assignment);
+                db.SaveChanges();
+
+                TempData["Success"] = $"Assignment '{model.Title}' created successfully!";
+                return RedirectToAction("AssignmentManagement");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error creating assignment: " + ex.Message;
+                return RedirectToAction("AssignmentManagement");
+            }
         }
 
-        public ActionResult AssignmentDetails()
+        public ActionResult AssignmentDetails(int id)
+        {
+            if (Session["UserRole"]?.ToString() != "Teacher")
+                return RedirectToAction("Login", "Account");
+
+            int teacherId = Convert.ToInt32(Session["UserId"]);
+
+            var assignment = db.Assignments
+                .Include(a => a.Submissions)
+                .Include(a => a.Submissions.Select(s => s.Student))
+                .FirstOrDefault(a => a.Id == id && a.CreatedByUserId == teacherId);
+
+            if (assignment == null)
+            {
+                TempData["Error"] = "Assignment not found or you don't have permission to view it.";
+                return RedirectToAction("AssignmentManagement");
+            }
+
+            var submissions = assignment.Submissions.Select(s => new AssignmentSubmissionView
+            {
+                Id = s.Id,
+                StudentName = s.Student.Name,
+                StudentEmail = s.Student.Email,
+                SubmissionDate = s.SubmissionDate,
+                Status = s.Status,
+                Points = s.Points,
+                HasTextSubmission = !string.IsNullOrEmpty(s.TextSubmission),
+                HasImageSubmission = !string.IsNullOrEmpty(s.ImagePath),
+                IsLate = s.SubmissionDate > assignment.DueDate
+            }).OrderBy(s => s.StudentName).ToList();
+
+            var viewModel = new AssignmentDetailsViewModel
+            {
+                Assignment = assignment,
+                Submissions = submissions,
+                TotalSubmissions = submissions.Count,
+                PendingGrading = submissions.Count(s => s.Points == null),
+                AverageScore = submissions.Where(s => s.Points.HasValue).Any()
+                    ? submissions.Where(s => s.Points.HasValue).Average(s => s.Points.Value)
+                    : 0
+            };
+
+            return View(viewModel);
+        }
+
+        public ActionResult ReviewSubmission(int id)
+        {
+            if (Session["UserRole"]?.ToString() != "Teacher")
+                return RedirectToAction("Login", "Account");
+
+            int teacherId = Convert.ToInt32(Session["UserId"]);
+
+            var submission = db.AssignmentSubmissions
+                .Include(s => s.Assignment)
+                .Include(s => s.Student)
+                .FirstOrDefault(s => s.Id == id && s.Assignment.CreatedByUserId == teacherId);
+
+            if (submission == null)
+            {
+                TempData["Error"] = "Submission not found or you don't have permission to review it.";
+                return RedirectToAction("AssignmentManagement");
+            }
+
+            return View(submission);
+        }
+
+        [HttpPost]
+        public ActionResult GradeSubmission(int id, int points, string feedback)
+        {
+            if (Session["UserRole"]?.ToString() != "Teacher")
+                return RedirectToAction("Login", "Account");
+
+            int teacherId = Convert.ToInt32(Session["UserId"]);
+
+            var submission = db.AssignmentSubmissions
+                .Include(s => s.Assignment)
+                .FirstOrDefault(s => s.Id == id && s.Assignment.CreatedByUserId == teacherId);
+
+            if (submission == null)
+            {
+                TempData["Error"] = "Submission not found.";
+                return RedirectToAction("AssignmentManagement");
+            }
+
+            try
+            {
+                submission.Points = points;
+                submission.TeacherFeedback = feedback;
+                submission.GradedDate = DateTime.Now;
+                submission.GradedByUserId = teacherId;
+                submission.Status = "Graded";
+
+                db.SaveChanges();
+
+                TempData["Success"] = "Submission graded successfully!";
+                return RedirectToAction("AssignmentDetails", new { id = submission.AssignmentId });
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error grading submission: " + ex.Message;
+                return RedirectToAction("ReviewSubmission", new { id = id });
+            }
+        }
+
+        [HttpPost]
+        public ActionResult DeleteAssignment(int id)
+        {
+            if (Session["UserRole"]?.ToString() != "Teacher")
+                return RedirectToAction("Login", "Account");
+
+            int teacherId = Convert.ToInt32(Session["UserId"]);
+
+            var assignment = db.Assignments
+                .Include(a => a.Submissions)
+                .FirstOrDefault(a => a.Id == id && a.CreatedByUserId == teacherId);
+
+            if (assignment == null)
+            {
+                TempData["Error"] = "Assignment not found or you don't have permission to delete it.";
+                return RedirectToAction("AssignmentManagement");
+            }
+
+            try
+            {
+                // Delete associated image files
+                foreach (var submission in assignment.Submissions.Where(s => !string.IsNullOrEmpty(s.ImagePath)))
+                {
+                    var imagePath = Server.MapPath(submission.ImagePath);
+                    if (System.IO.File.Exists(imagePath))
+                    {
+                        System.IO.File.Delete(imagePath);
+                    }
+                }
+
+                db.Assignments.Remove(assignment);
+                db.SaveChanges();
+
+                TempData["Success"] = $"Assignment '{assignment.Title}' deleted successfully.";
+                return RedirectToAction("AssignmentManagement");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error deleting assignment: " + ex.Message;
+                return RedirectToAction("AssignmentManagement");
+            }
+        }
+
+        public ActionResult DownloadSubmissionImage(int submissionId)
+        {
+            if (Session["UserRole"]?.ToString() != "Teacher")
+                return RedirectToAction("Login", "Account");
+
+            int teacherId = Convert.ToInt32(Session["UserId"]);
+
+            var submission = db.AssignmentSubmissions
+                .Include(s => s.Assignment)
+                .FirstOrDefault(s => s.Id == submissionId && s.Assignment.CreatedByUserId == teacherId);
+
+            if (submission == null || string.IsNullOrEmpty(submission.ImagePath))
+            {
+                return HttpNotFound();
+            }
+
+            var imagePath = Server.MapPath(submission.ImagePath);
+            if (!System.IO.File.Exists(imagePath))
+            {
+                return HttpNotFound();
+            }
+
+            var fileName = submission.OriginalFileName ?? "submission_image.jpg";
+            return File(imagePath, "application/octet-stream", fileName);
+        }
+        #endregion
+
+        #region Other Actions
+        public ActionResult QuizParticipation()
         {
             if (Session["UserRole"]?.ToString() != "Teacher")
                 return RedirectToAction("Login", "Account");
@@ -471,6 +677,7 @@ namespace Brain_Mint.Controllers
                 return RedirectToAction("Login", "Account");
             return View();
         }
+        #endregion
 
         protected override void Dispose(bool disposing)
         {

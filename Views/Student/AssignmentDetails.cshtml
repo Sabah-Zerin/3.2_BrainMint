@@ -1,0 +1,462 @@
+@model Brain_Mint.Models.AssignmentDetailsViewModel
+@{
+    ViewBag.Title = "Assignment Details";
+    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+}
+
+<div class="dashboard-card">
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <h2 class="card-title mb-2">@Model.Assignment.Title</h2>
+            <p class="mb-1 text-muted">
+                <i class="fas fa-book me-2"></i>Subject: @Model.Assignment.Subject
+            </p>
+            <p class="mb-1 text-muted">
+                <i class="fas fa-calendar me-2"></i>Due: @Model.Assignment.DueDate.ToString("MMM dd, yyyy 'at' hh:mm tt")
+            </p>
+            <p class="mb-1 text-muted">
+                <i class="fas fa-star me-2"></i>Max Points: @Model.Assignment.MaxPoints
+            </p>
+            <p class="text-muted">
+                <i class="fas fa-clock me-2"></i>Created: @Model.Assignment.CreatedDate.ToString("MMM dd, yyyy")
+            </p>
+        </div>
+        <div>
+            <div class="d-flex gap-2 mb-2">
+                <button class="btn btn-outline-mint" onclick="exportResults()">
+                    <i class="fas fa-download me-1"></i> Export Results
+                </button>
+                <button class="btn btn-mint" data-bs-toggle="modal" data-bs-target="#editAssignmentModal">
+                    <i class="fas fa-edit me-1"></i> Edit
+                </button>
+            </div>
+            <span class="badge @(Model.Assignment.Status == "Active" ? "bg-success" : "bg-secondary") fs-6">
+                @Model.Assignment.Status
+            </span>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Assignment Description -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-info-circle me-2"></i>Assignment Instructions
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="assignment-description">
+                @Html.Raw(Model.Assignment.Description.Replace("\n", "<br/>"))
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Overview -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">@Model.TotalSubmissions</h3>
+                    <p class="mb-0">Total Submissions</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">@Model.PendingGrading</h3>
+                    <p class="mb-0">Pending Grading</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">@(Model.TotalSubmissions - Model.PendingGrading)</h3>
+                    <p class="mb-0">Graded</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">@(Model.AverageScore > 0 ? Model.AverageScore.ToString("F1") : "N/A")</h3>
+                    <p class="mb-0">Average Score</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submissions Table -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-users me-2"></i>Student Submissions (@Model.TotalSubmissions)
+            </h5>
+            <div class="d-flex gap-2">
+                <div class="input-group" style="width: 250px;">
+                    <input type="text" class="form-control" placeholder="Search students..." id="studentSearch">
+                    <button class="btn btn-outline-mint" onclick="searchStudents()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-outline-mint dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="filterSubmissions('all')">All Submissions</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="filterSubmissions('graded')">Graded</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="filterSubmissions('pending')">Pending Grading</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="filterSubmissions('late')">Late Submissions</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.Submissions.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="submissionsTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Student</th>
+                                <th>Submission Date</th>
+                                <th>Status</th>
+                                <th>Submission Type</th>
+                                <th>Grade</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var submission in Model.Submissions)
+                            {
+                                <tr class="submission-row"
+                                    data-status="@submission.Status.ToLower()"
+                                    data-student="@submission.StudentName.ToLower()">
+                                    <td>
+                                        <div>
+                                            <strong>@submission.StudentName</strong>
+                                            <br>
+                                            <small class="text-muted">@submission.StudentEmail</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @submission.SubmissionDate.ToString("MMM dd, yyyy")
+                                        <br>
+                                        <small class="text-muted">@submission.SubmissionDate.ToString("hh:mm tt")</small>
+                                        @if (submission.IsLate)
+                                        {
+                                            <br><span class="badge bg-warning text-dark">Late</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge @(submission.Status == "Graded" ? "bg-success" :
+                                                            submission.Status == "Late" ? "bg-warning text-dark" :
+                                                            "bg-primary")">
+                                            @submission.Status
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex gap-1">
+                                            @if (submission.HasTextSubmission)
+                                            {
+                                                <span class="badge bg-info">Text</span>
+                                            }
+                                            @if (submission.HasImageSubmission)
+                                            {
+                                                <span class="badge bg-secondary">Image</span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (submission.Points.HasValue)
+                                        {
+                                            <strong>@submission.Points / @Model.Assignment.MaxPoints</strong>
+                                            <br>
+                                            <small class="text-muted">
+                                                @((submission.Points.Value / (double)Model.Assignment.MaxPoints * 100).ToString("F1"))%
+                                            </small>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Not graded</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="@Url.Action("ReviewSubmission", "Teacher", new { id = submission.Id })"
+                                               class="btn btn-outline-mint" title="Review Submission">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            @if (!submission.Points.HasValue)
+                                            {
+                                                <button class="btn btn-outline-success"
+                                                        onclick="quickGrade(@submission.Id, '@submission.StudentName')"
+                                                        title="Quick Grade">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No submissions yet</h5>
+                    <p class="text-muted">Students haven't submitted any work for this assignment.</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="d-flex justify-content-start mt-4">
+        <a href="@Url.Action("AssignmentManagement", "Teacher")" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Back to Assignment Management
+        </a>
+    </div>
+</div>
+
+<!-- Quick Grade Modal -->
+<div class="modal fade" id="quickGradeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Quick Grade Submission</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="quickGradeForm" method="post" action="@Url.Action("GradeSubmission", "Teacher")">
+                <div class="modal-body">
+                    <input type="hidden" id="submissionId" name="id" />
+                    <p>Grading submission for: <strong id="studentNameDisplay"></strong></p>
+
+                    <div class="form-group mb-3">
+                        <label class="form-label">Points (out of @Model.Assignment.MaxPoints)</label>
+                        <input type="number" class="form-control" name="points"
+                               min="0" max="@Model.Assignment.MaxPoints" required />
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="form-label">Feedback (Optional)</label>
+                        <textarea class="form-control" name="feedback" rows="3"
+                                  placeholder="Provide feedback to the student..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Save Grade</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Assignment Modal -->
+<div class="modal fade" id="editAssignmentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Assignment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="@Url.Action("UpdateAssignment", "Teacher")">
+                <div class="modal-body">
+                    <input type="hidden" name="id" value="@Model.Assignment.Id" />
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Title</label>
+                                <input type="text" class="form-control" name="title"
+                                       value="@Model.Assignment.Title" required />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Subject</label>
+                                <input type="text" class="form-control" name="subject"
+                                       value="@Model.Assignment.Subject" required />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Due Date</label>
+                                <input type="datetime-local" class="form-control" name="dueDate"
+                                       value="@Model.Assignment.DueDate.ToString("yyyy-MM-ddTHH:mm")" required />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Max Points</label>
+                                <input type="number" class="form-control" name="maxPoints"
+                                       value="@Model.Assignment.MaxPoints" min="1" required />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="form-label">Instructions</label>
+                        <textarea class="form-control" name="description" rows="6" required>@Model.Assignment.Description</textarea>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="form-label">Submission Type</label>
+                        <select class="form-control" name="submissionType" required>
+                            <option value="Text" @(Model.Assignment.SubmissionType == "Text" ? "selected" : "")>Text Only</option>
+                            <option value="Image" @(Model.Assignment.SubmissionType == "Image" ? "selected" : "")>Image Only</option>
+                            <option value="Both" @(Model.Assignment.SubmissionType == "Both" ? "selected" : "")>Text and Image</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-mint">Update Assignment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        function searchStudents() {
+            const searchTerm = document.getElementById('studentSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('.submission-row');
+
+            rows.forEach(row => {
+                const studentName = row.getAttribute('data-student');
+                if (studentName.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function filterSubmissions(status) {
+            const rows = document.querySelectorAll('.submission-row');
+
+            rows.forEach(row => {
+                const rowStatus = row.getAttribute('data-status');
+                if (status === 'all' ||
+                    (status === 'graded' && rowStatus === 'graded') ||
+                    (status === 'pending' && (rowStatus === 'submitted' || rowStatus === 'late')) ||
+                    (status === 'late' && rowStatus === 'late')) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function quickGrade(submissionId, studentName) {
+            document.getElementById('submissionId').value = submissionId;
+            document.getElementById('studentNameDisplay').textContent = studentName;
+            new bootstrap.Modal(document.getElementById('quickGradeModal')).show();
+        }
+
+        function exportResults() {
+            // Export functionality - could generate CSV or PDF
+            const csvContent = "data:text/csv;charset=utf-8,"
+                + "Student Name,Email,Submission Date,Status,Grade,Percentage\n"
+                + Array.from(document.querySelectorAll('.submission-row')).map(row => {
+                    const cells = row.querySelectorAll('td');
+                    return [
+                        cells[0].querySelector('strong').textContent,
+                        cells[0].querySelector('small').textContent,
+                        cells[1].textContent.split('\n')[0].trim(),
+                        cells[2].querySelector('.badge').textContent,
+                        cells[4].textContent.trim() || 'Not graded',
+                        cells[4].querySelector('small') ? cells[4].querySelector('small').textContent : 'N/A'
+                    ].join(',');
+                }).join('\n');
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "@Model.Assignment.Title.Replace(" ", "_")_results.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Auto-refresh submissions every 30 seconds
+        setInterval(function() {
+            // Could implement real-time updates here
+        }, 30000);
+    </script>
+}
+
+<style>
+    .bg-mint {
+        background-color: var(--mint-medium) !important;
+    }
+
+    .btn-mint {
+        background-color: var(--mint-medium);
+        border-color: var(--mint-medium);
+        color: white;
+    }
+
+        .btn-mint:hover {
+            background-color: var(--mint-dark);
+            border-color: var(--mint-dark);
+            color: white;
+        }
+
+    .btn-outline-mint {
+        color: var(--mint-medium);
+        border-color: var(--mint-medium);
+    }
+
+        .btn-outline-mint:hover {
+            background-color: var(--mint-medium);
+            border-color: var(--mint-medium);
+            color: white;
+        }
+
+    .assignment-description {
+        line-height: 1.6;
+        font-size: 1.05rem;
+    }
+
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        background-color: #f8f9fa;
+    }
+
+    .badge.fs-6 {
+        font-size: 0.9rem !important;
+    }
+
+    .card-header {
+        background-color: rgba(72, 201, 176, 0.1);
+        border-bottom: 2px solid var(--mint-light);
+    }
+</style>

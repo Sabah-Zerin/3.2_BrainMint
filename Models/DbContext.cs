@@ -19,10 +19,15 @@ namespace Brain_Mint.Models
         public DbSet<QuizAttempt> QuizAttempts { get; set; }
         public DbSet<QuizResponse> QuizResponses { get; set; }
 
+        // Assignment Tables
+        public DbSet<Assignment> Assignments { get; set; }
+        public DbSet<AssignmentSubmission> AssignmentSubmissions { get; set; }
+
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
+            // Quiz relationships
             modelBuilder.Entity<Quiz>()
                 .HasRequired(q => q.CreatedBy)
                 .WithMany()
@@ -57,6 +62,31 @@ namespace Brain_Mint.Models
                 .HasRequired(qr => qr.Question)
                 .WithMany()
                 .HasForeignKey(qr => qr.QuestionId)
+                .WillCascadeOnDelete(false);
+
+            // Assignment relationships
+            modelBuilder.Entity<Assignment>()
+                .HasRequired(a => a.CreatedBy)
+                .WithMany()
+                .HasForeignKey(a => a.CreatedByUserId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<AssignmentSubmission>()
+                .HasRequired(s => s.Assignment)
+                .WithMany(a => a.Submissions)
+                .HasForeignKey(s => s.AssignmentId)
+                .WillCascadeOnDelete(true);
+
+            modelBuilder.Entity<AssignmentSubmission>()
+                .HasRequired(s => s.Student)
+                .WithMany()
+                .HasForeignKey(s => s.StudentId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<AssignmentSubmission>()
+                .HasOptional(s => s.GradedBy)
+                .WithMany()
+                .HasForeignKey(s => s.GradedByUserId)
                 .WillCascadeOnDelete(false);
         }
     }

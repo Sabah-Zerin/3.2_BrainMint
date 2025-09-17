@@ -6,7 +6,8 @@ using System.Web;
 
 namespace Brain_Mint.Models
 {
-    public class Assignment
+    // Simple assignment class for backward compatibility (remove the other Assignment classes)
+    public class SimpleAssignment
     {
         public int Id { get; set; }
         public string Title { get; set; }

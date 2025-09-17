@@ -154,7 +154,18 @@
     <Compile Include="Migrations\202509130446106_AddQuizAttemptTables.Designer.cs">
       <DependentUpon>202509130446106_AddQuizAttemptTables.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202509171718228_AddAssignmentTables.cs" />
+    <Compile Include="Migrations\202509171718228_AddAssignmentTables.Designer.cs">
+      <DependentUpon>202509171718228_AddAssignmentTables.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202509171816161_AddAssignmentTables1.cs" />
+    <Compile Include="Migrations\202509171816161_AddAssignmentTables1.Designer.cs">
+      <DependentUpon>202509171816161_AddAssignmentTables1.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\AssgViewModels.cs" />
+    <Compile Include="Models\Assignment.cs" />
+    <Compile Include="Models\AssignmentModels.cs" />
     <Compile Include="Models\DbContext.cs" />
     <Compile Include="Models\Login-log-model.cs" />
     <Compile Include="Models\Question.cs" />
@@ -245,10 +256,15 @@
     <Content Include="Views\Teacher\MultipleChoiceOptions.cshtml" />
     <Content Include="Views\Shared\_MultipleChoiceOptions.cshtml" />
     <Content Include="Views\Shared\_ShortAnswerPartial.cshtml" />
+    <Content Include="Views\Student\SubmitAssignment.cshtml" />
+    <Content Include="Views\Student\ViewAssignment.cshtml" />
+    <Content Include="Views\Student\AssignmentDetails.cshtml" />
+    <Content Include="Views\Student\ReviewSubmission.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Content\App_LocalResources\" />
+    <Folder Include="Views\Assgnt\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />
@@ -293,6 +309,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202509130446106_AddQuizAttemptTables.resx">
       <DependentUpon>202509130446106_AddQuizAttemptTables.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202509171718228_AddAssignmentTables.resx">
+      <DependentUpon>202509171718228_AddAssignmentTables.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202509171816161_AddAssignmentTables1.resx">
+      <DependentUpon>202509171816161_AddAssignmentTables1.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

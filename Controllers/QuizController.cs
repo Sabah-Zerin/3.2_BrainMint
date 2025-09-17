@@ -301,9 +301,6 @@ namespace Brain_Mint.Controllers
             return View("DebugResult");
         }
 
-        // You can temporarily change your form action to test:
-        // action="@Url.Action("DebugFormData", "Quiz")"
-
 
         protected override void Dispose(bool disposing)
         {

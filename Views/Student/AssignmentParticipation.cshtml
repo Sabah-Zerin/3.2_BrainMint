@@ -1,53 +1,324 @@
-@model List<Brain_Mint.Models.Assignment>
+@model List<Brain_Mint.Models.AssignmentStudentViewModel>
 @{
     Layout = "~/Views/Shared/_StudentLayout.cshtml";
+    ViewBag.Title = "Assignment Participation";
 }
 
-<h2>Assignment Participation</h2>
-<table class="table table-striped">
-    <thead class="thead-dark">
-        <tr>
-            <th>Assignment Title</th>
-            <th>Due Date</th>
-            <th>Status</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var assignment in Model)
-        {
-            string statusClass = "";
-            if (assignment.Status == "Submitted")
-            {
-                statusClass = "success";
-            }
-            else if (assignment.Status == "Missed")
-            {
-                statusClass = "danger";
-            }
-            else
-            {
-                statusClass = "warning";
-            }
+<div class="dashboard-card">
+    <h2 class="card-title">Assignment Participation</h2>
 
-            <tr>
-                <td>@assignment.Title</td>
-                <td>@assignment.DueDate.ToString("dd MMM yyyy")</td>
-                <td><span class="badge bg-@statusClass @(statusClass == "warning" ? "text-dark" : "")">@assignment.Status</span></td>
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
-                <td>
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
-                    @if (assignment.Status == "Pending")
+    @if (Model != null && Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Assignment Title</th>
+                        <th>Subject</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th>Grade</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
                     {
-                        <button class="btn btn-sm btn-primary">Submit</button>
-                        <button class="btn btn-sm btn-info">View</button>
+                        <tr class="@(item.IsOverdue && !item.HasSubmitted ? "table-warning" : "")">
+                            <td>
+                                <strong>@item.Assignment.Title</strong>
+                                @if (!string.IsNullOrEmpty(item.Assignment.Description) && item.Assignment.Description.Length > 100)
+                                {
+                                    <br><small class="text-muted">@item.Assignment.Description.Substring(0, 100)...</small>
+                                }
+                                else if (!string.IsNullOrEmpty(item.Assignment.Description))
+                                {
+                                    <br><small class="text-muted">@item.Assignment.Description</small>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">@item.Assignment.Subject</span>
+                            </td>
+                            <td>
+                                @item.Assignment.DueDate.ToString("MMM dd, yyyy")
+                                <br>
+                                <small class="text-muted">@item.Assignment.DueDate.ToString("hh:mm tt")</small>
+                                @if (item.IsOverdue)
+                                {
+                                    <br><span class="badge bg-danger">Overdue</span>
+                                }
+                                else if (item.DaysUntilDue <= 1)
+                                {
+                                    <br><span class="badge bg-warning text-dark">Due Soon</span>
+                                }
+                                else if (item.DaysUntilDue <= 3)
+                                {
+                                    <br><span class="badge bg-info">Due in @item.DaysUntilDue days</span>
+                                }
+                            </td>
+                            <td>
+                                @if (item.HasSubmitted)
+                                {
+                                    <span class="badge @(item.Submission.Status == "Graded" ? "bg-success" :
+                                                        item.Submission.Status == "Late" ? "bg-warning text-dark" :
+                                                        "bg-primary")">
+                                        @item.Submission.Status
+                                    </span>
+                                    if (item.Submission.Status == "Late")
+                                    {
+                                        <br><small class="text-muted">Submitted @item.Submission.SubmissionDate.ToString("MMM dd")</small>
+                                    }
+                                }
+                                else
+                                {
+                                    if (item.IsOverdue)
+                                    {
+                                        <span class="badge bg-danger">Missed</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-dark">Not Submitted</span>
+                                    }
+                                }
+                            </td>
+                            <td>
+                                @if (item.HasSubmitted && item.Submission != null && item.Submission.Points.HasValue)
+                                {
+                                    <span class="badge @(item.Submission.Points.Value >= item.Assignment.MaxPoints * 0.9 ? "bg-success" :
+                                                        item.Submission.Points.Value >= item.Assignment.MaxPoints * 0.7 ? "bg-info" :
+                                                        item.Submission.Points.Value >= item.Assignment.MaxPoints * 0.6 ? "bg-warning" : "bg-danger")">
+                                        @item.Submission.Points / @item.Assignment.MaxPoints
+                                    </span>
+                                    <br>
+                                    <small class="text-muted">
+                                        @((item.Submission.Points.Value / (double)item.Assignment.MaxPoints * 100).ToString("F1"))%
+                                    </small>
+                                }
+                                else if (item.HasSubmitted)
+                                {
+                                    <span class="text-muted">Pending</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            <td>
+                                @if (item.HasSubmitted && item.Submission != null)
+                                {
+                                    <a href="@Url.Action("ViewSubmissionResult", "Student", new { id = item.Submission.Id })"
+                                       class="btn btn-outline-primary btn-sm mb-1">
+                                        <i class="fas fa-eye"></i> View Result
+                                    </a>
+                                    if (DateTime.Now <= item.Assignment.DueDate)
+                                    {
+                                        <br>
+                                        <a href="@Url.Action("ViewAssignment", "Student", new { id = item.Assignment.Id })"
+                                           class="btn btn-outline-warning btn-sm">
+                                            <i class="fas fa-edit"></i> Update
+                                        </a>
+                                    }
+                                }
+                                else
+                                {
+                                    if (!item.IsOverdue)
+                                    {
+                                        <a href="@Url.Action("ViewAssignment", "Student", new { id = item.Assignment.Id })"
+                                           class="btn btn-primary btn-sm">
+                                            <i class="fas fa-play"></i> Start Assignment
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-secondary btn-sm" disabled>
+                                            <i class="fas fa-times"></i> Overdue
+                                        </button>
+                                    }
+                                }
+                                <br>
+                                <button class="btn btn-outline-info btn-sm mt-1"
+                                        onclick="showInstructions('@item.Assignment.Id', '@Html.Raw(item.Assignment.Title.Replace("'", "\\'"))',
+                                                '@Html.Raw(item.Assignment.Description.Replace("'", "\\'").Replace("\n", "\\n"))',
+                                                '@item.Assignment.Subject', '@item.Assignment.DueDate.ToString("MMM dd, yyyy 'at' hh:mm tt")',
+                                                '@item.Assignment.MaxPoints', '@item.Assignment.SubmissionType')">
+                                    <i class="fas fa-info-circle"></i> Instructions
+                                </button>
+                            </td>
+                        </tr>
                     }
-                    else
-                    {
-                        <button class="btn btn-sm btn-info">View Details</button>
-                    }
-                </td>
-            </tr>
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">No assignments available</h5>
+            <p class="text-muted">Check back later for new assignments from your teachers.</p>
+        </div>
+    }
+</div>
+
+<!-- Instructions Modal -->
+<div class="modal fade" id="instructionsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-info-circle me-2"></i><span id="modalTitle"></span> - Instructions
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="assignment-details mb-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Subject:</strong> <span id="modalSubject"></span></p>
+                            <p><strong>Due Date:</strong> <span id="modalDueDate"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Max Points:</strong> <span id="modalMaxPoints"></span></p>
+                            <p><strong>Submission Type:</strong> <span id="modalSubmissionType"></span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <h6>Assignment Instructions:</h6>
+                <div class="p-3 bg-light border rounded" id="modalDescription">
+                </div>
+
+                <div class="mt-4">
+                    <h6>Submission Guidelines:</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success me-2"></i>Read all instructions carefully before starting</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Ensure your work is original and follows academic integrity policies</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Submit before the due date to avoid late penalties</li>
+                        <li><i class="fas fa-check text-success me-2"></i>You can update your submission until the due date</li>
+                        <li id="imageGuideline" style="display: none;"><i class="fas fa-check text-success me-2"></i>Image files should be clear and readable (max 5MB)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a id="startAssignmentBtn" href="#" class="btn btn-primary" style="display: none;">
+                    <i class="fas fa-play me-1"></i>Start Assignment
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        function showInstructions(assignmentId, title, description, subject, dueDate, maxPoints, submissionType) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalSubject').textContent = subject;
+            document.getElementById('modalDueDate').textContent = dueDate;
+            document.getElementById('modalMaxPoints').textContent = maxPoints;
+            document.getElementById('modalSubmissionType').textContent = submissionType;
+            document.getElementById('modalDescription').innerHTML = description.replace(/\n/g, '<br/>');
+
+            // Show image guideline if needed
+            if (submissionType === 'Both' || submissionType === 'Image') {
+                document.getElementById('imageGuideline').style.display = 'block';
+            } else {
+                document.getElementById('imageGuideline').style.display = 'none';
+            }
+
+            // Set up start assignment button
+            const startBtn = document.getElementById('startAssignmentBtn');
+            startBtn.href = '@Url.Action("ViewAssignment", "Student")?id=' + assignmentId;
+
+            // Check if assignment is still available
+            const now = new Date();
+            const due = new Date(dueDate);
+            if (now <= due) {
+                startBtn.style.display = 'inline-block';
+            } else {
+                startBtn.style.display = 'none';
+            }
+
+            new bootstrap.Modal(document.getElementById('instructionsModal')).show();
         }
-    </tbody>
-</table>
+
+        // Auto-refresh page every 5 minutes to update assignment statuses
+        setInterval(function() {
+            location.reload();
+        }, 300000);
+
+        // Highlight overdue assignments
+        document.addEventListener('DOMContentLoaded', function() {
+            const overdueRows = document.querySelectorAll('.table-warning');
+            if (overdueRows.length > 0) {
+                // Add a subtle notification for overdue assignments
+                const notification = document.createElement('div');
+                notification.className = 'alert alert-warning alert-dismissible fade show';
+                notification.innerHTML = `
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    You have ${overdueRows.length} overdue assignment${overdueRows.length > 1 ? 's' : ''}.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                document.querySelector('.dashboard-card').insertBefore(notification, document.querySelector('.table-responsive'));
+            }
+        });
+    </script>
+}
+
+<style>
+    .table-warning {
+        background-color: rgba(255, 193, 7, 0.1) !important;
+    }
+
+    .badge {
+        font-size: 0.75em;
+    }
+
+    .btn-group-sm .btn {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        background-color: #495057;
+        color: white;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(72, 201, 176, 0.1);
+    }
+
+    .modal-body {
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+    media (max-width: 768px) {
+        .table-responsive {
+            font-size: 0.875rem;
+        }
+
+        .btn-sm {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.4rem;
+        }
+    }
+</style>

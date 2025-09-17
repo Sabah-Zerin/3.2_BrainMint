@@ -1,3 +1,4 @@
+@model List<Brain_Mint.Models.Assignment>
 @{
     ViewBag.Title = "Assignment Management";
     Layout = "~/Views/Shared/_TeacherLayout.cshtml";
@@ -11,97 +12,240 @@
         </button>
     </div>
 
-    <div class="table-responsive">
-        <table class="table table-hover">
-            <thead class="bg-mint text-white">
-                <tr>
-                    <th>Title</th>
-                    <th>Subject</th>
-                    <th>Due Date</th>
-                    <th>Submissions</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Algebra Homework</td>
-                    <td>Mathematics</td>
-                    <td>May 15, 2023</td>
-                    <td>24/30</td>
-                    <td><span class="badge bg-success">Active</span></td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-mint">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Chemistry Lab Report</td>
-                    <td>Science</td>
-                    <td>May 20, 2023</td>
-                    <td>18/30</td>
-                    <td><span class="badge bg-warning">Pending</span></td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-mint">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+    <!-- Display Messages -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="bg-mint text-white">
+                    <tr>
+                        <th>Title</th>
+                        <th>Subject</th>
+                        <th>Due Date</th>
+                        <th>Submissions</th>
+                        <th>Max Points</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var assignment in Model)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@assignment.Title</strong>
+                                @if (!string.IsNullOrEmpty(assignment.Description) && assignment.Description.Length > 50)
+                                {
+                                    <br><small class="text-muted">@assignment.Description.Substring(0, 50)...</small>
+                                }
+                                else if (!string.IsNullOrEmpty(assignment.Description))
+                                {
+                                    <br><small class="text-muted">@assignment.Description</small>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">@assignment.Subject</span>
+                            </td>
+                            <td>
+                                @assignment.DueDate.ToString("MMM dd, yyyy")
+                                <br><small class="text-muted">@assignment.DueDate.ToString("HH:mm")</small>
+                                @if (assignment.DueDate < DateTime.Now)
+                                {
+                                    <br><small class="text-danger">Overdue</small>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge bg-info">
+                                    @(assignment.Submissions?.Count ?? 0) submissions
+                                </span>
+                            </td>
+                            <td>@assignment.MaxPoints pts</td>
+                            <td>
+                                @if (assignment.Status == "Active")
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">@assignment.Status</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="@Url.Action("AssignmentDetails", "Teacher", new { id = assignment.Id })"
+                                       class="btn btn-outline-primary" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="@Url.Action("EditAssignment", "Teacher", new { id = assignment.Id })"
+                                       class="btn btn-outline-secondary" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-outline-danger"
+                                            onclick="deleteAssignment(@assignment.Id, '@assignment.Title')" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">No assignments created yet</h5>
+            <p class="text-muted">Create your first assignment to get started.</p>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createAssignmentModal">
+                <i class="fas fa-plus"></i> Create Your First Assignment
+            </button>
+        </div>
+    }
 </div>
 
 <!-- Create Assignment Modal -->
 <div class="modal fade" id="createAssignmentModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-mint text-white">
                 <h5 class="modal-title">Create New Assignment</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="@Url.Action("CreateAssignment", "Teacher")">
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <label class="form-label">Assignment Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="Title" placeholder="Enter assignment title" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Max Points</label>
+                            <input type="number" class="form-control" name="MaxPoints" value="100" min="1" max="1000">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Subject <span class="text-danger">*</span></label>
+                            <select class="form-select" name="Subject" required>
+                                <option value="">Select Subject</option>
+                                <option value="Mathematics">Mathematics</option>
+                                <option value="Science">Science</option>
+                                <option value="English">English</option>
+                                <option value="History">History</option>
+                                <option value="Geography">Geography</option>
+                                <option value="Computer Science">Computer Science</option>
+                                <option value="Art">Art</option>
+                                <option value="Physical Education">Physical Education</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Submission Type</label>
+                            <select class="form-select" name="SubmissionType">
+                                <option value="Both">Text & Image</option>
+                                <option value="Text">Text Only</option>
+                                <option value="Image">Image Only</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Due Date & Time <span class="text-danger">*</span></label>
+                        <input type="datetime-local" class="form-control" name="DueDate" required
+                               min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Instructions <span class="text-danger">*</span></label>
+                        <textarea class="form-control" name="Description" rows="4"
+                                  placeholder="Provide detailed instructions for the assignment..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-mint">Create Assignment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteAssignmentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form>
-                    <div class="mb-3">
-                        <label class="form-label">Assignment Title</label>
-                        <input type="text" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Subject</label>
-                        <select class="form-select">
-                            <option>Mathematics</option>
-                            <option>Science</option>
-                            <option>English</option>
-                            <option>History</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Due Date</label>
-                        <input type="date" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Instructions</label>
-                        <textarea class="form-control" rows="4"></textarea>
-                    </div>
-                </form>
+                <p>Are you sure you want to delete the assignment "<span id="assignmentNameToDelete"></span>"?</p>
+                <p class="text-danger"><strong>This action cannot be undone and will delete all student submissions.</strong></p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-mint">Create Assignment</button>
+                <form method="post" action="@Url.Action("DeleteAssignment", "Teacher")" class="d-inline">
+                    <input type="hidden" name="id" id="assignmentIdToDelete" />
+                    <button type="submit" class="btn btn-danger">Delete Assignment</button>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
+<script>
+    function deleteAssignment(assignmentId, assignmentTitle) {
+        document.getElementById('assignmentIdToDelete').value = assignmentId;
+        document.getElementById('assignmentNameToDelete').textContent = assignmentTitle;
+
+        var deleteModal = new bootstrap.Modal(document.getElementById('deleteAssignmentModal'));
+        deleteModal.show();
+    }
+</script>
+
 <style>
     .bg-mint {
-        background-color: var(--mint-medium);
+        background-color: var(--mint-medium) !important;
     }
+
+    .btn-mint {
+        background-color: var(--mint-medium);
+        border-color: var(--mint-medium);
+        color: white;
+    }
+
+        .btn-mint:hover {
+            background-color: var(--mint-dark);
+            border-color: var(--mint-dark);
+            color: white;
+        }
+
+    .btn-outline-mint {
+        border-color: var(--mint-medium);
+        color: var(--mint-medium);
+    }
+
+        .btn-outline-mint:hover {
+            background-color: var(--mint-medium);
+            border-color: var(--mint-medium);
+            color: white;
+        }
 </style>
