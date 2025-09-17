@@ -126,11 +126,22 @@
                                                             </button>
                                                         }
                                                     }
+                                                    else
+                                                    {
+                                                        <!-- Eye button for viewing submissions -->
+                                                        <a href="@Url.Action("QuizSubmissions", "Teacher", new { id = quiz.Id })"
+                                                           class="btn btn-outline-info" title="View Submissions">
+                                                            <i class="fas fa-eye"></i> Submissions
+                                                        </a>
+                                                    }
 
-                                                    <a href="@Url.Action("AddQuestion", "Teacher", new { quizId = quiz.Id })"
-                                                       class="btn btn-outline-info" title="Add Question">
-                                                        <i class="fas fa-plus"></i> Question
-                                                    </a>
+                                                    @if (quiz.Status == "Draft")
+                                                    {
+                                                        <a href="@Url.Action("AddQuestion", "Teacher", new { quizId = quiz.Id })"
+                                                           class="btn btn-outline-info" title="Add Question">
+                                                            <i class="fas fa-plus"></i> Question
+                                                        </a>
+                                                    }
 
                                                     <button type="button" class="btn btn-outline-danger"
                                                             onclick="deleteQuiz(@quiz.Id, '@quiz.Title')" title="Delete Quiz">
@@ -201,43 +212,3 @@
         deleteModal.show();
     }
 </script>
-
-<style>
-    .fw-bold {
-        font-weight: 600 !important;
-    }
-
-    .table th {
-        border-top: none;
-        font-weight: 600;
-        background-color: #f8f9fa;
-    }
-
-    .btn-group-sm .btn {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.5rem;
-        margin-right: 2px;
-    }
-
-    .badge {
-        font-size: 0.75em;
-    }
-
-    .card-header {
-        background-color: #fff;
-        border-bottom: 1px solid #dee2e6;
-    }
-
-    .table-hover tbody tr:hover {
-        background-color: rgba(0, 0, 0, 0.075);
-    }
-
-    .alert {
-        border: none;
-        border-radius: 8px;
-    }
-
-    .text-muted {
-        font-size: 0.875em;
-    }
-</style>

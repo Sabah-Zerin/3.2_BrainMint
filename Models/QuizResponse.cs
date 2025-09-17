@@ -20,17 +20,20 @@ namespace Brain_Mint.Models
         [Required]
         public int QuestionId { get; set; }
 
-        [StringLength(1000)]
         public string StudentAnswer { get; set; }
 
-        public bool? IsCorrect { get; set; } // null for ungraded short answers
+        public bool? IsCorrect { get; set; }
 
         public int? PointsAwarded { get; set; }
 
-        [StringLength(500)]
         public string TeacherFeedback { get; set; }
 
         public DateTime ResponseTime { get; set; }
+
+        // Add these new properties
+        public DateTime? GradedDate { get; set; }
+
+        public int? GradedByUserId { get; set; }
 
         // Navigation properties
         [ForeignKey("QuizAttemptId")]
@@ -38,5 +41,8 @@ namespace Brain_Mint.Models
 
         [ForeignKey("QuestionId")]
         public virtual QuizQuestion Question { get; set; }
+
+        [ForeignKey("GradedByUserId")]
+        public virtual User GradedBy { get; set; }
     }
 }

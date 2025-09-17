@@ -430,6 +430,113 @@ namespace Brain_Mint.Controllers
                 return RedirectToAction("QuizManagement");
             }
         }
+
+        public ActionResult QuizSubmissions(int id)
+        {
+            if (Session["UserRole"]?.ToString() != "Teacher")
+                return RedirectToAction("Login", "Account");
+
+            int teacherId = Convert.ToInt32(Session["UserId"]);
+
+            var quiz = db.Quizzes
+                .Include(q => q.Questions)
+                .FirstOrDefault(q => q.Id == id && q.CreatedByUserId == teacherId);
+
+            if (quiz == null)
+            {
+                TempData["Error"] = "Quiz not found or you don't have permission to view it.";
+                return RedirectToAction("QuizManagement");
+            }
+
+            // Get all attempts for this quiz
+            var attempts = db.QuizAttempts
+                .Include(qa => qa.Student)
+                .Include(qa => qa.Responses)
+                .Include(qa => qa.Responses.Select(r => r.Question))
+                .Where(qa => qa.QuizId == id)
+                .OrderByDescending(qa => qa.StartTime)
+                .ToList();
+
+            ViewBag.Quiz = quiz;
+            return View(attempts);
+        }
+        public ActionResult ReviewQuizAttempt(int id)
+        {
+            if (Session["UserRole"]?.ToString() != "Teacher")
+                return RedirectToAction("Login", "Account");
+
+            int teacherId = Convert.ToInt32(Session["UserId"]);
+
+            var attempt = db.QuizAttempts
+                .Include(qa => qa.Quiz)
+                .Include(qa => qa.Student)
+                .Include(qa => qa.Responses)
+                .Include(qa => qa.Responses.Select(r => r.Question))
+                .FirstOrDefault(qa => qa.Id == id && qa.Quiz.CreatedByUserId == teacherId);
+
+            if (attempt == null)
+            {
+                TempData["Error"] = "Quiz attempt not found or you don't have permission to view it.";
+                return RedirectToAction("QuizManagement");
+            }
+
+            return View(attempt);
+        }
+
+        [HttpPost]
+        public ActionResult GradeQuizResponse(int responseId, int? points, string feedback)
+        {
+            if (Session["UserRole"]?.ToString() != "Teacher")
+                return RedirectToAction("Login", "Account");
+
+            int teacherId = Convert.ToInt32(Session["UserId"]);
+
+            var response = db.QuizResponses
+                .Include(r => r.QuizAttempt)
+                .Include(r => r.QuizAttempt.Quiz)
+                .FirstOrDefault(r => r.Id == responseId && r.QuizAttempt.Quiz.CreatedByUserId == teacherId);
+
+            if (response == null)
+            {
+                TempData["Error"] = "Response not found.";
+                return RedirectToAction("QuizManagement");
+            }
+
+            try
+            {
+                response.PointsAwarded = points;
+                response.TeacherFeedback = feedback;
+                response.GradedDate = DateTime.Now;
+                response.GradedByUserId = teacherId;
+
+                // Update the attempt grading status
+                var attempt = response.QuizAttempt;
+                if (attempt.Responses.All(r => r.PointsAwarded.HasValue || r.Question.QuestionType != "ShortAnswer"))
+                {
+                    attempt.GradingStatus = "Graded";
+
+                    // Calculate total score
+                    attempt.TotalScore = attempt.Responses
+                        .Where(r => r.PointsAwarded.HasValue)
+                        .Sum(r => r.PointsAwarded.Value);
+
+                    attempt.MaximumScore = attempt.Responses.Count;
+                    attempt.PercentageScore = attempt.MaximumScore > 0 ?
+                        (decimal)attempt.TotalScore / attempt.MaximumScore * 100 : 0;
+                }
+
+                db.SaveChanges();
+
+                TempData["Success"] = "Response graded successfully!";
+                return RedirectToAction("ReviewQuizAttempt", new { id = response.QuizAttemptId });
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error grading response: " + ex.Message;
+                return RedirectToAction("ReviewQuizAttempt", new { id = response.QuizAttemptId });
+            }
+        }
+
         #endregion
 
         #region Assignment Management

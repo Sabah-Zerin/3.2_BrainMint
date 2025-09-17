@@ -22,6 +22,7 @@ namespace Brain_Mint.Models
         // Assignment Tables
         public DbSet<Assignment> Assignments { get; set; }
         public DbSet<AssignmentSubmission> AssignmentSubmissions { get; set; }
+        
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -51,6 +52,7 @@ namespace Brain_Mint.Models
                 .HasForeignKey(qa => qa.StudentId)
                 .WillCascadeOnDelete(false);
 
+            // QuizResponse relationships
             modelBuilder.Entity<QuizResponse>()
                 .HasRequired(qr => qr.QuizAttempt)
                 .WithMany(qa => qa.Responses)
@@ -63,11 +65,10 @@ namespace Brain_Mint.Models
                 .HasForeignKey(qr => qr.QuestionId)
                 .WillCascadeOnDelete(false);
 
-            // Assignment relationships
-            modelBuilder.Entity<Assignment>()
-                .HasRequired(a => a.CreatedBy)
+            modelBuilder.Entity<QuizResponse>()
+                .HasOptional(qr => qr.GradedBy)
                 .WithMany()
-                .HasForeignKey(a => a.CreatedByUserId)
+                .HasForeignKey(qr => qr.GradedByUserId)
                 .WillCascadeOnDelete(false);
 
             modelBuilder.Entity<AssignmentSubmission>()

@@ -1,0 +1,185 @@
+@model Brain_Mint.Models.AssignmentSubmission
+@{
+    ViewBag.Title = "Review Submission";
+    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h2>Review Submission</h2>
+        </div>
+        <div class="card-body">
+            <!-- Student Information -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5>Student Information</h5>
+                    <p><strong>Name:</strong> @Model.Student.Name</p>
+                    <p><strong>Email:</strong> @Model.Student.Email</p>
+                </div>
+                <div class="col-md-6">
+                    <h5>Submission Details</h5>
+                    <p><strong>Submitted:</strong> @Model.SubmissionDate.ToString("MMM dd, yyyy 'at' hh:mm tt")</p>
+                    <p><strong>Status:</strong> <span class="badge bg-@(Model.Status == "Graded" ? "success" : Model.Status == "Late" ? "warning" : "primary")">@Model.Status</span></p>
+                    @if (Model.SubmissionDate > Model.Assignment.DueDate)
+                    {
+                        <p class="text-danger"><strong>This submission is late</strong></p>
+                    }
+                </div>
+            </div>
+
+            <!-- Assignment Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Assignment: @Model.Assignment.Title</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Subject:</strong> @Model.Assignment.Subject</p>
+                    <p><strong>Due Date:</strong> @Model.Assignment.DueDate.ToString("MMM dd, yyyy 'at' hh:mm tt")</p>
+                    <p><strong>Max Points:</strong> @Model.Assignment.MaxPoints</p>
+                    <div class="assignment-description">
+                        <strong>Instructions:</strong>
+                        <p>@Model.Assignment.Description</p>
+                    </div>
+                </div>
+            </div>
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show">
+                    @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <!-- Student's Submission -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Student's Work</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Text Submission -->
+                    @if (!string.IsNullOrEmpty(Model.TextSubmission))
+                    {
+                        <div class="mb-4">
+                            <h6>Text Submission:</h6>
+                            <div class="border p-3 bg-light rounded">
+                                @Model.TextSubmission
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Image Submission -->
+                    @if (!string.IsNullOrEmpty(Model.ImagePath))
+                    {
+                        <div>
+                            <h6>Image Submission:</h6>
+                            <div class="text-center">
+                                <img src="@Url.Content(Model.ImagePath)"
+                                     alt="Student's submission image"
+                                     class="img-fluid rounded border"
+                                     style="max-height: 500px;" />
+                                <div class="mt-2">
+                                    <small class="text-muted">Original filename: @Model.OriginalFileName</small>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (string.IsNullOrEmpty(Model.TextSubmission) && string.IsNullOrEmpty(Model.ImagePath))
+                    {
+                        <div class="alert alert-warning">
+                            No submission content found.
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Grading Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h5>Grading</h5>
+                </div>
+                <div class="card-body">
+                    @using (Html.BeginForm("GradeSubmission", "Teacher", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.Hidden("id", Model.Id)
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Points (out of @Model.Assignment.MaxPoints)</label>
+                                    <input type="number" class="form-control" name="points"
+                                           value="@(Model.Points.HasValue ? Model.Points.Value : 0)"
+                                           min="0" max="@Model.Assignment.MaxPoints" required />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Status</label>
+                                    <select class="form-control" name="status">
+                                        <option value="Submitted" @(Model.Status == "Submitted" ? "selected" : "")>Submitted</option>
+                                        <option value="Late" @(Model.Status == "Late" ? "selected" : "")>Late</option>
+                                        <option value="Graded" @(Model.Status == "Graded" ? "selected" : "")>Graded</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label">Feedback</label>
+                            <textarea class="form-control" name="feedback" rows="5"
+                                      placeholder="Provide feedback to the student...">@Model.TeacherFeedback</textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="@Url.Action("AssignmentDetails", "Teacher", new { id = Model.AssignmentId })"
+                               class="btn btn-secondary">Back to Submissions</a>
+                            <button type="submit" class="btn btn-success">Save Grade</button>
+                        </div>
+                    }
+
+                    <!-- Previous Grade (if any) -->
+                    @if (Model.Points.HasValue)
+                    {
+                        <div class="mt-4 p-3 bg-light rounded">
+                            <h6>Previous Grade:</h6>
+                            <p><strong>Points:</strong> @Model.Points / @Model.Assignment.MaxPoints</p>
+                            <p><strong>Percentage:</strong> @((Model.Points.Value / (double)Model.Assignment.MaxPoints * 100).ToString("F1"))%</p>
+                            @if (!string.IsNullOrEmpty(Model.TeacherFeedback))
+                            {
+                                <p><strong>Feedback:</strong> @Model.TeacherFeedback</p>
+                            }
+                            @if (Model.GradedDate.HasValue)
+                            {
+                                <p><strong>Graded on:</strong> @Model.GradedDate.Value.ToString("MMM dd, yyyy 'at' hh:mm tt")</p>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        // Optional: Add any client-side validation or functionality here
+    </script>
+}
+
+<style>
+    .assignment-description {
+        white-space: pre-line;
+    }
+
+    .badge {
+        font-size: 0.9em;
+    }
+
+    .img-fluid {
+        max-width: 100%;
+        height: auto;
+    }
+</style>

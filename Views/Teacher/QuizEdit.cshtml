@@ -68,10 +68,19 @@
                     <!-- Add Question Button -->
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5>Questions (@Model.Questions.Count())</h5>
-                        <a href="@Url.Action("AddQuestion", "Teacher", new { quizId = Model.Id })"
-                           class="btn btn-primary btn-sm">
-                            <i class="fas fa-plus"></i> Add Question
-                        </a>
+                        @if (Model.Status == "Draft")
+                        {
+                            <a href="@Url.Action("AddQuestion", "Teacher", new { quizId = Model.Id })"
+                               class="btn btn-primary btn-sm">
+                                <i class="fas fa-plus"></i> Add Question
+                            </a>
+                        }
+                        else
+                        {
+                            <button class="btn btn-secondary btn-sm" disabled title="Cannot add questions to published quizzes">
+                                <i class="fas fa-plus"></i> Add Question
+                            </button>
+                        }
                     </div>
 
                     <!-- Questions List -->

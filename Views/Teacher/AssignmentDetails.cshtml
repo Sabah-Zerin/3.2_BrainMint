@@ -1,115 +1,260 @@
+@model Brain_Mint.Models.AssignmentDetailsViewModel
 @{
-    ViewBag.Title = "Assignment Details";
+    ViewBag.Title = "Assignment Submissions";
     Layout = "~/Views/Shared/_TeacherLayout.cshtml";
 }
 
-<div class="dashboard-card">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="card-title mb-0">Algebra Homework</h2>
-            <p class="mb-0 text-muted">Mathematics • Due: May 15, 2023</p>
-        </div>
-        <div>
-            <button class="btn btn-outline-mint me-2">
-                <i class="fas fa-download me-1"></i> Export
-            </button>
-            <button class="btn btn-mint">
-                <i class="fas fa-edit me-1"></i> Edit
-            </button>
-        </div>
-    </div>
-
-    <div class="mb-5">
-        <h4>Instructions</h4>
-        <p>Solve the following algebraic equations and show your work. Submit your solutions in PDF format by the due date.</p>
-        <ol>
-            <li>Solve for x: 2x + 5 = 15</li>
-            <li>Simplify: 3(x + 4) - 2(2x - 1)</li>
-            <li>Find the slope of the line passing through points (2,3) and (5,11)</li>
-        </ol>
-    </div>
-
-    <div class="mb-4">
-        <h4 class="d-flex justify-content-between">
-            Submissions (24/30)
-            <div class="d-flex gap-2">
-                <div class="input-group" style="width: 250px;">
-                    <input type="text" class="form-control" placeholder="Search students...">
-                    <button class="btn btn-outline-mint">
-                        <i class="fas fa-search"></i>
-                    </button>
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">@Model.Assignment.Title - Submissions</h2>
+                    <p class="mb-0">Subject: @Model.Assignment.Subject</p>
                 </div>
-                <button class="btn btn-outline-mint">
-                    <i class="fas fa-filter"></i> Filter
-                </button>
+                <div>
+                    <a href="@Url.Action("AssignmentManagement", "Teacher")" class="btn btn-outline-light btn-sm">
+                        <i class="fas fa-arrow-left me-1"></i> Back to Assignments
+                    </a>
+                </div>
             </div>
-        </h4>
-
-        <div class="table-responsive mt-3">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Student</th>
-                        <th>Submission Date</th>
-                        <th>Status</th>
-                        <th>Grade</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>John Smith</td>
-                        <td>May 14, 2023</td>
-                        <td><span class="badge bg-success">Submitted</span></td>
-                        <td>A-</td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-mint">
-                                <i class="fas fa-eye"></i> Review
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Emma Johnson</td>
-                        <td>May 13, 2023</td>
-                        <td><span class="badge bg-success">Submitted</span></td>
-                        <td>B+</td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-mint">
-                                <i class="fas fa-eye"></i> Review
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Michael Brown</td>
-                        <td>-</td>
-                        <td><span class="badge bg-warning">Pending</span></td>
-                        <td>-</td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-mint" disabled>
-                                <i class="fas fa-eye"></i> Review
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
         </div>
-    </div>
 
-    <div class="d-flex justify-content-end mt-4">
-        <nav>
-            <ul class="pagination">
-                <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
-                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item"><a class="page-link" href="#">Next</a></li>
-            </ul>
-        </nav>
+        <div class="card-body">
+            <!-- Assignment Info -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title">Due Date</h6>
+                            <p class="card-text">@Model.Assignment.DueDate.ToString("MMM dd, yyyy 'at' hh:mm tt")</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title">Max Points</h6>
+                            <p class="card-text">@Model.Assignment.MaxPoints</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title">Submissions</h6>
+                            <p class="card-text">@Model.TotalSubmissions of @(Model.TotalSubmissions + Model.PendingGrading)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assignment Description -->
+            <div class="mb-4">
+                <h5>Assignment Instructions</h5>
+                <div class="border p-3 rounded bg-light">
+                    @Html.Raw(Model.Assignment.Description.Replace("\n", "<br/>"))
+                </div>
+            </div>
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show">
+                    @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show">
+                    @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <!-- Submissions Table -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users me-2"></i>Student Submissions
+                    </h5>
+                    <div class="d-flex gap-2">
+                        <div class="input-group" style="width: 250px;">
+                            <input type="text" class="form-control" placeholder="Search students..." id="studentSearch">
+                            <button class="btn btn-outline-primary" onclick="searchStudents()">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body p-0">
+                    @if (Model.Submissions.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0" id="submissionsTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Student Name</th>
+                                        <th>Email</th>
+                                        <th>Submission Date</th>
+                                        <th>Status</th>
+                                        <th>Submission Type</th>
+                                        <th>Grade/Points</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var submission in Model.Submissions.OrderByDescending(s => s.SubmissionDate))
+                                    {
+                                        <tr class="submission-row" data-student="@submission.StudentName.ToLower()">
+                                            <td>
+                                                <strong>@submission.StudentName</strong>
+                                            </td>
+                                            <td>@submission.StudentEmail</td>
+                                            <td>
+                                                @submission.SubmissionDate.ToString("MMM dd, yyyy hh:mm tt")
+                                                @if (submission.IsLate)
+                                                {
+                                                    <br><span class="badge bg-warning text-dark">Late</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="badge @(submission.Status == "Graded" ? "bg-success" :
+                                                                submission.Status == "Late" ? "bg-warning text-dark" :
+                                                                "bg-primary")">
+                                                    @submission.Status
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    @if (submission.HasTextSubmission)
+                                                    {
+                                                        <span class="badge bg-info">Text</span>
+                                                    }
+                                                    @if (submission.HasImageSubmission)
+                                                    {
+                                                        <span class="badge bg-secondary">Image</span>
+                                                    }
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @if (submission.Points.HasValue)
+                                                {
+                                                    <strong>@submission.Points / @Model.Assignment.MaxPoints</strong>
+                                                    <br>
+                                                    <small class="text-muted">
+                                                        @((submission.Points.Value / (double)Model.Assignment.MaxPoints * 100).ToString("F1"))%
+                                                    </small>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Not graded</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="@Url.Action("ReviewSubmission", "Teacher", new { id = submission.Id })"
+                                                       class="btn btn-outline-primary" title="Review Submission">
+                                                        <i class="fas fa-eye"></i> Review
+                                                    </a>
+                                                    @if (!submission.Points.HasValue)
+                                                    {
+                                                        <button class="btn btn-outline-success"
+                                                                onclick="quickGrade(@submission.Id, '@submission.StudentName')"
+                                                                title="Quick Grade">
+                                                            <i class="fas fa-check"></i>
+                                                        </button>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No submissions yet</h5>
+                            <p class="text-muted">Students haven't submitted any work for this assignment.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
+<!-- Quick Grade Modal -->
+<div class="modal fade" id="quickGradeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Quick Grade Submission</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="quickGradeForm" method="post" action="@Url.Action("GradeSubmission", "Teacher")">
+                <div class="modal-body">
+                    <input type="hidden" id="submissionId" name="id" />
+                    <p>Grading submission for: <strong id="studentNameDisplay"></strong></p>
+
+                    <div class="form-group mb-3">
+                        <label class="form-label">Points (out of @Model.Assignment.MaxPoints)</label>
+                        <input type="number" class="form-control" name="points"
+                               min="0" max="@Model.Assignment.MaxPoints" required />
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="form-label">Feedback (Optional)</label>
+                        <textarea class="form-control" name="feedback" rows="3"
+                                  placeholder="Provide feedback to the student..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Save Grade</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        function searchStudents() {
+            const searchTerm = document.getElementById('studentSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('.submission-row');
+
+            rows.forEach(row => {
+                const studentName = row.getAttribute('data-student');
+                if (studentName.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function quickGrade(submissionId, studentName) {
+            document.getElementById('submissionId').value = submissionId;
+            document.getElementById('studentNameDisplay').textContent = studentName;
+            new bootstrap.Modal(document.getElementById('quickGradeModal')).show();
+        }
+    </script>
+}
+
 <style>
-    .badge.bg-success {
-        background-color: var(--mint-medium) !important;
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        background-color: #f8f9fa;
+    }
+
+    .badge {
+        font-size: 0.85em;
     }
 </style>

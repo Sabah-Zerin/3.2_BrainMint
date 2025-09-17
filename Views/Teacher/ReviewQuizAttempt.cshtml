@@ -1,0 +1,217 @@
+@model Brain_Mint.Models.QuizAttempt
+@{
+    ViewBag.Title = "Review Quiz Attempt";
+    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Review Quiz Attempt</h3>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="mb-0"><strong>Student:</strong> @Model.Student.Name</p>
+                            <p class="mb-0"><strong>Quiz:</strong> @Model.Quiz.Title</p>
+                            <p class="mb-0"><strong>Started:</strong> @Model.StartTime.ToString("MMM dd, yyyy hh:mm tt")</p>
+                            @if (Model.EndTime.HasValue)
+                            {
+                                <p class="mb-0"><strong>Completed:</strong> @Model.EndTime.Value.ToString("MMM dd, yyyy hh:mm tt")</p>
+                            }
+                        </div>
+                        <div>
+                            <span class="badge bg-@(Model.Status == "Completed" ? "success" : "warning") me-2">
+                                @Model.Status
+                            </span>
+                            <span class="badge bg-@(Model.GradingStatus == "Graded" ? "success" :
+                                                 Model.GradingStatus == "PendingReview" ? "warning" : "secondary")">
+                                @Model.GradingStatus
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show">
+                            @TempData["Success"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show">
+                            @TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h5>Score</h5>
+                                    <p class="mb-0">
+                                        @if (Model.TotalScore.HasValue && Model.MaximumScore.HasValue)
+                                        {
+                                            <text>@Model.TotalScore / @Model.MaximumScore</text>
+                                        }
+                                        else
+                                        {
+                                            <text>Not graded</text>
+                                        }
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h5>Percentage</h5>
+                                    <p class="mb-0">
+                                        @if (Model.PercentageScore.HasValue)
+                                        {
+                                            <text>@Model.PercentageScore.Value.ToString("F1")%</text>
+                                        }
+                                        else
+                                        {
+                                            <text>N/A</text>
+                                        }
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h5>Time Taken</h5>
+                                    <p class="mb-0">
+                                        @if (Model.EndTime.HasValue)
+                                        {
+                                            var timeTaken = Model.EndTime.Value - Model.StartTime;
+                                            <text>@timeTaken.Minutes min @timeTaken.Seconds sec</text>
+                                        }
+                                        else
+                                        {
+                                            <text>Not completed</text>
+                                        }
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="mb-3">Questions and Answers</h4>
+                    @foreach (var response in Model.Responses.OrderBy(r => r.Question.QuestionOrder))
+                    {
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h5 class="mb-0">Question @response.Question.QuestionOrder</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <strong>Question:</strong>
+                                    <p>@response.Question.QuestionText</p>
+                                </div>
+
+                                <div class="mb-3">
+                                    <strong>Student's Answer:</strong>
+                                    <div class="border p-3 bg-light rounded">
+                                        @response.StudentAnswer
+                                    </div>
+                                </div>
+
+                                @if (response.Question.QuestionType == "MultipleChoice")
+                                {
+                                    <div class="mb-3">
+                                        <strong>Options:</strong>
+                                        <div class="ms-3">
+                                            <div>A) @response.Question.OptionA</div>
+                                            <div>B) @response.Question.OptionB</div>
+                                            <div>C) @response.Question.OptionC</div>
+                                            <div>D) @response.Question.OptionD</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <strong>Correct Answer:</strong>
+                                        <span class="badge bg-success">@response.Question.CorrectAnswer</span>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <strong>Auto-Graded:</strong>
+                                        <span class="badge bg-@(response.IsCorrect == true ? "success" : "danger")">
+                                            @(response.IsCorrect == true ? "Correct" : "Incorrect")
+                                        </span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="mb-3">
+                                        <strong>Expected Answer:</strong>
+                                        <div class="border p-3 bg-light rounded">
+                                            @response.Question.CorrectAnswer
+                                        </div>
+                                    </div>
+                                }
+
+                                @if (response.Question.QuestionType == "ShortAnswer" || !response.PointsAwarded.HasValue)
+                                {
+                                    using (Html.BeginForm("GradeQuizResponse", "Teacher", FormMethod.Post))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="responseId" value="@response.Id" />
+
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group mb-3">
+                                                    <label class="form-label">Points (0-1)</label>
+                                                    <input type="number" class="form-control" name="points"
+                                                           value="@(response.PointsAwarded.HasValue ? response.PointsAwarded.Value : 0)"
+                                                           min="0" max="1" required />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group mb-3">
+                                            <label class="form-label">Feedback</label>
+                                            <textarea class="form-control" name="feedback" rows="3">@response.TeacherFeedback</textarea>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary">Save Grade</button>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="mb-3">
+                                        <strong>Points Awarded:</strong>
+                                        <span class="badge bg-info">@response.PointsAwarded</span>
+                                    </div>
+
+                                    if (!string.IsNullOrEmpty(response.TeacherFeedback))
+                                    {
+                                        <div class="mb-3">
+                                            <strong>Feedback:</strong>
+                                            <p>@response.TeacherFeedback</p>
+                                        </div>
+                                    }
+                                }
+                                <!-- In the ReviewQuizAttempt view, add this section after displaying the teacher feedback -->
+                                @if (response.GradedDate.HasValue)
+                                {
+                                    <div class="mb-3">
+                                        <strong>Graded by:</strong>
+                                        @(response.GradedBy?.Name ?? "Teacher") on
+                                        @response.GradedDate.Value.ToString("MMM dd, yyyy hh:mm tt")
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

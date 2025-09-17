@@ -162,6 +162,10 @@
     <Compile Include="Migrations\202509171816161_AddAssignmentTables1.Designer.cs">
       <DependentUpon>202509171816161_AddAssignmentTables1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202509172048411_AddGradingInfoToQuizResponse.cs" />
+    <Compile Include="Migrations\202509172048411_AddGradingInfoToQuizResponse.Designer.cs">
+      <DependentUpon>202509172048411_AddGradingInfoToQuizResponse.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AssgViewModels.cs" />
     <Compile Include="Models\Assignment.cs" />
@@ -261,6 +265,9 @@
     <Content Include="Views\Student\AssignmentDetails.cshtml" />
     <Content Include="Views\Student\ReviewSubmission.cshtml" />
     <Content Include="Views\Teacher\EditAssignment.cshtml" />
+    <Content Include="Views\Teacher\ReviewSubmission.cshtml" />
+    <Content Include="Views\Teacher\QuizSubmissions.cshtml" />
+    <Content Include="Views\Teacher\ReviewQuizAttempt.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -316,6 +323,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202509171816161_AddAssignmentTables1.resx">
       <DependentUpon>202509171816161_AddAssignmentTables1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202509172048411_AddGradingInfoToQuizResponse.resx">
+      <DependentUpon>202509172048411_AddGradingInfoToQuizResponse.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
