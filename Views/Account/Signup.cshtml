@@ -167,18 +167,16 @@
             position: relative;
         }
 
-        .auth-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background:
-                radial-gradient(circle at 25% 75%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 75% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-            pointer-events: none;
-        }
+            .auth-container::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: radial-gradient(circle at 25% 75%, rgba(255, 255, 255, 0.1) 0%, transparent 50%), radial-gradient(circle at 75% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+                pointer-events: none;
+            }
 
         .auth-card {
             width: 100%;
@@ -187,10 +185,7 @@
             backdrop-filter: blur(20px);
             border-radius: 24px;
             overflow: hidden;
-            box-shadow:
-                0 25px 50px rgba(22, 160, 133, 0.25),
-                0 15px 30px rgba(22, 160, 133, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            box-shadow: 0 25px 50px rgba(22, 160, 133, 0.25), 0 15px 30px rgba(22, 160, 133, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.2);
             position: relative;
             z-index: 10;
@@ -198,14 +193,18 @@
         }
 
         keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(50px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
+            from
+
+        {
+            opacity: 0;
+            transform: translateY(50px) scale(0.95);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
         }
 
         .auth-header {
@@ -216,15 +215,15 @@
             position: relative;
         }
 
-        .auth-header::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 20px;
-            background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.1));
-        }
+            .auth-header::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 20px;
+                background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.1));
+            }
 
         .logo-container {
             position: relative;
@@ -244,15 +243,26 @@
             animation: bounce 2s infinite;
         }
 
-        .logo-icon i {
-            font-size: 2rem;
-            color: white;
-        }
+            .logo-icon i {
+                font-size: 2rem;
+                color: white;
+            }
 
         keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
+            0%, 20%, 50%, 80%, 100%
+
+        {
+            transform: translateY(0);
+        }
+
+        40% {
+            transform: translateY(-10px);
+        }
+
+        60% {
+            transform: translateY(-5px);
+        }
+
         }
 
         .auth-title {
@@ -298,12 +308,12 @@
             box-sizing: border-box;
         }
 
-        .form-control:focus {
-            outline: none;
-            border-color: var(--mint-medium);
-            box-shadow: 0 0 0 4px var(--shadow-light);
-            transform: translateY(-1px);
-        }
+            .form-control:focus {
+                outline: none;
+                border-color: var(--mint-medium);
+                box-shadow: 0 0 0 4px var(--shadow-light);
+                transform: translateY(-1px);
+            }
 
         .input-hint {
             font-size: 0.8rem;
@@ -328,9 +338,9 @@
             transition: color 0.3s ease;
         }
 
-        .password-toggle:hover {
-            color: var(--mint-medium);
-        }
+            .password-toggle:hover {
+                color: var(--mint-medium);
+            }
 
         .password-strength {
             margin-top: 8px;
@@ -370,12 +380,12 @@
             position: relative;
         }
 
-        .role-option input[type="radio"] {
-            position: absolute;
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
+            .role-option input[type="radio"] {
+                position: absolute;
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
 
         .role-label {
             display: flex;
@@ -388,11 +398,11 @@
             background: white;
         }
 
-        .role-label:hover {
-            border-color: var(--mint-light);
-            transform: translateX(5px);
-            box-shadow: 0 4px 12px var(--shadow-light);
-        }
+            .role-label:hover {
+                border-color: var(--mint-light);
+                transform: translateX(5px);
+                box-shadow: 0 4px 12px var(--shadow-light);
+            }
 
         .role-option input[type="radio"]:checked + .role-label {
             border-color: var(--mint-medium);
@@ -436,12 +446,12 @@
             gap: 10px;
         }
 
-        .terms-checkbox input[type="checkbox"] {
-            margin-top: 3px;
-            width: 18px;
-            height: 18px;
-            accent-color: var(--mint-medium);
-        }
+            .terms-checkbox input[type="checkbox"] {
+                margin-top: 3px;
+                width: 18px;
+                height: 18px;
+                accent-color: var(--mint-medium);
+            }
 
         .terms-label {
             font-size: 0.9rem;
@@ -455,9 +465,9 @@
             font-weight: 500;
         }
 
-        .terms-link:hover {
-            text-decoration: underline;
-        }
+            .terms-link:hover {
+                text-decoration: underline;
+            }
 
         .btn-auth {
             width: 100%;
@@ -478,14 +488,14 @@
             justify-content: center;
         }
 
-        .btn-auth:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px var(--shadow-medium);
-        }
+            .btn-auth:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px var(--shadow-medium);
+            }
 
-        .btn-auth:active {
-            transform: translateY(0);
-        }
+            .btn-auth:active {
+                transform: translateY(0);
+            }
 
         .btn-shine {
             position: absolute;
@@ -507,11 +517,11 @@
             border-top: 1px solid #e1e8ed;
         }
 
-        .auth-footer p {
-            margin: 0;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
+            .auth-footer p {
+                margin: 0;
+                color: var(--text-muted);
+                font-size: 0.9rem;
+            }
 
         .auth-link {
             color: var(--mint-medium);
@@ -520,10 +530,10 @@
             transition: color 0.3s ease;
         }
 
-        .auth-link:hover {
-            color: var(--mint-dark);
-            text-decoration: underline;
-        }
+            .auth-link:hover {
+                color: var(--mint-dark);
+                text-decoration: underline;
+            }
 
         .alert {
             padding: 12px 16px;
@@ -560,14 +570,18 @@
         }
 
         keyframes particleFloat {
-            0% {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
-            100% {
-                opacity: 0;
-                transform: scale(0.3) translateY(-200px);
-            }
+            0%
+
+        {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
+        100% {
+            opacity: 0;
+            transform: scale(0.3) translateY(-200px);
+        }
+
         }
 
         /* Floating Shapes */
@@ -629,43 +643,59 @@
         }
 
         keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); }
-            25% { transform: translateY(-15px) rotate(90deg) scale(1.1); }
-            50% { transform: translateY(10px) rotate(180deg) scale(0.9); }
-            75% { transform: translateY(-5px) rotate(270deg) scale(1.05); }
+            0%, 100%
+
+        {
+            transform: translateY(0px) rotate(0deg) scale(1);
+        }
+
+        25% {
+            transform: translateY(-15px) rotate(90deg) scale(1.1);
+        }
+
+        50% {
+            transform: translateY(10px) rotate(180deg) scale(0.9);
+        }
+
+        75% {
+            transform: translateY(-5px) rotate(270deg) scale(1.05);
+        }
+
         }
 
         /* Responsive Design */
         media (max-width: 576px) {
-            .auth-container {
-                padding: 10px;
-            }
+            .auth-container
 
-            .auth-card {
-                max-width: 100%;
-            }
+        {
+            padding: 10px;
+        }
 
-            .auth-header {
-                padding: 25px 20px 20px;
-            }
+        .auth-card {
+            max-width: 100%;
+        }
 
-            .auth-body {
-                padding: 25px 20px;
-            }
+        .auth-header {
+            padding: 25px 20px 20px;
+        }
 
-            .auth-title {
-                font-size: 1.6rem;
-            }
+        .auth-body {
+            padding: 25px 20px;
+        }
 
-            .role-label {
-                padding: 12px 15px;
-            }
+        .auth-title {
+            font-size: 1.6rem;
+        }
 
-            .role-icon {
-                width: 40px;
-                height: 40px;
-                margin-right: 12px;
-            }
+        .role-label {
+            padding: 12px 15px;
+        }
+
+        .role-icon {
+            width: 40px;
+            height: 40px;
+            margin-right: 12px;
+        }
         }
     </style>
 }
@@ -737,7 +767,6 @@
                 button.style.pointerEvents = 'none';
 
                 // Add success particles on successful signup
-                // (This would normally be triggered by server response)
                 setTimeout(() => {
                     createSuccessParticles();
                 }, 500);

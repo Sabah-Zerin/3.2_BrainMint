@@ -35,3 +35,15 @@
         new { @class = "form-control" })
     @Html.ValidationMessageFor(m => m.CorrectAnswer, "", new { @class = "text-danger" })
 </div>
+
+<div class="form-group mb-3">
+    @Html.LabelFor(m => m.CorrectAnswer, "Correct Answer", new { @class = "form-label" })
+    @Html.DropDownListFor(m => m.CorrectAnswer, new SelectList(new[] {
+        new { Value = "", Text = "Select the correct answer" },
+        new { Value = "A", Text = "Option A" },
+        new { Value = "B", Text = "Option B" },
+        new { Value = "C", Text = "Option C" },
+        new { Value = "D", Text = "Option D" }
+    }, "Value", "Text", Model.CorrectAnswer),
+        new { @class = "form-control" })
+</div>

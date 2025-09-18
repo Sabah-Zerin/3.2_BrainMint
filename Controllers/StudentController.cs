@@ -31,6 +31,7 @@ namespace Brain_Mint.Controllers
             // Redirect to the Quiz controller's Index action
             return RedirectToAction("Index", "Quiz");
         }
+
         // Assignment Participation
         public ActionResult AssignmentParticipation()
         {
@@ -56,8 +57,6 @@ namespace Brain_Mint.Controllers
 
             return View(assignmentViewModels);
         }
-
-        // Also remove the old duplicate AssignmentParticipation method that returns List<Assignment>
 
         // View Assignment Details for Student
         public ActionResult ViewAssignment(int id)
@@ -92,67 +91,85 @@ namespace Brain_Mint.Controllers
             return View(viewModel);
         }
 
-        // Submit Assignment
+        // FIXED: Single SubmitAssignment method with proper error handling
         [HttpPost]
-        public ActionResult SubmitAssignment(int assignmentId, string textSubmission, HttpPostedFileBase imageFile)
+        [ValidateAntiForgeryToken]
+        public ActionResult SubmitAssignment(SubmitAssignmentViewModel model, HttpPostedFileBase imageFile)
         {
             if (Session["UserRole"]?.ToString() != "Student")
                 return RedirectToAction("Login", "Account");
 
             int studentId = Convert.ToInt32(Session["UserId"]);
 
-            var assignment = db.Assignments.Find(assignmentId);
-            if (assignment == null || assignment.Status != "Active")
-            {
-                TempData["Error"] = "Assignment not found or not available.";
-                return RedirectToAction("AssignmentParticipation");
-            }
-
-            // Check if both text and image are empty
-            if (string.IsNullOrWhiteSpace(textSubmission) && imageFile == null)
-            {
-                TempData["Error"] = "Please provide either text submission or upload an image.";
-                return RedirectToAction("ViewAssignment", new { id = assignmentId });
-            }
-
             try
             {
-                var existingSubmission = db.AssignmentSubmissions
-                    .FirstOrDefault(s => s.AssignmentId == assignmentId && s.StudentId == studentId);
+                var assignment = db.Assignments.Find(model.AssignmentId);
+                if (assignment == null || assignment.Status != "Active")
+                {
+                    TempData["Error"] = "Assignment not found or not available.";
+                    return RedirectToAction("AssignmentParticipation");
+                }
 
-                string imagePath = null;
-                string originalFileName = null;
+                // Check if both text and image are empty
+                if (string.IsNullOrWhiteSpace(model.TextSubmission) &&
+                    (imageFile == null || imageFile.ContentLength == 0))
+                {
+                    TempData["Error"] = "Please provide either text submission or upload an image.";
+                    return RedirectToAction("ViewAssignment", new { id = model.AssignmentId });
+                }
+
+                // Check if already submitted
+                var existingSubmission = db.AssignmentSubmissions
+                    .FirstOrDefault(s => s.AssignmentId == model.AssignmentId && s.StudentId == studentId);
+
+                AssignmentSubmission submission;
+                if (existingSubmission != null)
+                {
+                    // Update existing submission
+                    submission = existingSubmission;
+                    submission.LastModified = DateTime.Now;
+                }
+                else
+                {
+                    // Create new submission
+                    submission = new AssignmentSubmission
+                    {
+                        AssignmentId = model.AssignmentId,
+                        StudentId = studentId,
+                        SubmissionDate = DateTime.Now,
+                        Status = DateTime.Now > assignment.DueDate ? "Late" : "Submitted"
+                    };
+                    db.AssignmentSubmissions.Add(submission);
+                }
+
+                // Handle text submission
+                if (!string.IsNullOrEmpty(model.TextSubmission))
+                {
+                    submission.TextSubmission = model.TextSubmission;
+                }
 
                 // Handle image upload
                 if (imageFile != null && imageFile.ContentLength > 0)
                 {
-                    // Validate file type
-                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
-                    var fileExtension = Path.GetExtension(imageFile.FileName).ToLower();
+                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".pdf", ".gif", ".bmp" };
+                    var extension = Path.GetExtension(imageFile.FileName).ToLower();
 
-                    if (!allowedExtensions.Contains(fileExtension))
+                    if (!allowedExtensions.Contains(extension))
                     {
-                        TempData["Error"] = "Please upload a valid image file (JPG, PNG, GIF, BMP).";
-                        return RedirectToAction("ViewAssignment", new { id = assignmentId });
+                        TempData["Error"] = "Only JPG, PNG, PDF, GIF, and BMP files are allowed.";
+                        return RedirectToAction("ViewAssignment", new { id = model.AssignmentId });
                     }
 
-                    // Validate file size (max 5MB)
-                    if (imageFile.ContentLength > 5 * 1024 * 1024)
+                    if (imageFile.ContentLength > 5 * 1024 * 1024) // 5MB limit
                     {
-                        TempData["Error"] = "Image file size should not exceed 5MB.";
-                        return RedirectToAction("ViewAssignment", new { id = assignmentId });
+                        TempData["Error"] = "File size must be less than 5MB.";
+                        return RedirectToAction("ViewAssignment", new { id = model.AssignmentId });
                     }
 
                     // Create upload directory if it doesn't exist
-                    var uploadDir = Server.MapPath("~/Uploads/Assignments/");
-                    if (!Directory.Exists(uploadDir))
-                    {
-                        Directory.CreateDirectory(uploadDir);
-                    }
-
-                    // Generate unique filename
-                    var fileName = $"{studentId}_{assignmentId}_{DateTime.Now:yyyyMMddHHmmss}{fileExtension}";
-                    var filePath = Path.Combine(uploadDir, fileName);
+                    var uploadsPath = Server.MapPath("~/Uploads/Assignments");
+                    if (!Directory.Exists(uploadsPath))
+                        Directory.CreateDirectory(uploadsPath);
 
                     // Delete old image if updating submission
                     if (existingSubmission != null && !string.IsNullOrEmpty(existingSubmission.ImagePath))
@@ -165,51 +182,26 @@ namespace Brain_Mint.Controllers
                     }
 
                     // Save new image
+                    var fileName = $"{studentId}_{model.AssignmentId}_{DateTime.Now:yyyyMMdd_HHmmss}{extension}";
+                    var filePath = Path.Combine(uploadsPath, fileName);
                     imageFile.SaveAs(filePath);
-                    imagePath = "~/Uploads/Assignments/" + fileName;
-                    originalFileName = imageFile.FileName;
-                }
 
-                // Create or update submission
-                if (existingSubmission == null)
-                {
-                    // Create new submission
-                    var newSubmission = new AssignmentSubmission
-                    {
-                        AssignmentId = assignmentId,
-                        StudentId = studentId,
-                        TextSubmission = textSubmission,
-                        ImagePath = imagePath,
-                        OriginalFileName = originalFileName,
-                        SubmissionDate = DateTime.Now,
-                        Status = DateTime.Now > assignment.DueDate ? "Late" : "Submitted"
-                    };
-
-                    db.AssignmentSubmissions.Add(newSubmission);
-                    TempData["Success"] = "Assignment submitted successfully!";
-                }
-                else
-                {
-                    // Update existing submission
-                    existingSubmission.TextSubmission = textSubmission;
-                    if (!string.IsNullOrEmpty(imagePath))
-                    {
-                        existingSubmission.ImagePath = imagePath;
-                        existingSubmission.OriginalFileName = originalFileName;
-                    }
-                    existingSubmission.LastModified = DateTime.Now;
-                    existingSubmission.Status = DateTime.Now > assignment.DueDate ? "Late" : "Submitted";
-
-                    TempData["Success"] = "Assignment updated successfully!";
+                    submission.ImagePath = "~/Uploads/Assignments/" + fileName;
+                    submission.OriginalFileName = imageFile.FileName;
                 }
 
                 db.SaveChanges();
+
+                TempData["Success"] = existingSubmission != null ?
+                    "Assignment updated successfully!" :
+                    "Assignment submitted successfully!";
+
                 return RedirectToAction("AssignmentParticipation");
             }
             catch (Exception ex)
             {
                 TempData["Error"] = "Error submitting assignment: " + ex.Message;
-                return RedirectToAction("ViewAssignment", new { id = assignmentId });
+                return RedirectToAction("ViewAssignment", new { id = model.AssignmentId });
             }
         }
 

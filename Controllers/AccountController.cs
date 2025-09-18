@@ -3,6 +3,7 @@ using System;
 using System.Data.Entity;
 using System.Linq;
 using System.Web.Mvc;
+using BCrypt.Net;
 
 namespace Brain_Mint.Controllers
 {
@@ -26,6 +27,9 @@ namespace Brain_Mint.Controllers
                     ViewBag.Error = "User already exists.";
                     return View();
                 }
+
+                // Hash the password before saving
+                user.Password = HashPassword(user.Password);
 
                 // Add user to database
                 db.Users.Add(user);
@@ -59,10 +63,18 @@ namespace Brain_Mint.Controllers
                 return View();
             }
 
-            if (user.Password != password)
+            // FIXED: Check if password is valid (handles both plain text and hashed)
+            if (!IsPasswordValid(password, user.Password))
             {
                 ViewBag.Error = "Password is wrong.";
                 return View();
+            }
+
+            // If user has plain text password, hash it now
+            if (!IsBCryptHash(user.Password))
+            {
+                user.Password = HashPassword(password);
+                db.SaveChanges();
             }
 
             // Store session data
@@ -90,7 +102,6 @@ namespace Brain_Mint.Controllers
 
             TempData["LoginSuccess"] = "Login successful!";
 
-
             // Redirect to appropriate dashboard
             if (user.Role == "Teacher")
                 return RedirectToAction("TeacherDashboard", "Teacher");
@@ -99,7 +110,6 @@ namespace Brain_Mint.Controllers
             else
                 return RedirectToAction("Index", "Home");
         }
-
 
         public ActionResult LoginActivity()
         {
@@ -130,7 +140,53 @@ namespace Brain_Mint.Controllers
             return View(currentlyLoggedIn);
         }
 
+        // FIXED: Password handling methods
+        private string HashPassword(string password)
+        {
+            return BCrypt.Net.BCrypt.HashPassword(password);
+        }
 
+        private bool VerifyPassword(string password, string hashedPassword)
+        {
+            try
+            {
+                return BCrypt.Net.BCrypt.Verify(password, hashedPassword);
+            }
+            catch
+            {
+                return false; // If verification fails, return false
+            }
+        }
+
+        // Check if a string is a BCrypt hash
+        private bool IsBCryptHash(string password)
+        {
+            // BCrypt hashes start with $2a$, $2b$, $2x$, $2y$ and are 60 characters long
+            return !string.IsNullOrEmpty(password) &&
+                   password.Length == 60 &&
+                   (password.StartsWith("$2a$") ||
+                    password.StartsWith("$2b$") ||
+                    password.StartsWith("$2x$") ||
+                    password.StartsWith("$2y$"));
+        }
+
+        // Validate password (handles both plain text and hashed passwords)
+        private bool IsPasswordValid(string inputPassword, string storedPassword)
+        {
+            if (string.IsNullOrEmpty(inputPassword) || string.IsNullOrEmpty(storedPassword))
+                return false;
+
+            // If stored password is a BCrypt hash, verify using BCrypt
+            if (IsBCryptHash(storedPassword))
+            {
+                return VerifyPassword(inputPassword, storedPassword);
+            }
+            else
+            {
+                // If stored password is plain text, compare directly
+                return inputPassword == storedPassword;
+            }
+        }
 
         public ActionResult Logout()
         {
@@ -150,5 +206,16 @@ namespace Brain_Mint.Controllers
             Session.Abandon();
             return RedirectToAction("Login");
         }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                db.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
     }
+
 }

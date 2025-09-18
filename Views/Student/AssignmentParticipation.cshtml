@@ -235,28 +235,24 @@
             document.getElementById('modalSubmissionType').textContent = submissionType;
             document.getElementById('modalDescription').innerHTML = description.replace(/\n/g, '<br/>');
 
-            // Show image guideline if needed
-            if (submissionType === 'Both' || submissionType === 'Image') {
+            // Set up start assignment button
+            var startBtn = document.getElementById('startAssignmentBtn');
+            startBtn.href = '@Url.Action("SubmitAssignment", "Student")' + '/' + assignmentId;
+            startBtn.style.display = 'inline-block';
+
+            // Show/hide image guideline
+            if (submissionType === 'Image' || submissionType === 'Both') {
                 document.getElementById('imageGuideline').style.display = 'block';
             } else {
                 document.getElementById('imageGuideline').style.display = 'none';
             }
 
-            // Set up start assignment button
-            const startBtn = document.getElementById('startAssignmentBtn');
-            startBtn.href = '@Url.Action("ViewAssignment", "Student")?id=' + assignmentId;
-
-            // Check if assignment is still available
-            const now = new Date();
-            const due = new Date(dueDate);
-            if (now <= due) {
-                startBtn.style.display = 'inline-block';
-            } else {
-                startBtn.style.display = 'none';
-            }
-
-            new bootstrap.Modal(document.getElementById('instructionsModal')).show();
+            // Show modal
+            var modal = new bootstrap.Modal(document.getElementById('instructionsModal'));
+            modal.show();
         }
+
+
 
         // Auto-refresh page every 5 minutes to update assignment statuses
         setInterval(function() {

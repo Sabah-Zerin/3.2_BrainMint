@@ -1,10 +1,12 @@
 ﻿// Controllers/HomeController.cs
 using System.Web.Mvc;
+using Brain_Mint.Models;
 
 namespace Brain_Mint.Controllers
 {
     public class HomeController : Controller
     {
+        private BrainMintDbContext db = new BrainMintDbContext();
         public ActionResult Welcome()
         {
             return View();
@@ -37,6 +39,15 @@ namespace Brain_Mint.Controllers
         public ActionResult Contact()
         {
             return View();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                db.Dispose();
+            }
+            base.Dispose(disposing);
         }
     }
 }

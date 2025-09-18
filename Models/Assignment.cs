@@ -97,6 +97,7 @@ namespace Brain_Mint.Models
 
         [ForeignKey("GradedByUserId")]
         public virtual User GradedBy { get; set; }
+
     }
 
     // View Models
@@ -162,5 +163,13 @@ namespace Brain_Mint.Models
         public bool HasTextSubmission { get; set; }
         public bool HasImageSubmission { get; set; }
         public bool IsLate { get; set; }
+    }
+
+    public class FutureDateAttribute : ValidationAttribute
+    {
+        public override bool IsValid(object value)
+        {
+            return value != null && (DateTime)value > DateTime.Now;
+        }
     }
 }
