@@ -120,6 +120,11 @@
         </div>
     }
 </div>
+<div class="mt-4">
+    <a href="@Url.Action("TeacherDashboard", "Teacher")" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
 
 <!-- Create Assignment Modal -->
 <div class="modal fade" id="createAssignmentModal" tabindex="-1">
@@ -183,7 +188,16 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-mint">Create Assignment</button>
                 </div>
+
+                <div class="mb-3">
+                    <a href="@Url.Action("AssignmentManagement", "Teacher")" class="btn btn-mint" ">
+                        <i class="fas fa-arrow-left"></i>  Back to Assignment Management
+                    </a>
+                </div>
+                   
+
             </form>
+            
         </div>
     </div>
 </div>
