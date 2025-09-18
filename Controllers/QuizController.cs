@@ -109,85 +109,95 @@ namespace Brain_Mint.Controllers
                 return RedirectToAction("Index");
             }
 
-            // Mark attempt as completed
-            quizAttempt.EndTime = DateTime.Now;
-            quizAttempt.Status = "Completed";
-
-            int totalScore = 0;
-            int maximumScore = quizAttempt.Quiz.Questions.Count();
-            bool hasShortAnswers = false;
-
-            // Process each answer
-            foreach (var question in quizAttempt.Quiz.Questions)
+            try
             {
-                string questionKey = "question_" + question.Id;
-                string studentAnswer = "";
+                // Mark attempt as completed
+                quizAttempt.EndTime = DateTime.Now;
+                quizAttempt.Status = "Completed";
 
-                // Get the student's answer from the form
-                if (form[questionKey] != null)
+                int totalScore = 0;
+                int maximumScore = quizAttempt.Quiz.Questions.Count();
+                bool hasShortAnswers = false;
+
+                // Process each answer
+                foreach (var question in quizAttempt.Quiz.Questions)
                 {
-                    studentAnswer = form[questionKey].ToString().Trim();
-                }
+                    string questionKey = "question_" + question.Id;
+                    string studentAnswer = "";
 
-                var response = new QuizResponse
-                {
-                    QuizAttemptId = attemptId,
-                    QuestionId = question.Id,
-                    StudentAnswer = studentAnswer,
-                    ResponseTime = DateTime.Now
-                };
-
-                // FIXED: Better logic to determine if it's multiple choice
-                bool isMultipleChoice = question.QuestionType == "MultipleChoice" ||
-                                       (!string.IsNullOrEmpty(question.OptionA) &&
-                                        !string.IsNullOrEmpty(question.OptionB) &&
-                                        !string.IsNullOrEmpty(question.OptionC) &&
-                                        !string.IsNullOrEmpty(question.OptionD));
-
-                if (isMultipleChoice)
-                {
-                    // Multiple Choice - Auto grade immediately
-                    if (!string.IsNullOrEmpty(studentAnswer) &&
-                        !string.IsNullOrEmpty(question.CorrectAnswer) &&
-                        studentAnswer.ToUpper() == question.CorrectAnswer.ToUpper())
+                    // Get the student's answer from the form
+                    if (form[questionKey] != null)
                     {
-                        response.IsCorrect = true;
-                        response.PointsAwarded = 1;
-                        totalScore++;
+                        studentAnswer = form[questionKey].ToString().Trim();
+                    }
+
+                    var response = new QuizResponse
+                    {
+                        QuizAttemptId = attemptId,
+                        QuestionId = question.Id,
+                        StudentAnswer = studentAnswer,
+                        ResponseTime = DateTime.Now
+                    };
+
+                    // Determine if it's multiple choice based on question type and options
+                    bool isMultipleChoice = question.QuestionType == "MultipleChoice" ||
+                                           (!string.IsNullOrEmpty(question.OptionA) &&
+                                            !string.IsNullOrEmpty(question.OptionB) &&
+                                            !string.IsNullOrEmpty(question.OptionC) &&
+                                            !string.IsNullOrEmpty(question.OptionD));
+
+                    if (isMultipleChoice)
+                    {
+                        // Multiple Choice - Auto grade immediately
+                        if (!string.IsNullOrEmpty(studentAnswer) &&
+                            !string.IsNullOrEmpty(question.CorrectAnswer) &&
+                            studentAnswer.ToUpper() == question.CorrectAnswer.ToUpper())
+                        {
+                            response.IsCorrect = true;
+                            response.PointsAwarded = 1;
+                            totalScore++;
+                        }
+                        else
+                        {
+                            response.IsCorrect = false;
+                            response.PointsAwarded = 0;
+                        }
                     }
                     else
                     {
-                        response.IsCorrect = false;
-                        response.PointsAwarded = 0;
+                        // Short answer questions need manual review
+                        response.IsCorrect = null;
+                        response.PointsAwarded = null;
+                        hasShortAnswers = true;
                     }
+
+                    db.QuizResponses.Add(response);
+                }
+
+                // Set grading status based on whether there are short answer questions
+                if (hasShortAnswers)
+                {
+                    quizAttempt.GradingStatus = "PendingReview";
+                    // Don't calculate final score yet, wait for teacher review
                 }
                 else
                 {
-                    // Short answer questions need manual review
-                    response.IsCorrect = null;
-                    response.PointsAwarded = null;
-                    hasShortAnswers = true;
+                    quizAttempt.GradingStatus = "AutoGraded";
+                    quizAttempt.TotalScore = totalScore;
+                    quizAttempt.MaximumScore = maximumScore;
+                    quizAttempt.PercentageScore = maximumScore > 0 ? (decimal)totalScore / maximumScore * 100 : 0;
                 }
 
-                db.QuizResponses.Add(response);
-            }
+                db.SaveChanges();
 
-            // Set grading status based on whether there are actual short answer questions
-            if (hasShortAnswers)
+                TempData["Success"] = "Quiz submitted successfully!";
+                return RedirectToAction("ViewResult", new { attemptId = attemptId });
+            }
+            catch (Exception ex)
             {
-                quizAttempt.GradingStatus = "PendingReview";
+                TempData["Error"] = "Error submitting quiz: " + ex.Message;
+                return RedirectToAction("Take", new { id = quizAttempt.QuizId });
             }
-            else
-            {
-                quizAttempt.GradingStatus = "AutoGraded";
-                quizAttempt.TotalScore = totalScore;
-                quizAttempt.MaximumScore = maximumScore;
-                quizAttempt.PercentageScore = maximumScore > 0 ? (decimal)totalScore / maximumScore * 100 : 0;
-            }
-
-            db.SaveChanges();
-
-            return RedirectToAction("ViewResult", new { attemptId = attemptId });
         }
 
 

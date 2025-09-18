@@ -182,10 +182,6 @@
     <Compile Include="Migrations\202509172048411_AddGradingInfoToQuizResponse.Designer.cs">
       <DependentUpon>202509172048411_AddGradingInfoToQuizResponse.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\202509181708546_InitialCreate2.cs" />
-    <Compile Include="Migrations\202509181708546_InitialCreate2.Designer.cs">
-      <DependentUpon>202509181708546_InitialCreate2.cs</DependentUpon>
-    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AssgViewModels.cs" />
     <Compile Include="Models\Assignment.cs" />
@@ -278,7 +274,6 @@
     <Content Include="Views\Teacher\AddQuestion.cshtml" />
     <Content Include="Views\Teacher\EditQuestion.cshtml" />
     <Content Include="Views\Teacher\MultipleChoiceOptions.cshtml" />
-    <Content Include="Views\Shared\_MultipleChoiceOptions.cshtml" />
     <Content Include="Views\Shared\_ShortAnswerPartial.cshtml" />
     <Content Include="Views\Student\SubmitAssignment.cshtml" />
     <Content Include="Views\Student\ViewAssignment.cshtml" />
@@ -291,7 +286,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\App_LocalResources\" />
-    <Folder Include="Views\Assgnt\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />
@@ -345,9 +339,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202509172048411_AddGradingInfoToQuizResponse.resx">
       <DependentUpon>202509172048411_AddGradingInfoToQuizResponse.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202509181708546_InitialCreate2.resx">
-      <DependentUpon>202509181708546_InitialCreate2.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

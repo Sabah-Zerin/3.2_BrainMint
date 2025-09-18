@@ -56,33 +56,33 @@
                     <p class="lead">@question.QuestionText</p>
                 </div>
 
-                @if (question.QuestionType == "MultipleChoice")
+                @if (question.QuestionType == "MultipleChoice" || (!string.IsNullOrEmpty(question.OptionA) && !string.IsNullOrEmpty(question.OptionB)))
                 {
                     <div class="options-container">
                         <div class="form-check mb-2">
                             <input class="form-check-input" type="radio"
-                                   name="question_@question.Id" id="q@(question.Id)_A" value="A" required>
+                                   name="question_@question.Id" id="q@(question.Id)_A" value="A">
                             <label class="form-check-label" for="q@(question.Id)_A">
                                 <strong>A)</strong> @question.OptionA
                             </label>
                         </div>
                         <div class="form-check mb-2">
                             <input class="form-check-input" type="radio"
-                                   name="question_@question.Id" id="q@(question.Id)_B" value="B" required>
+                                   name="question_@question.Id" id="q@(question.Id)_B" value="B">
                             <label class="form-check-label" for="q@(question.Id)_B">
                                 <strong>B)</strong> @question.OptionB
                             </label>
                         </div>
                         <div class="form-check mb-2">
                             <input class="form-check-input" type="radio"
-                                   name="question_@question.Id" id="q@(question.Id)_C" value="C" required>
+                                   name="question_@question.Id" id="q@(question.Id)_C" value="C">
                             <label class="form-check-label" for="q@(question.Id)_C">
                                 <strong>C)</strong> @question.OptionC
                             </label>
                         </div>
                         <div class="form-check mb-2">
                             <input class="form-check-input" type="radio"
-                                   name="question_@question.Id" id="q@(question.Id)_D" value="D" required>
+                                   name="question_@question.Id" id="q@(question.Id)_D" value="D">
                             <label class="form-check-label" for="q@(question.Id)_D">
                                 <strong>D)</strong> @question.OptionD
                             </label>
@@ -96,8 +96,7 @@
                                   name="question_@question.Id"
                                   id="q@(question.Id)_text"
                                   rows="4"
-                                  placeholder="Type your answer here..."
-                                  required></textarea>
+                                  placeholder="Type your answer here..."></textarea>
                     </div>
                 }
             </div>
@@ -141,12 +140,18 @@
 
 @section scripts {
     <script>
-        // Timer functionality
+        // FIXED: Timer functionality with proper calculation
         let timeLimit = @Model.Quiz.TimeLimit * 60; // Convert to seconds
         let startTime = new Date("@Model.StartTime.ToString("yyyy-MM-ddTHH:mm:ss")");
+        let remainingSeconds = timeLimit;
+
+        // Calculate elapsed time and adjust remaining time
         let currentTime = new Date();
         let elapsedSeconds = Math.floor((currentTime - startTime) / 1000);
-        let remainingSeconds = Math.max(0, timeLimit - elapsedSeconds);
+        remainingSeconds = Math.max(0, timeLimit - elapsedSeconds);
+
+        let timerInterval;
+        let autoSaveInterval;
 
         function updateTimer() {
             let minutes = Math.floor(remainingSeconds / 60);
@@ -155,22 +160,35 @@
             document.getElementById('timeRemaining').textContent =
                 minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
 
+            // Change color when time is running out
             if (remainingSeconds <= 300) { // 5 minutes remaining
                 document.getElementById('timeRemaining').className = 'fw-bold text-danger';
+            } else if (remainingSeconds <= 600) { // 10 minutes remaining
+                document.getElementById('timeRemaining').className = 'fw-bold text-warning';
             }
 
+            // Auto-submit when time is up
             if (remainingSeconds <= 0) {
-                alert('Time is up! Your quiz will be automatically submitted.');
-                document.getElementById('quizForm').submit();
+                clearInterval(timerInterval);
+                clearInterval(autoSaveInterval);
+                autoSubmitQuiz();
                 return;
             }
 
             remainingSeconds--;
         }
 
-        // Start the timer
-        setInterval(updateTimer, 1000);
-        updateTimer();
+        function autoSubmitQuiz() {
+            alert('Time is up! Your quiz will be automatically submitted with your current answers.');
+
+            // Disable all inputs to prevent further changes
+            document.querySelectorAll('input, textarea').forEach(function(input) {
+                input.disabled = true;
+            });
+
+            // Submit the form
+            document.getElementById('quizForm').submit();
+        }
 
         function showSubmitConfirmation() {
             // Check for unanswered questions
@@ -213,44 +231,39 @@
         }
 
         function submitQuiz() {
+            clearInterval(timerInterval);
+            clearInterval(autoSaveInterval);
             document.getElementById('quizForm').submit();
         }
 
-        // Prevent accidental page refresh/close
-        window.addEventListener('beforeunload', function(e) {
-            e.preventDefault();
-            e.returnValue = '';
-        });
-
-
-        // Quiz Timer
-        var timeLimit = @Model.Quiz.TimeLimit; // minutes
-        var totalSeconds = timeLimit * 60;
-
-        function startTimer() {
-            var timer = setInterval(function() {
-                var minutes = Math.floor(totalSeconds / 60);
-                var seconds = totalSeconds % 60;
-
-                document.getElementById('timeRemaining').textContent =
-                    minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
-
-                if (totalSeconds <= 0) {
-                    clearInterval(timer);
-                    alert('Time is up! Submitting quiz automatically.');
-                    document.getElementById('quizForm').submit();
-                }
-
-                totalSeconds--;
-            }, 1000);
+        // Auto-save progress every 30 seconds
+        function autoSaveProgress() {
+            console.log('Auto-saving quiz progress...');
+            // You can implement auto-save to localStorage or server here if needed
         }
 
-        // Start timer when page loads
-        window.onload = function() {
-            startTimer();
-        };
+        // Initialize timer and auto-save when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Start timer
+            timerInterval = setInterval(updateTimer, 1000);
+            updateTimer(); // Update immediately
 
+            // Start auto-save
+            autoSaveInterval = setInterval(autoSaveProgress, 30000);
+        });
 
+        // Prevent accidental page refresh/close
+        window.addEventListener('beforeunload', function(e) {
+            if (remainingSeconds > 0) {
+                e.preventDefault();
+                e.returnValue = 'Are you sure you want to leave? Your progress will be lost.';
+            }
+        });
+
+        // Remove beforeunload when form is submitted
+        document.getElementById('quizForm').addEventListener('submit', function() {
+            window.removeEventListener('beforeunload', function() {});
+        });
     </script>
 }
 
@@ -278,6 +291,7 @@
         margin-left: 8px;
         border-radius: 4px;
         transition: background-color 0.2s;
+        width: 100%;
     }
 
     .form-check-input:checked + .form-check-label {
@@ -287,7 +301,11 @@
     }
 
     .quiz-timer {
-        font-size: 1.2rem;
+        font-size: 1.3rem;
+        padding: 10px 15px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 8px;
+        border: 2px solid #ffc107;
     }
 
     .quiz-info {
@@ -297,10 +315,21 @@
     textarea.form-control {
         border: 2px solid #e9ecef;
         transition: border-color 0.3s ease;
+        min-height: 120px;
     }
 
         textarea.form-control:focus {
             border-color: var(--mint-medium);
             box-shadow: 0 0 0 0.25rem rgba(72, 201, 176, 0.25);
+        }
+
+    .btn-warning {
+        background-color: #ffc107;
+        border-color: #ffc107;
+    }
+
+        .btn-warning:hover {
+            background-color: #e0a800;
+            border-color: #d39e00;
         }
 </style>

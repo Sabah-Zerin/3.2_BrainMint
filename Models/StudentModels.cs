@@ -14,16 +14,4 @@ namespace Brain_Mint.Models
         public DateTime DueDate { get; set; }
         public string Status { get; set; }
     }
-
-    public class StudentPerformance
-    {
-        public List<ScoreRecord> QuizScores { get; set; }
-        public List<ScoreRecord> AssignmentScores { get; set; }
-    }
-
-    public class ScoreRecord
-    {
-        public string Name { get; set; }
-        public int Score { get; set; }
-    }
 }
