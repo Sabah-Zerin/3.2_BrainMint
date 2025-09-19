@@ -608,17 +608,25 @@ namespace Brain_Mint.Controllers
             }
         }
 
-        public ActionResult AssignmentDetails(int id)
+        // Replace your existing AssignmentDetails action with this version that handles missing parameters:
+
+        public ActionResult AssignmentDetails(int? id)
         {
             if (Session["UserRole"]?.ToString() != "Teacher")
                 return RedirectToAction("Login", "Account");
+
+            // If no ID provided, redirect to Assignment Participation page
+            if (!id.HasValue)
+            {
+                return RedirectToAction("AssignmentParticipation");
+            }
 
             int teacherId = Convert.ToInt32(Session["UserId"]);
 
             var assignment = db.Assignments
                 .Include(a => a.Submissions)
                 .Include(a => a.Submissions.Select(s => s.Student))
-                .FirstOrDefault(a => a.Id == id && a.CreatedByUserId == teacherId);
+                .FirstOrDefault(a => a.Id == id.Value && a.CreatedByUserId == teacherId);
 
             if (assignment == null)
             {
@@ -652,6 +660,7 @@ namespace Brain_Mint.Controllers
 
             return View(viewModel);
         }
+
 
         // GET: Teacher/EditAssignment/5
         public ActionResult EditAssignment(int id)
@@ -986,14 +995,119 @@ namespace Brain_Mint.Controllers
 
 
 
-
-
-        public ActionResult ClassPerformance()
+        
+        public ActionResult AssignmentParticipation()
         {
             if (Session["UserRole"]?.ToString() != "Teacher")
                 return RedirectToAction("Login", "Account");
-            return View();
+
+            try
+            {
+                // Get all active assignments with basic info first
+                var allAssignments = db.Assignments
+                    .Include(a => a.CreatedBy)
+                    .Include(a => a.Submissions)
+                    .Include(a => a.Submissions.Select(s => s.Student))
+                    .Where(a => a.Status == "Active")
+                    .OrderByDescending(a => a.CreatedDate)
+                    .ToList();
+
+                // Create the participation info for active assignments
+                var activeAssignments = new List<AssignmentParticipationInfo>();
+
+                foreach (var assignment in allAssignments)
+                {
+                    // Calculate statistics
+                    var submissions = assignment.Submissions?.ToList() ?? new List<AssignmentSubmission>();
+                    var gradedSubmissions = submissions.Where(s => s.Points.HasValue).ToList();
+                    var uniqueParticipants = submissions.Select(s => s.StudentId).Distinct().ToList();
+
+                    // Calculate average score from graded submissions
+                    var averageScore = gradedSubmissions.Any()
+                        ? gradedSubmissions.Average(s => (decimal)s.Points.Value / assignment.MaxPoints * 100)
+                        : (decimal?)null;
+
+                    var assignmentInfo = new AssignmentParticipationInfo
+                    {
+                        Id = assignment.Id,
+                        Title = assignment.Title,
+                        Subject = assignment.Subject,
+                        DueDate = assignment.DueDate,
+                        MaxPoints = assignment.MaxPoints,
+                        CreatedDate = assignment.CreatedDate,
+                        Status = assignment.Status,
+
+                        // Calculate participation statistics
+                        ParticipantCount = uniqueParticipants.Count,
+                        TotalSubmissions = submissions.Count,
+                        GradedSubmissions = gradedSubmissions.Count,
+
+                        // Calculate average score
+                        AverageScore = averageScore,
+
+                        // Add teacher name
+                        TeacherName = assignment.CreatedBy?.Name ?? "Unknown Teacher"
+                    };
+
+                    activeAssignments.Add(assignmentInfo);
+                }
+
+                // Calculate overall totals
+                var totalAssignments = allAssignments.Count;
+                var allSubmissions = allAssignments.SelectMany(a => a.Submissions ?? new List<AssignmentSubmission>()).ToList();
+                var totalParticipants = allSubmissions.Select(s => s.StudentId).Distinct().Count();
+                var allGradedSubmissions = allSubmissions.Where(s => s.Points.HasValue).ToList();
+
+                // Calculate overall average score
+                var overallAverageScore = allGradedSubmissions.Any()
+                    ? allGradedSubmissions.Average(s => {
+                        var assignment = allAssignments.First(a => a.Id == s.AssignmentId);
+                        return (decimal)s.Points.Value / assignment.MaxPoints * 100;
+                    })
+                    : 0;
+
+                // Create the view model
+                var viewModel = new AssignmentParticipationViewModel
+                {
+                    ActiveAssignments = activeAssignments,
+                    TotalAssignments = totalAssignments,
+                    TotalParticipants = totalParticipants,
+                    QuickStats = new AssignmentQuickStats
+                    {
+                        TotalAssignmentsCreated = totalAssignments,
+                        TotalSubmissions = allSubmissions.Count,
+                        OverallAverageScore = overallAverageScore,
+                        ActiveAssignmentsCount = activeAssignments.Count,
+                        TotalUniqueParticipants = totalParticipants
+                    }
+                };
+
+                // Pass current teacher's name to the view
+                int currentTeacherId = Convert.ToInt32(Session["UserId"]);
+                var currentTeacher = db.Users.FirstOrDefault(u => u.Id == currentTeacherId);
+                ViewBag.CurrentTeacherName = currentTeacher?.Name ?? "Unknown";
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                // Log the error and return a safe fallback
+                ViewBag.Error = "An error occurred while loading assignment participation data: " + ex.Message;
+
+                // Return empty view model to prevent null reference
+                var emptyViewModel = new AssignmentParticipationViewModel
+                {
+                    ActiveAssignments = new List<AssignmentParticipationInfo>(),
+                    TotalAssignments = 0,
+                    TotalParticipants = 0,
+                    QuickStats = new AssignmentQuickStats()
+                };
+
+                return View(emptyViewModel);
+            }
         }
+
+
         #endregion
 
         protected override void Dispose(bool disposing)

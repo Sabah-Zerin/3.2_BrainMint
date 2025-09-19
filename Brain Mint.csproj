@@ -190,6 +190,7 @@
     <Compile Include="Models\AssgViewModels.cs" />
     <Compile Include="Models\Assignment.cs" />
     <Compile Include="Models\AssignmentModels.cs" />
+    <Compile Include="Models\AssignmentParticipationViewModel.cs" />
     <Compile Include="Models\DbContext.cs" />
     <Compile Include="Models\Login-log-model.cs" />
     <Compile Include="Models\QuizParticipationViewModel.cs" />
@@ -268,7 +269,6 @@
     <Content Include="Views\Teacher\AssignmentManagement.cshtml" />
     <Content Include="Views\Teacher\QuizParticipation.cshtml" />
     <Content Include="Views\Teacher\AssignmentDetails.cshtml" />
-    <Content Include="Views\Teacher\ClassPerformance.cshtml" />
     <Content Include="Views\Shared\_StudentLayout.cshtml" />
     <Content Include="Views\Student\StudentDashboard.cshtml" />
     <Content Include="Views\Student\QuizParticipation.cshtml" />
@@ -289,6 +289,7 @@
     <Content Include="Views\Teacher\ReviewSubmission.cshtml" />
     <Content Include="Views\Teacher\QuizSubmissions.cshtml" />
     <Content Include="Views\Teacher\ReviewQuizAttempt.cshtml" />
+    <Content Include="Views\Teacher\AssignmentParticipation.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\App_LocalResources\" />

@@ -1,15 +1,15 @@
-@* Replace your Views/Teacher/QuizParticipation.cshtml with this simplified version *@
-@model Brain_Mint.Models.QuizParticipationViewModel
+@* Create this file: Views/Teacher/AssignmentParticipation.cshtml *@
+@model Brain_Mint.Models.AssignmentParticipationViewModel
 @{
-    ViewBag.Title = "Quiz Participation";
+    ViewBag.Title = "Assignment Participation";
     Layout = "~/Views/Shared/_TeacherLayout.cshtml";
 }
 
 <div class="dashboard-card">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="card-title mb-0">Quiz Participation - All Quizzes</h2>
+        <h2 class="card-title mb-0">Assignment Participation - All Assignments</h2>
         <div class="quiz-overview">
-            <span class="badge bg-primary fs-6 me-2">@Model.TotalQuizzes Total Quizzes</span>
+            <span class="badge bg-primary fs-6 me-2">@Model.TotalAssignments Total Assignments</span>
             <span class="badge bg-success fs-6">@Model.TotalParticipants Total Participants</span>
         </div>
     </div>
@@ -21,6 +21,7 @@
             @ViewBag.Error
         </div>
     }
+
     @* Quick Stats Section *@
     @if (Model.QuickStats != null)
     {
@@ -28,16 +29,16 @@
             <div class="col-md-4">
                 <div class="card stats-card stats-card-blue">
                     <div class="card-body text-center">
-                        <h3 class="stats-number">@Model.QuickStats.TotalQuizzesCreated</h3>
-                        <p class="stats-label">Total Quizzes</p>
+                        <h3 class="stats-number">@Model.QuickStats.TotalAssignmentsCreated</h3>
+                        <p class="stats-label">Total Assignments</p>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="card stats-card stats-card-green">
                     <div class="card-body text-center">
-                        <h3 class="stats-number">@Model.QuickStats.TotalAttempts</h3>
-                        <p class="stats-label">Total Attempts</p>
+                        <h3 class="stats-number">@Model.QuickStats.TotalSubmissions</h3>
+                        <p class="stats-label">Total Submissions</p>
                     </div>
                 </div>
             </div>
@@ -54,114 +55,124 @@
 
     @* Action Buttons *@
     <div class="d-flex gap-2 mb-4">
-        <a href="@Url.Action("QuizParticipation", "Teacher")" class="btn btn-outline-primary">
+        <a href="@Url.Action("AssignmentParticipation", "Teacher")" class="btn btn-outline-primary">
             <i class="fas fa-sync-alt me-1"></i> Refresh
         </a>
-        <a href="@Url.Action("QuizCreate", "Teacher")" class="btn btn-success">
-            <i class="fas fa-plus me-1"></i> Create New Quiz
+        <a href="@Url.Action("AssignmentManagement", "Teacher")" class="btn btn-success">
+            <i class="fas fa-plus me-1"></i> Manage Assignments
         </a>
-        <a href="@Url.Action("QuizManagement", "Teacher")" class="btn btn-outline-secondary">
-            <i class="fas fa-list me-1"></i> Manage My Quizzes
+        <a href="@Url.Action("AssignmentManagement", "Teacher")" class="btn btn-outline-secondary">
+            <i class="fas fa-list me-1"></i> My Assignments
         </a>
     </div>
 
-    @* All Quizzes Table - SIMPLIFIED *@
+    @* All Assignments Table *@
     <div class="card">
         <div class="card-header">
             <h4 class="mb-0">
                 <i class="fas fa-table me-2"></i>
-                All Active Quizzes (@Model.ActiveQuizzes.Count)
+                All Active Assignments (@Model.ActiveAssignments.Count)
             </h4>
         </div>
         <div class="card-body">
-            @if (Model.ActiveQuizzes.Any())
+            @if (Model.ActiveAssignments.Any())
             {
                 <div class="table-responsive">
                     <table class="table table-striped table-hover">
                         <thead class="table-dark">
                             <tr>
-                                <th>Quiz Title</th>
+                                <th>Assignment Title</th>
                                 <th>Teacher</th>
-                                <th>Created Date</th>
-                                <th>Questions</th>
-                                <th>Time Limit</th>
+                                <th>Due Date</th>
                                 <th>Participants</th>
-                                <th>Completed Attempts</th>
+                                <th>Submissions</th>
                                 <th>Average Score</th>
                                 <th>Actions</th>
-                                @* REMOVED: Last Activity column *@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var quiz in Model.ActiveQuizzes)
+                            @foreach (var assignment in Model.ActiveAssignments)
                             {
                                 <tr>
                                     <td>
                                         <div>
-                                            <strong>@quiz.Title</strong>
-                                            <span class="badge bg-success ms-2">@quiz.Status</span>
+                                            <strong>@assignment.Title</strong>
+                                            <span class="badge bg-success ms-2">@assignment.Status</span>
                                         </div>
-                                        @if (!string.IsNullOrEmpty(quiz.Description))
-                                        {
-                                            <small class="text-muted d-block">
-                                                @(quiz.Description.Length > 50 ? quiz.Description.Substring(0, 50) + "..." : quiz.Description)
-                                            </small>
-                                        }
+                                        <small class="text-muted d-block">
+                                            <i class="fas fa-book me-1"></i>@assignment.Subject
+                                        </small>
+                                        <small class="text-muted">
+                                            <i class="fas fa-star me-1"></i>Max Points: @assignment.MaxPoints
+                                        </small>
                                     </td>
                                     <td>
                                         <i class="fas fa-user me-1"></i>
-                                        @quiz.TeacherName
+                                        @assignment.TeacherName
                                     </td>
                                     <td>
-                                        <small>@quiz.CreatedDate.ToString("MMM dd, yyyy")</small>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-info">@quiz.TotalQuestions</span>
-                                    </td>
-                                    <td>
-                                        <i class="fas fa-clock me-1"></i>
-                                        @quiz.TimeLimit min
+                                        <div>
+                                            @assignment.DueDate.ToString("MMM dd, yyyy")
+                                            <br>
+                                            <small class="text-muted">@assignment.DueDate.ToString("hh:mm tt")</small>
+                                            @if (assignment.DueDate < DateTime.Now)
+                                            {
+                                                <br><span class="badge bg-danger">Overdue</span>
+                                            }
+                                            else if (assignment.DueDate <= DateTime.Now.AddDays(1))
+                                            {
+                                                <br><span class="badge bg-warning">Due Soon</span>
+                                            }
+                                        </div>
                                     </td>
                                     <td>
                                         <span class="badge bg-primary">
-                                            @quiz.ParticipantCount
-                                            @if (quiz.ParticipantCount == 1)
+                                            @assignment.ParticipantCount
+                                            @if (assignment.ParticipantCount == 1)
                                             {<text>student</text> }
                                         else
                                         { <text>students</text>}
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="badge bg-success">@quiz.CompletedAttempts</span>
-                                        @* REMOVED: Pending Attempts badge *@
+                                        <span class="badge bg-info">@assignment.TotalSubmissions</span>
+                                        @if (assignment.GradedSubmissions > 0)
+                                        {
+                                            <br><span class="badge bg-success">@assignment.GradedSubmissions graded</span>
+                                        }
                                     </td>
                                     <td>
-                                        @if (quiz.AverageScore.HasValue && quiz.ParticipantCount > 0)
+                                        @if (assignment.AverageScore.HasValue && assignment.GradedSubmissions > 0)
                                         {
-                                            var scoreClass = quiz.AverageScore >= 70 ? "success" : quiz.AverageScore >= 50 ? "warning" : "danger";
-                                            <span class="badge bg-@scoreClass">@quiz.AverageScore.Value.ToString("F1")%</span>
+                                            var scoreClass = assignment.AverageScore >= 70 ? "success" : assignment.AverageScore >= 50 ? "warning" : "danger";
+                                            <span class="badge bg-@scoreClass">@assignment.AverageScore.Value.ToString("F1")%</span>
                                         }
                                         else
                                         {
-                                            <span class="text-muted">No attempts</span>
+                                            <span class="text-muted">No grades</span>
                                         }
                                     </td>
-                                    @* REMOVED: Last Activity column *@
                                     <td>
                                         <div class="btn-group btn-group-sm" role="group">
-                                            <a href="@Url.Action("QuizSubmissions", "Teacher", new { id = quiz.Id })"
-                                               class="btn btn-outline-primary btn-sm"
-                                               title="View Submissions">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            @* Only show edit/delete for current teacher's quizzes *@
-                                            @if (quiz.TeacherName == ViewBag.CurrentTeacherName)
+                                            @* Only show detailed view for assignments from any teacher *@
+                                            @if (assignment.TeacherName == ViewBag.CurrentTeacherName)
                                             {
-                                                <a href="@Url.Action("QuizEdit", "Teacher", new { id = quiz.Id })"
+                                                <a href="@Url.Action("AssignmentDetails", "Teacher", new { id = assignment.Id })"
+                                                   class="btn btn-outline-primary btn-sm"
+                                                   title="View Details">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="@Url.Action("EditAssignment", "Teacher", new { id = assignment.Id })"
                                                    class="btn btn-outline-warning btn-sm"
-                                                   title="Edit Quiz">
+                                                   title="Edit Assignment">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-outline-secondary btn-sm" disabled title="Not your assignment">
+                                                    <i class="fas fa-lock"></i>
+                                                </button>
                                             }
                                         </div>
                                     </td>
@@ -174,17 +185,16 @@
             else
             {
                 <div class="text-center py-5">
-                    <i class="fas fa-quiz fa-3x text-muted mb-3"></i>
-                    <h5 class="text-muted">No Active Quizzes Found</h5>
-                    <p class="text-muted">There are currently no active quizzes in the system.</p>
-                    <a href="@Url.Action("QuizCreate", "Teacher")" class="btn btn-primary">
-                        <i class="fas fa-plus me-1"></i> Create Your First Quiz
+                    <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No Active Assignments Found</h5>
+                    <p class="text-muted">There are currently no active assignments in the system.</p>
+                    <a href="@Url.Action("AssignmentManagement", "Teacher")" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i> Create Your First Assignment
                     </a>
                 </div>
             }
         </div>
     </div>
-
 </div>
 
 <style>
