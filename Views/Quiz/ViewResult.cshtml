@@ -23,24 +23,35 @@
         <div class="text-center mb-4">
             <h2 class="card-title">Quiz Result: @Model.Quiz.Title</h2>
 
-            @if (Model.GradingStatus == "AutoGraded")
+            @* FIXED: Show results for both AutoGraded and Graded statuses *@
+            @if (Model.GradingStatus == "AutoGraded" || Model.GradingStatus == "Graded")
             {
                 <div class="result-display my-4">
                     <div class="display-4 @(Model.PercentageScore >= 70 ? "text-success" : Model.PercentageScore >= 50 ? "text-warning" : "text-danger")">
-                        @Model.TotalScore / @Model.MaximumScore
+                        @(Model.TotalScore ?? 0) / @(Model.MaximumScore ?? 0)
                     </div>
                     <div class="progress mt-3" style="height: 20px;">
                         <div class="progress-bar @(Model.PercentageScore >= 70 ? "bg-success" : Model.PercentageScore >= 50 ? "bg-warning" : "bg-danger")"
-                             role="progressbar" style="width: @Model.PercentageScore%">
+                             role="progressbar" style="width: @(Model.PercentageScore ?? 0)%">
                         </div>
                     </div>
-                    <p class="mt-2">@Model.PercentageScore.Value.ToString("F1")% Correct</p>
+                    <p class="mt-2">@((Model.PercentageScore ?? 0).ToString("F1"))% Correct</p>
+
+                    @* Show additional info for manually graded quizzes *@
+                    @if (Model.GradingStatus == "Graded")
+                    {
+                        <div class="alert alert-success mt-3">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong>Graded by Teacher</strong> - Review your answers below for detailed feedback
+                        </div>
+                    }
                 </div>
             }
             else
             {
+                @* Only show "Under Review" for PendingReview status *@
                 <div class="alert alert-info">
-                    <h5>Quiz Under Review</h5>
+                    <h5><i class="fas fa-clock me-2"></i>Quiz Under Review</h5>
                     <p>Your quiz contains short answer questions that require manual grading. You will be notified when results are available.</p>
                 </div>
             }
@@ -57,7 +68,7 @@
             </div>
         </div>
 
-        <!-- Detailed Question Review Section -->
+        @* Detailed Question Review Section *@
         if (Model.Responses != null && Model.Responses.Any())
         {
             <div class="question-review-section mt-5">
@@ -68,18 +79,16 @@
 
                 @foreach (var response in Model.Responses.OrderBy(r => r.Question.QuestionOrder))
                 {
-                   
-                        // FIXED: Correct logic to determine if it's multiple choice
-                        bool isMultipleChoice = response.Question.QuestionType == "MultipleChoice" ||
-                                               (!string.IsNullOrEmpty(response.Question.OptionA) &&
-                                                !string.IsNullOrEmpty(response.Question.OptionB) &&
-                                                !string.IsNullOrEmpty(response.Question.OptionC) &&
-                                                !string.IsNullOrEmpty(response.Question.OptionD));
-                    
+                    // Determine if it's multiple choice with proper null checking
+                    bool isMultipleChoice = response.Question.QuestionType == "MultipleChoice" ||
+                        (!string.IsNullOrEmpty(response.Question.OptionA) &&
+                        !string.IsNullOrEmpty(response.Question.OptionB) &&
+                        !string.IsNullOrEmpty(response.Question.OptionC) &&
+                        !string.IsNullOrEmpty(response.Question.OptionD));
 
                     <div class="question-review-card mb-4 p-4 border rounded @(response.IsCorrect == true ? "border-success" : response.IsCorrect == false ? "border-danger" : "border-warning")">
 
-                        <!-- Question Header -->
+                        @* Question Header *@
                         <div class="question-header mb-3 d-flex justify-content-between align-items-start">
                             <h5 class="question-number mb-0">
                                 Question @response.Question.QuestionOrder
@@ -88,6 +97,7 @@
                                 </span>
                             </h5>
 
+                            @* Question Status Badge *@
                             @if (isMultipleChoice)
                             {
                                 @* Multiple choice questions are always auto-graded *@
@@ -101,32 +111,37 @@
                             }
                             else
                             {
-                                @* Only short answer questions can be pending review *@
-                                if (response.IsCorrect.HasValue)
+                                @* Short answer questions can be pending review or graded *@
+                                if (response.IsCorrect.HasValue || response.PointsAwarded.HasValue)
                                 {
-                                    <span class="badge @(response.IsCorrect.Value ? "bg-success" : "bg-danger") fs-6">
-                                        @(response.IsCorrect.Value ? "Correct" : "Incorrect")
+                                    <span class="badge @(response.PointsAwarded > 0 ? "bg-success" : "bg-danger") fs-6">
                                         @if (response.PointsAwarded.HasValue)
                                         {
-                                            <span>(@response.PointsAwarded/1 point)</span>
+                                            <span>@response.PointsAwarded point(s)</span>
+                                        }
+                                        else
+                                        {
+                                            <span>@(response.IsCorrect == true ? "Correct" : "Incorrect")</span>
                                         }
                                     </span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-warning text-dark fs-6">Pending Review</span>
+                                    <span class="badge bg-warning text-dark fs-6">
+                                        <i class="fas fa-clock me-1"></i>Pending Review
+                                    </span>
                                 }
                             }
                         </div>
 
-                        <!-- Question Text -->
+                        @* Question Text *@
                         <div class="question-text mb-4">
                             <p class="lead fw-medium">@response.Question.QuestionText</p>
                         </div>
 
                         @if (isMultipleChoice)
                         {
-                            <!-- Multiple Choice Question -->
+                            @* Multiple Choice Question Display *@
                             <div class="options-review mb-3">
                                 <h6 class="fw-bold mb-3">Answer Options:</h6>
 
@@ -203,7 +218,7 @@
                                 </div>
                             </div>
 
-                            <!-- Answer Summary for Multiple Choice -->
+                            @* Answer Summary for Multiple Choice *@
                             <div class="answer-summary">
                                 <div class="row">
                                     <div class="col-md-6">
@@ -225,7 +240,7 @@
                         }
                         else
                         {
-                            <!-- Short Answer Question -->
+                            @* Short Answer Question Display *@
                             <div class="short-answer-review">
                                 <div class="row">
                                     <div class="col-md-6">
@@ -253,13 +268,27 @@
                                     }
                                 </div>
 
+                                @* Teacher Feedback Section *@
                                 @if (!string.IsNullOrEmpty(response.TeacherFeedback))
                                 {
                                     <div class="mt-3">
-                                        <h6 class="fw-bold">Teacher Feedback:</h6>
+                                        <h6 class="fw-bold text-primary">
+                                            <i class="fas fa-comment-dots me-2"></i>Teacher Feedback:
+                                        </h6>
                                         <div class="p-3 border rounded bg-info-subtle">
                                             @response.TeacherFeedback
                                         </div>
+                                    </div>
+                                }
+
+                                @* Show grading info if available *@
+                                @if (response.GradedDate.HasValue)
+                                {
+                                    <div class="mt-2">
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar-check me-1"></i>
+                                            Graded on @response.GradedDate.Value.ToString("MMM dd, yyyy 'at' hh:mm tt")
+                                        </small>
                                     </div>
                                 }
                             </div>
@@ -269,12 +298,14 @@
             </div>
         }
 
+        @* Action Buttons *@
         <div class="text-center mt-5">
             <a href="@Url.Action("Index", "Quiz")" class="btn btn-primary btn-lg">
                 <i class="fas fa-arrow-left"></i> Back to Quiz List
             </a>
 
-            @if (Model.GradingStatus == "AutoGraded")
+            @* FIXED: Show print button for both AutoGraded and manually Graded quizzes *@
+            @if (Model.GradingStatus == "AutoGraded" || Model.GradingStatus == "Graded")
             {
                 <button class="btn btn-outline-secondary btn-lg ms-3" onclick="window.print()">
                     <i class="fas fa-print"></i> Print Results
@@ -288,22 +319,27 @@
     .question-review-card {
         background: #ffffff;
         transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
 
     .question-review-card:hover {
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
     }
 
     .border-success {
         border-color: #198754 !important;
+        border-width: 2px !important;
     }
 
     .border-danger {
         border-color: #dc3545 !important;
+        border-width: 2px !important;
     }
 
     .border-warning {
         border-color: #ffc107 !important;
+        border-width: 2px !important;
     }
 
     .bg-success-subtle {
@@ -322,6 +358,10 @@
         transition: all 0.2s ease;
     }
 
+    .option-item:hover {
+        background-color: rgba(0,0,0,0.02) !important;
+    }
+
     .summary-item {
         padding: 10px 0;
     }
@@ -337,6 +377,26 @@
 
     .progress-bar {
         border-radius: 10px;
+        transition: width 0.6s ease;
+    }
+
+    .result-display {
+        padding: 2rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 15px;
+        border: 1px solid #dee2e6;
+    }
+
+    .dashboard-card {
+        background: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        padding: 2rem;
+    }
+
+    .quiz-summary {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border: 1px solid #dee2e6;
     }
 
     media print {
@@ -347,6 +407,31 @@
         .question-review-card {
             break-inside: avoid;
             margin-bottom: 20px;
+            box-shadow: none !important;
+            border: 1px solid #000 !important;
+        }
+
+        .dashboard-card {
+            box-shadow: none !important;
+            padding: 1rem !important;
+        }
+
+        .alert {
+            break-inside: avoid;
+        }
+    }
+
+    media (max-width: 768px) {
+        .result-display {
+            padding: 1rem;
+        }
+
+        .display-4 {
+            font-size: 2rem;
+        }
+
+        .question-review-card {
+            padding: 1rem !important;
         }
     }
 </style>
