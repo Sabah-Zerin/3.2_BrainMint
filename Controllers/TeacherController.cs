@@ -854,13 +854,139 @@ namespace Brain_Mint.Controllers
         }
         #endregion
 
-        #region Other Actions
+
+
+        #region Participation
+
         public ActionResult QuizParticipation()
         {
             if (Session["UserRole"]?.ToString() != "Teacher")
                 return RedirectToAction("Login", "Account");
-            return View();
+
+            try
+            {
+                // Get all active quizzes with basic info first
+                var allQuizzes = db.Quizzes
+                    .Include(q => q.CreatedBy)
+                    .Include(q => q.Questions)
+                    .Where(q => q.Status == "Active")
+                    .OrderByDescending(q => q.CreatedDate)
+                    .ToList();
+
+                // Extract quiz IDs as primitive types for Entity Framework
+                var quizIds = allQuizzes.Select(q => q.Id).ToList();
+
+                // Get all quiz attempts separately using primitive quiz IDs
+                var allAttempts = db.QuizAttempts
+                    .Include(qa => qa.Student)
+                    .Where(qa => quizIds.Contains(qa.QuizId))
+                    .ToList();
+
+                // Create the participation info for active quizzes
+                var activeQuizzes = new List<QuizParticipationInfo>();
+
+                foreach (var quiz in allQuizzes)
+                {
+                    // Get attempts for this specific quiz
+                    var quizAttempts = allAttempts.Where(qa => qa.QuizId == quiz.Id).ToList();
+
+                    // Calculate statistics
+                    var completedAttempts = quizAttempts.Where(qa => qa.Status == "Completed").ToList();
+                    var uniqueParticipants = completedAttempts.Select(qa => qa.StudentId).Distinct().ToList();
+
+                    // Calculate average score from completed attempts with percentage scores
+                    var scoresForAverage = completedAttempts
+                        .Where(qa => qa.PercentageScore.HasValue)
+                        .Select(qa => qa.PercentageScore.Value)
+                        .ToList();
+
+                    var quizInfo = new QuizParticipationInfo
+                    {
+                        Id = quiz.Id,
+                        Title = quiz.Title,
+                        Description = quiz.Description,
+                        Status = quiz.Status,
+                        CreatedDate = quiz.CreatedDate,
+                        TotalQuestions = quiz.Questions?.Count ?? 0,
+                        TimeLimit = quiz.TimeLimit,
+
+                        // Calculate participation statistics using the filtered attempts
+                        ParticipantCount = uniqueParticipants.Count,
+                        CompletedAttempts = completedAttempts.Count,
+
+                        // Calculate average score
+                        AverageScore = scoresForAverage.Any() ? scoresForAverage.Average() : (decimal?)null,
+
+                        // Add teacher name
+                        TeacherName = quiz.CreatedBy?.Name ?? "Unknown Teacher"
+
+                        // REMOVED: LastActivity, PendingAttempts - not needed anymore
+                    };
+
+                    activeQuizzes.Add(quizInfo);
+                }
+
+                // Calculate overall totals using the separate attempts query
+                var totalQuizzes = allQuizzes.Count;
+                var completedAttemptsForTotal = allAttempts.Where(qa => qa.Status == "Completed").ToList();
+                var totalParticipants = completedAttemptsForTotal.Select(qa => qa.StudentId).Distinct().Count();
+
+                // Calculate overall average score
+                var allCompletedScores = completedAttemptsForTotal
+                    .Where(qa => qa.PercentageScore.HasValue)
+                    .Select(qa => qa.PercentageScore.Value)
+                    .ToList();
+
+                // Create the view model
+                var viewModel = new QuizParticipationViewModel
+                {
+                    ActiveQuizzes = activeQuizzes,
+                    // REMOVED: RecentSessions - not needed anymore
+                    TotalQuizzes = totalQuizzes,
+                    TotalParticipants = totalParticipants,
+                    QuickStats = new QuizQuickStats
+                    {
+                        TotalQuizzesCreated = totalQuizzes,
+                        TotalAttempts = completedAttemptsForTotal.Count,
+                        OverallAverageScore = allCompletedScores.Any() ? allCompletedScores.Average() : 0,
+                        ActiveQuizzesCount = activeQuizzes.Count,
+                        TotalUniqueParticipants = totalParticipants
+                    }
+                };
+
+                // Pass current teacher's name to the view
+                int currentTeacherId = Convert.ToInt32(Session["UserId"]);
+                var currentTeacher = db.Users.FirstOrDefault(u => u.Id == currentTeacherId);
+                ViewBag.CurrentTeacherName = currentTeacher?.Name ?? "Unknown";
+
+                // Debug information - you can remove this after confirming it works
+                ViewBag.DebugInfo = $"Total Quizzes: {totalQuizzes}, Total Attempts: {allAttempts.Count}, " +
+                                   $"Completed Attempts: {completedAttemptsForTotal.Count}, " +
+                                   $"Total Participants: {totalParticipants}, Quiz IDs: [{string.Join(", ", quizIds)}]";
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                // Log the error and return a safe fallback
+                ViewBag.Error = "An error occurred while loading quiz participation data: " + ex.Message;
+
+                // Return empty view model to prevent null reference
+                var emptyViewModel = new QuizParticipationViewModel
+                {
+                    ActiveQuizzes = new List<QuizParticipationInfo>(),
+                    TotalQuizzes = 0,
+                    TotalParticipants = 0,
+                    QuickStats = new QuizQuickStats()
+                };
+
+                return View(emptyViewModel);
+            }
         }
+
+
+
+
 
         public ActionResult ClassPerformance()
         {

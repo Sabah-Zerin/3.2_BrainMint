@@ -182,16 +182,22 @@
     <Compile Include="Migrations\202509172048411_AddGradingInfoToQuizResponse.Designer.cs">
       <DependentUpon>202509172048411_AddGradingInfoToQuizResponse.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202509190221087_AddMaxPointsToQuizQuestions.cs" />
+    <Compile Include="Migrations\202509190221087_AddMaxPointsToQuizQuestions.Designer.cs">
+      <DependentUpon>202509190221087_AddMaxPointsToQuizQuestions.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AssgViewModels.cs" />
     <Compile Include="Models\Assignment.cs" />
     <Compile Include="Models\AssignmentModels.cs" />
     <Compile Include="Models\DbContext.cs" />
     <Compile Include="Models\Login-log-model.cs" />
+    <Compile Include="Models\QuizParticipationViewModel.cs" />
     <Compile Include="Models\Question.cs" />
     <Compile Include="Models\Quiz.cs" />
     <Compile Include="Models\QuizAttempt.cs" />
     <Compile Include="Models\QuizResponse.cs" />
+    <Compile Include="Models\QuizStatistics.cs" />
     <Compile Include="Models\QuizViewModels.cs" />
     <Compile Include="Models\StudentModels.cs" />
     <Compile Include="Models\User.cs" />
@@ -339,6 +345,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202509172048411_AddGradingInfoToQuizResponse.resx">
       <DependentUpon>202509172048411_AddGradingInfoToQuizResponse.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202509190221087_AddMaxPointsToQuizQuestions.resx">
+      <DependentUpon>202509190221087_AddMaxPointsToQuizQuestions.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

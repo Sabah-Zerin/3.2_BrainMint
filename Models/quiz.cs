@@ -1,9 +1,11 @@
-﻿using System;
+﻿//  Quiz.cs MODEL
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+
 
 namespace Brain_Mint.Models
 {
@@ -47,6 +49,9 @@ namespace Brain_Mint.Models
         public virtual User CreatedBy { get; set; }
 
         public virtual ICollection<QuizQuestion> Questions { get; set; }
+
+        // ADD THIS - Missing navigation property
+        public virtual ICollection<QuizAttempt> QuizAttempts { get; set; }
     }
 
     [Table("QuizQuestions")]
@@ -86,6 +91,10 @@ namespace Brain_Mint.Models
         // Add question type field
         [StringLength(20)]
         public string QuestionType { get; set; } = "MultipleChoice"; // MultipleChoice or ShortAnswer
+
+        // ADD THIS - Missing MaxPoints property
+        [Required]
+        public int MaxPoints { get; set; } = 1;
 
         // Navigation property
         [ForeignKey("QuizId")]
