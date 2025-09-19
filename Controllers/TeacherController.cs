@@ -1108,6 +1108,155 @@ namespace Brain_Mint.Controllers
         }
 
 
+        // Add these methods to your TeacherController.cs class
+
+        // Add these methods to your TeacherController.cs class (before the closing brace)
+
+        #region Profile Management
+        public ActionResult Profile()
+        {
+            if (Session["UserRole"]?.ToString() != "Teacher")
+                return RedirectToAction("Login", "Account");
+
+            int teacherId = Convert.ToInt32(Session["UserId"]);
+            var teacher = db.Users.Find(teacherId);
+
+            if (teacher == null)
+            {
+                TempData["Error"] = "Teacher profile not found.";
+                return RedirectToAction("TeacherDashboard");
+            }
+
+            return View(teacher);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Profile(User model)
+        {
+            if (Session["UserRole"]?.ToString() != "Teacher")
+                return RedirectToAction("Login", "Account");
+
+            int teacherId = Convert.ToInt32(Session["UserId"]);
+            var teacher = db.Users.Find(teacherId);
+
+            if (teacher == null)
+            {
+                TempData["Error"] = "Teacher profile not found.";
+                return RedirectToAction("TeacherDashboard");
+            }
+
+            // Only allow updating certain fields
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    teacher.Name = model.Name;
+                    teacher.Email = model.Email;
+
+                    // Update session values
+                    Session["UserName"] = model.Name;
+                    Session["UserEmail"] = model.Email;
+
+                    db.SaveChanges();
+
+                    TempData["Success"] = "Profile updated successfully!";
+                    return RedirectToAction("Profile");
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "Error updating profile: " + ex.Message);
+                }
+            }
+
+            return View(teacher);
+        }
+        #endregion
+
+        #region User Management
+        public ActionResult UserManagement(string search = "", string role = "")
+        {
+            if (Session["UserRole"]?.ToString() != "Teacher")
+                return RedirectToAction("Login", "Account");
+
+            var allUsers = db.Users.AsQueryable();
+
+            // Filter by search term (name or email)
+            if (!string.IsNullOrEmpty(search))
+            {
+                allUsers = allUsers.Where(u => u.Name.Contains(search) || u.Email.Contains(search));
+            }
+
+            // Filter by role
+            if (!string.IsNullOrEmpty(role) && role != "All")
+            {
+                allUsers = allUsers.Where(u => u.Role == role);
+            }
+
+            var users = allUsers.OrderBy(u => u.Role).ThenBy(u => u.Name).ToList();
+
+            // Separate teachers and students
+            var teachers = users.Where(u => u.Role == "Teacher").ToList();
+            var students = users.Where(u => u.Role == "Student").ToList();
+
+            var viewModel = new UserManagementViewModel
+            {
+                Teachers = teachers,
+                Students = students,
+                SearchTerm = search,
+                SelectedRole = role,
+                TotalTeachers = teachers.Count,
+                TotalStudents = students.Count
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        public JsonResult SearchUsers(string search, string role)
+        {
+            if (Session["UserRole"]?.ToString() != "Teacher")
+                return Json(new { success = false, message = "Unauthorized" });
+
+            try
+            {
+                var allUsers = db.Users.AsQueryable();
+
+                // Filter by search term
+                if (!string.IsNullOrEmpty(search))
+                {
+                    allUsers = allUsers.Where(u => u.Name.Contains(search) || u.Email.Contains(search));
+                }
+
+                // Filter by role
+                if (!string.IsNullOrEmpty(role) && role != "All")
+                {
+                    allUsers = allUsers.Where(u => u.Role == role);
+                }
+
+                var users = allUsers.OrderBy(u => u.Role).ThenBy(u => u.Name)
+                    .Select(u => new
+                    {
+                        Id = u.Id,
+                        Name = u.Name,
+                        Email = u.Email,
+                        Role = u.Role
+                    }).ToList();
+
+                return Json(new { success = true, users = users });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+        #endregion
+
+
+
+
+
+
         #endregion
 
         protected override void Dispose(bool disposing)

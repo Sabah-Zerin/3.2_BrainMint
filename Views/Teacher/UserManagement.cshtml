@@ -1,0 +1,301 @@
+@model Brain_Mint.Models.UserManagementViewModel
+@{
+    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+    ViewBag.Title = "User Management";
+}
+
+<div class="dashboard-card">
+    <h2 class="card-title">
+        <i class="fas fa-users me-2 text-mint"></i>User Management
+        <span class="badge bg-mint">@(Model.TotalTeachers + Model.TotalStudents) Total Users</span>
+    </h2>
+
+    <!-- Search and Filter Section -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="input-group">
+                <span class="input-group-text bg-mint text-white">
+                    <i class="fas fa-search"></i>
+                </span>
+                <input type="text" id="searchInput" class="form-control form-control-lg"
+                       placeholder="Search by name or email..." value="@Model.SearchTerm" />
+                <button class="btn btn-mint" type="button" onclick="searchUsers()">
+                    <i class="fas fa-search me-2"></i>Search
+                </button>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <select id="roleFilter" class="form-select form-select-lg" onchange="searchUsers()">
+                <option value="All" @(Model.SelectedRole == "All" ? "selected" : "")>All Users</option>
+                <option value="Teacher" @(Model.SelectedRole == "Teacher" ? "selected" : "")>Teachers Only</option>
+                <option value="Student" @(Model.SelectedRole == "Student" ? "selected" : "")>Students Only</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card border-mint">
+                <div class="card-body text-center">
+                    <i class="fas fa-chalkboard-teacher fa-3x text-mint mb-3"></i>
+                    <h3 class="text-mint" id="teacherCount">@Model.TotalTeachers</h3>
+                    <p class="mb-0">Total Teachers</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-mint">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-graduate fa-3x text-mint mb-3"></i>
+                    <h3 class="text-mint" id="studentCount">@Model.TotalStudents</h3>
+                    <p class="mb-0">Total Students</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teachers Table -->
+    <div class="mb-5" id="teachersSection">
+        <h3 class="mb-3">
+            <i class="fas fa-chalkboard-teacher me-2 text-mint"></i>Teachers
+            <span class="badge bg-success" id="teacherBadge">@Model.TotalTeachers</span>
+        </h3>
+
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th><i class="fas fa-id-badge me-2"></i>ID</th>
+                        <th><i class="fas fa-user me-2"></i>Name</th>
+                        <th><i class="fas fa-envelope me-2"></i>Email</th>
+                        <th><i class="fas fa-user-tag me-2"></i>Role</th>
+                    </tr>
+                </thead>
+                <tbody id="teachersTableBody">
+                    @if (Model.Teachers.Any())
+                    {
+                        foreach (var teacher in Model.Teachers)
+                        {
+                            <tr>
+                                <td><span class="badge bg-mint">#@teacher.Id</span></td>
+                                <td>
+                                    <i class="fas fa-user-circle me-2 text-mint"></i>@teacher.Name
+                                </td>
+                                <td>
+                                    <i class="fas fa-envelope me-2 text-muted"></i>@teacher.Email
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-chalkboard-teacher me-1"></i>@teacher.Role
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">
+                                <i class="fas fa-search me-2"></i>No teachers found
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Students Table -->
+    <div id="studentsSection">
+        <h3 class="mb-3">
+            <i class="fas fa-user-graduate me-2 text-mint"></i>Students
+            <span class="badge bg-primary" id="studentBadge">@Model.TotalStudents</span>
+        </h3>
+
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th><i class="fas fa-id-badge me-2"></i>ID</th>
+                        <th><i class="fas fa-user me-2"></i>Name</th>
+                        <th><i class="fas fa-envelope me-2"></i>Email</th>
+                        <th><i class="fas fa-user-tag me-2"></i>Role</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTableBody">
+                    @if (Model.Students.Any())
+                    {
+                        foreach (var student in Model.Students)
+                        {
+                            <tr>
+                                <td><span class="badge bg-mint">#@student.Id</span></td>
+                                <td>
+                                    <i class="fas fa-user-circle me-2 text-mint"></i>@student.Name
+                                </td>
+                                <td>
+                                    <i class="fas fa-envelope me-2 text-muted"></i>@student.Email
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary">
+                                        <i class="fas fa-user-graduate me-1"></i>@student.Role
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">
+                                <i class="fas fa-search me-2"></i>No students found
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Loading indicator -->
+    <div id="loadingIndicator" class="text-center" style="display: none;">
+        <div class="spinner-border text-mint" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Searching users...</p>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        function searchUsers() {
+            var search = $('#searchInput').val();
+            var role = $('#roleFilter').val();
+
+            // Show loading indicator
+            $('#loadingIndicator').show();
+            $('#teachersSection, #studentsSection').hide();
+
+            $.ajax({
+                url: '@Url.Action("SearchUsers", "Teacher")',
+                type: 'POST',
+                data: {
+                    search: search,
+                    role: role
+                },
+                success: function(response) {
+                    if (response.success) {
+                        updateUserTables(response.users);
+                    } else {
+                        alert('Error searching users: ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('Error occurred while searching users.');
+                },
+                complete: function() {
+                    // Hide loading indicator
+                    $('#loadingIndicator').hide();
+                    $('#teachersSection, #studentsSection').show();
+                }
+            });
+        }
+
+        function updateUserTables(users) {
+            var teachers = users.filter(u => u.Role === 'Teacher');
+            var students = users.filter(u => u.Role === 'Student');
+
+            // Update teachers table
+            var teachersBody = $('#teachersTableBody');
+            teachersBody.empty();
+
+            if (teachers.length > 0) {
+                teachers.forEach(function(teacher) {
+                    var row = `
+                        <tr>
+                            <td><span class="badge bg-mint">#${teacher.Id}</span></td>
+                            <td>
+                                <i class="fas fa-user-circle me-2 text-mint"></i>${teacher.Name}
+                            </td>
+                            <td>
+                                <i class="fas fa-envelope me-2 text-muted"></i>${teacher.Email}
+                            </td>
+                            <td>
+                                <span class="badge bg-success">
+                                    <i class="fas fa-chalkboard-teacher me-1"></i>${teacher.Role}
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+                    teachersBody.append(row);
+                });
+            } else {
+                teachersBody.append(`
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">
+                            <i class="fas fa-search me-2"></i>No teachers found
+                        </td>
+                    </tr>
+                `);
+            }
+
+            // Update students table
+            var studentsBody = $('#studentsTableBody');
+            studentsBody.empty();
+
+            if (students.length > 0) {
+                students.forEach(function(student) {
+                    var row = `
+                        <tr>
+                            <td><span class="badge bg-mint">#${student.Id}</span></td>
+                            <td>
+                                <i class="fas fa-user-circle me-2 text-mint"></i>${student.Name}
+                            </td>
+                            <td>
+                                <i class="fas fa-envelope me-2 text-muted"></i>${student.Email}
+                            </td>
+                            <td>
+                                <span class="badge bg-primary">
+                                    <i class="fas fa-user-graduate me-1"></i>${student.Role}
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+                    studentsBody.append(row);
+                });
+            } else {
+                studentsBody.append(`
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">
+                            <i class="fas fa-search me-2"></i>No students found
+                        </td>
+                    </tr>
+                `);
+            }
+
+            // Update counts
+            $('#teacherCount').text(teachers.length);
+            $('#studentCount').text(students.length);
+            $('#teacherBadge').text(teachers.length);
+            $('#studentBadge').text(students.length);
+        }
+
+        // Search on Enter key press
+        $('#searchInput').on('keypress', function(e) {
+            if (e.which === 13) { // Enter key
+                searchUsers();
+            }
+        });
+
+        // Auto-search with delay when typing
+        let searchTimeout;
+        $('#searchInput').on('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(function() {
+                if ($('#searchInput').val().length >= 2 || $('#searchInput').val().length === 0) {
+                    searchUsers();
+                }
+            }, 500); // 500ms delay
+        });
+    </script>
+}

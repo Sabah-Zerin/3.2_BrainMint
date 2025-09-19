@@ -202,6 +202,7 @@
     <Compile Include="Models\QuizViewModels.cs" />
     <Compile Include="Models\StudentModels.cs" />
     <Compile Include="Models\User.cs" />
+    <Compile Include="Models\UserManagementViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -290,6 +291,8 @@
     <Content Include="Views\Teacher\QuizSubmissions.cshtml" />
     <Content Include="Views\Teacher\ReviewQuizAttempt.cshtml" />
     <Content Include="Views\Teacher\AssignmentParticipation.cshtml" />
+    <Content Include="Views\Teacher\UserManagement.cshtml" />
+    <Content Include="Views\Teacher\Profile.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\App_LocalResources\" />

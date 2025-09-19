@@ -1,0 +1,101 @@
+@model Brain_Mint.Models.User
+@{
+    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+    ViewBag.Title = "Teacher Profile";
+}
+
+<div class="dashboard-card">
+    <h2 class="card-title">
+        <i class="fas fa-user me-2 text-mint"></i>Teacher Profile
+    </h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+        </div>
+    }
+
+    @using (Html.BeginForm("Profile", "Teacher", FormMethod.Post, new { @class = "mt-4" }))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="form-group">
+                    <label class="form-label fw-bold">
+                        <i class="fas fa-user me-2 text-mint"></i>Full Name
+                    </label>
+                    @Html.TextBoxFor(m => m.Name, new { @class = "form-control form-control-lg", @placeholder = "Enter your full name" })
+                    @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="form-group">
+                    <label class="form-label fw-bold">
+                        <i class="fas fa-envelope me-2 text-mint"></i>Email Address
+                    </label>
+                    @Html.TextBoxFor(m => m.Email, new { @class = "form-control form-control-lg", @placeholder = "Enter your email address" })
+                    @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="form-group">
+                    <label class="form-label fw-bold">
+                        <i class="fas fa-id-badge me-2 text-mint"></i>User ID
+                    </label>
+                    <input type="text" class="form-control form-control-lg" value="@Model.Id" readonly />
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="form-group">
+                    <label class="form-label fw-bold">
+                        <i class="fas fa-user-tag me-2 text-mint"></i>Role
+                    </label>
+                    <input type="text" class="form-control form-control-lg" value="@Model.Role" readonly />
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                
+                <a href="@Url.Action("TeacherDashboard", "Teacher")" class="btn btn-outline-secondary btn-lg">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            // Form validation
+            $('form').on('submit', function (e) {
+                var name = $('#Name').val().trim();
+                var email = $('#Email').val().trim();
+
+                if (name === '' || email === '') {
+                    e.preventDefault();
+                    alert('Please fill in all required fields.');
+                    return false;
+                }
+
+                
+            });
+        });
+    </script>
+}
