@@ -3,37 +3,75 @@
     ViewBag.Title = "Student Dashboard";
 }
 
-<h2>Student Dashboard</h2>
-<div class="alert alert-info">
-    Welcome to your student dashboard! Here you can manage your quizzes, assignments, and track your performance.
+<div class="container mt-4">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold text-primary">Student Dashboard</h2>
+        <p class="text-muted">Manage quizzes, assignments, and track your performance with ease.</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- Quizzes -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-lg h-100 dashboard-card bg-primary text-white">
+                <div class="card-body d-flex flex-column justify-content-between">
+                    <div>
+                        <h5 class="card-title fw-bold">Quizzes</h5>
+                        <p class="card-text">View available quizzes and track your participation.</p>
+                    </div>
+                    <a href="@Url.Action("QuizParticipation", "Student")"
+                       class="btn btn-light fw-semibold mt-3">Go to Quizzes</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assignments -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-lg h-100 dashboard-card bg-success text-white">
+                <div class="card-body d-flex flex-column justify-content-between">
+                    <div>
+                        <h5 class="card-title fw-bold">Assignments</h5>
+                        <p class="card-text">Submit assignments and keep track of deadlines.</p>
+                    </div>
+                    <a href="@Url.Action("AssignmentParticipation", "Student")"
+                       class="btn btn-light fw-semibold mt-3">Go to Assignments</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-lg h-100 dashboard-card bg-info text-white">
+                <div class="card-body d-flex flex-column justify-content-between">
+                    <div>
+                        <h5 class="card-title fw-bold">Profile</h5>
+                        <p class="card-text">View and update your profile information.</p>
+                    </div>
+                    <a href="@Url.Action("Profile", "Student")"
+                       class="btn btn-light fw-semibold mt-3">View Profile</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="row">
-    <div class="col-md-4">
-        <div class="card text-white bg-primary mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Quizzes</h5>
-                <p class="card-text">View available quizzes and track your participation</p>
-                <a href="@Url.Action("QuizParticipation", "Student")" class="btn btn-light">Go to Quizzes</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card text-white bg-success mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Assignments</h5>
-                <p class="card-text">Submit assignments and track deadlines</p>
-                <a href="@Url.Action("AssignmentParticipation", "Student")" class="btn btn-light">Go to Assignments</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card text-white bg-info mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Profile</h5>
-                <p class="card-text">View and update your profile information</p>
-                <a href="@Url.Action("Profile", "Student")" class="btn btn-light">View Profile</a>
-            </div>
-        </div>
-    </div>
-</div>
+<style>
+    .dashboard-card {
+        border-radius: 1rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .dashboard-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.2);
+        }
+
+        .dashboard-card .btn {
+            border-radius: 50px;
+            transition: background 0.2s ease;
+        }
+
+            .dashboard-card .btn:hover {
+                background: #f8f9fa;
+                color: #000;
+            }
+</style>
