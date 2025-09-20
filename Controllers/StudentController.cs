@@ -227,30 +227,6 @@ namespace Brain_Mint.Controllers
             return View(submission);
         }
 
-        // Performance
-        public ActionResult Performance()
-        {
-            if (Session["UserRole"]?.ToString() != "Student")
-                return RedirectToAction("Login", "Account");
-
-            // Sample performance data - replace with database logic
-            var performance = new StudentPerformance
-            {
-                QuizScores = new List<ScoreRecord>
-                {
-                    new ScoreRecord { Name = "Mathematics Quiz", Score = 85 },
-                    new ScoreRecord { Name = "Science Quiz", Score = 92 }
-                },
-                AssignmentScores = new List<ScoreRecord>
-                {
-                    new ScoreRecord { Name = "Math Homework", Score = 90 },
-                    new ScoreRecord { Name = "Science Report", Score = 88 }
-                }
-            };
-
-            ViewBag.Title = "Performance";
-            return View(performance);
-        }
 
         // Profile
         public ActionResult Profile()
@@ -265,33 +241,256 @@ namespace Brain_Mint.Controllers
                 return RedirectToAction("Login", "Account");
 
             ViewBag.Title = "Profile";
-            return View(user);
+            //return View(user);
+            return View("stu_profile", user);
         }
 
+        // Profile - POST Method (Updated with proper validation and password hashing)
         [HttpPost]
-        public ActionResult Profile(User model)
+        [ValidateAntiForgeryToken]
+        public ActionResult Profile(User model, string currentPassword, string newPassword, string confirmPassword)
         {
             if (Session["UserRole"]?.ToString() != "Student")
                 return RedirectToAction("Login", "Account");
 
-            if (ModelState.IsValid)
+            int userId = Convert.ToInt32(Session["UserId"]);
+            var user = db.Users.Find(userId);
+
+            if (user == null)
             {
-                var user = db.Users.Find(model.Id);
-                if (user != null)
+                TempData["Error"] = "User not found.";
+                return RedirectToAction("Profile");
+            }
+
+            // Create a clean model state by removing password-related validation errors
+            ModelState.Remove("Password");
+
+            // Validate required fields
+            if (string.IsNullOrWhiteSpace(model.Name))
+            {
+                ModelState.AddModelError("Name", "Name is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(model.Email))
+            {
+                ModelState.AddModelError("Email", "Email is required.");
+            }
+            else if (!IsValidEmail(model.Email))
+            {
+                ModelState.AddModelError("Email", "Please enter a valid email address.");
+            }
+
+            // Check if another user has the same name (excluding current user)
+            if (db.Users.Any(u => u.Name == model.Name && u.Id != userId))
+            {
+                ModelState.AddModelError("Name", "This name is already taken by another user.");
+            }
+
+            // Check if another user has the same email (excluding current user)
+            if (db.Users.Any(u => u.Email == model.Email && u.Id != userId))
+            {
+                ModelState.AddModelError("Email", "This email is already registered to another user.");
+            }
+
+            // Password change validation
+            bool isPasswordChangeRequested = !string.IsNullOrWhiteSpace(newPassword);
+
+            if (isPasswordChangeRequested)
+            {
+                // Validate current password
+                if (string.IsNullOrWhiteSpace(currentPassword))
                 {
-                    user.Email = model.Email;
-                    // Only update password if provided
-                    if (!string.IsNullOrEmpty(model.Password))
-                    {
-                        user.Password = model.Password;
-                    }
-                    db.SaveChanges();
-                    ViewBag.SuccessMessage = "Profile updated successfully!";
+                    ModelState.AddModelError("", "Current password is required to change password.");
+                }
+                else if (!IsPasswordValid(currentPassword, user.Password))
+                {
+                    ModelState.AddModelError("", "Current password is incorrect.");
+                }
+
+                // Validate new password
+                if (string.IsNullOrWhiteSpace(newPassword))
+                {
+                    ModelState.AddModelError("", "New password is required.");
+                }
+                else if (newPassword.Length < 6)
+                {
+                    ModelState.AddModelError("", "New password must be at least 6 characters long.");
+                }
+
+                // Validate confirm password
+                if (newPassword != confirmPassword)
+                {
+                    ModelState.AddModelError("", "New password and confirm password do not match.");
                 }
             }
 
-            return View(model);
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    // Update basic information
+                    user.Name = model.Name.Trim();
+                    user.Email = model.Email.Trim().ToLower();
+
+                    // Update password if requested
+                    if (isPasswordChangeRequested)
+                    {
+                        user.Password = HashPassword(newPassword);
+                    }
+
+                    db.SaveChanges();
+
+                    // Update session values
+                    Session["UserName"] = user.Name;
+                    Session["UserEmail"] = user.Email;
+
+                    TempData["Success"] = "Profile updated successfully!";
+                    return RedirectToAction("Profile");
+                }
+                catch (Exception ex)
+                {
+                    TempData["Error"] = "An error occurred while updating your profile. Please try again.";
+                    // Log the exception if you have logging setup
+                }
+            }
+
+            return View(user);
         }
+
+        private bool IsValidEmail(string email)
+        {
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(email);
+                return addr.Address == email;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private string HashPassword(string password)
+        {
+            return BCrypt.Net.BCrypt.HashPassword(password);
+        }
+
+        private bool IsPasswordValid(string inputPassword, string storedPassword)
+        {
+            if (string.IsNullOrEmpty(inputPassword) || string.IsNullOrEmpty(storedPassword))
+                return false;
+
+            // If stored password is a BCrypt hash, verify using BCrypt
+            if (IsBCryptHash(storedPassword))
+            {
+                return VerifyPassword(inputPassword, storedPassword);
+            }
+            else
+            {
+                // If stored password is plain text, compare directly
+                return inputPassword == storedPassword;
+            }
+        }
+
+        private bool VerifyPassword(string password, string hashedPassword)
+        {
+            try
+            {
+                return BCrypt.Net.BCrypt.Verify(password, hashedPassword);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private bool IsBCryptHash(string password)
+        {
+            return !string.IsNullOrEmpty(password) &&
+                   password.Length == 60 &&
+                   (password.StartsWith("$2a$") ||
+                    password.StartsWith("$2b$") ||
+                    password.StartsWith("$2x$") ||
+                    password.StartsWith("$2y$"));
+        }
+
+
+        // User Management for Students (View Only)
+        public ActionResult UserManagement(string search = "", string role = "")
+        {
+            if (Session["UserRole"]?.ToString() != "Student")
+                return RedirectToAction("Login", "Account");
+
+            var allUsers = db.Users.AsQueryable();
+
+            // Filter by search term (name or email)
+            if (!string.IsNullOrEmpty(search))
+            {
+                allUsers = allUsers.Where(u => u.Name.Contains(search) || u.Email.Contains(search));
+            }
+
+            // Filter by role
+            if (!string.IsNullOrEmpty(role) && role != "All")
+            {
+                allUsers = allUsers.Where(u => u.Role == role);
+            }
+
+            var users = allUsers.OrderBy(u => u.Role).ThenBy(u => u.Name).ToList();
+
+            // Separate teachers and students
+            var teachers = users.Where(u => u.Role == "Teacher").ToList();
+            var students = users.Where(u => u.Role == "Student").ToList();
+
+            var viewModel = new UserManagementViewModel
+            {
+                Teachers = teachers,
+                Students = students,
+                SearchTerm = search,
+                SelectedRole = role,
+                TotalTeachers = teachers.Count,
+                TotalStudents = students.Count
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        public JsonResult SearchUsers(string search, string role)
+        {
+            if (Session["UserRole"]?.ToString() != "Student")
+                return Json(new { success = false, message = "Unauthorized" });
+
+            try
+            {
+                var allUsers = db.Users.AsQueryable();
+
+                // Filter by search term
+                if (!string.IsNullOrEmpty(search))
+                {
+                    allUsers = allUsers.Where(u => u.Name.Contains(search) || u.Email.Contains(search));
+                }
+
+                // Filter by role
+                if (!string.IsNullOrEmpty(role) && role != "All")
+                {
+                    allUsers = allUsers.Where(u => u.Role == role);
+                }
+
+                var users = allUsers
+                    .OrderBy(u => u.Role)
+                    .ThenBy(u => u.Name)
+                    .Select(u => new { u.Id, u.Name, u.Email, u.Role })
+                    .ToList();
+
+                return Json(new { success = true, users = users });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error searching users: " + ex.Message });
+            }
+        }
+
+
 
         protected override void Dispose(bool disposing)
         {

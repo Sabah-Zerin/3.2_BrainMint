@@ -1108,11 +1108,8 @@ namespace Brain_Mint.Controllers
         }
 
 
-        // Add these methods to your TeacherController.cs class
-
-        // Add these methods to your TeacherController.cs class (before the closing brace)
-
         #region Profile Management
+        // Profile - GET Method
         public ActionResult Profile()
         {
             if (Session["UserRole"]?.ToString() != "Teacher")
@@ -1127,12 +1124,13 @@ namespace Brain_Mint.Controllers
                 return RedirectToAction("TeacherDashboard");
             }
 
-            return View(teacher);
+            return View("te_profile", teacher); 
         }
 
+        // Profile - POST Method (Enhanced with proper validation and password hashing)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Profile(User model)
+        public ActionResult Profile(User model, string currentPassword, string newPassword, string confirmPassword)
         {
             if (Session["UserRole"]?.ToString() != "Teacher")
                 return RedirectToAction("Login", "Account");
@@ -1146,30 +1144,158 @@ namespace Brain_Mint.Controllers
                 return RedirectToAction("TeacherDashboard");
             }
 
-            // Only allow updating certain fields
+            // Create a clean model state by removing password-related validation errors
+            ModelState.Remove("Password");
+
+            // Validate required fields
+            if (string.IsNullOrWhiteSpace(model.Name))
+            {
+                ModelState.AddModelError("Name", "Name is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(model.Email))
+            {
+                ModelState.AddModelError("Email", "Email is required.");
+            }
+            else if (!IsValidEmail(model.Email))
+            {
+                ModelState.AddModelError("Email", "Please enter a valid email address.");
+            }
+
+            // Check if another user has the same name (excluding current user)
+            if (db.Users.Any(u => u.Name == model.Name && u.Id != teacherId))
+            {
+                ModelState.AddModelError("Name", "This name is already taken by another user.");
+            }
+
+            // Check if another user has the same email (excluding current user)
+            if (db.Users.Any(u => u.Email == model.Email && u.Id != teacherId))
+            {
+                ModelState.AddModelError("Email", "This email is already registered to another user.");
+            }
+
+            // Password change validation
+            bool isPasswordChangeRequested = !string.IsNullOrWhiteSpace(newPassword);
+
+            if (isPasswordChangeRequested)
+            {
+                // Validate current password
+                if (string.IsNullOrWhiteSpace(currentPassword))
+                {
+                    ModelState.AddModelError("", "Current password is required to change password.");
+                }
+                else if (!IsPasswordValid(currentPassword, teacher.Password))
+                {
+                    ModelState.AddModelError("", "Current password is incorrect.");
+                }
+
+                // Validate new password
+                if (string.IsNullOrWhiteSpace(newPassword))
+                {
+                    ModelState.AddModelError("", "New password is required.");
+                }
+                else if (newPassword.Length < 6)
+                {
+                    ModelState.AddModelError("", "New password must be at least 6 characters long.");
+                }
+
+                // Validate confirm password
+                if (newPassword != confirmPassword)
+                {
+                    ModelState.AddModelError("", "New password and confirm password do not match.");
+                }
+            }
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    teacher.Name = model.Name;
-                    teacher.Email = model.Email;
+                    // Update basic information
+                    teacher.Name = model.Name.Trim();
+                    teacher.Email = model.Email.Trim().ToLower();
 
-                    // Update session values
-                    Session["UserName"] = model.Name;
-                    Session["UserEmail"] = model.Email;
+                    // Update password if requested
+                    if (isPasswordChangeRequested)
+                    {
+                        teacher.Password = HashPassword(newPassword);
+                    }
 
                     db.SaveChanges();
+
+                    // Update session values
+                    Session["UserName"] = teacher.Name;
+                    Session["UserEmail"] = teacher.Email;
 
                     TempData["Success"] = "Profile updated successfully!";
                     return RedirectToAction("Profile");
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError("", "Error updating profile: " + ex.Message);
+                    TempData["Error"] = "An error occurred while updating your profile. Please try again.";
+                    // Log the exception if you have logging setup
                 }
             }
 
+            // If we got this far, something failed, redisplay form
             return View(teacher);
+        }
+
+        // Helper methods for validation and password hashing
+        private bool IsValidEmail(string email)
+        {
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(email);
+                return addr.Address == email;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private string HashPassword(string password)
+        {
+            return BCrypt.Net.BCrypt.HashPassword(password);
+        }
+
+        private bool IsPasswordValid(string inputPassword, string storedPassword)
+        {
+            if (string.IsNullOrEmpty(inputPassword) || string.IsNullOrEmpty(storedPassword))
+                return false;
+
+            // If stored password is a BCrypt hash, verify using BCrypt
+            if (IsBCryptHash(storedPassword))
+            {
+                return VerifyPassword(inputPassword, storedPassword);
+            }
+            else
+            {
+                // If stored password is plain text, compare directly
+                return inputPassword == storedPassword;
+            }
+        }
+
+        private bool VerifyPassword(string password, string hashedPassword)
+        {
+            try
+            {
+                return BCrypt.Net.BCrypt.Verify(password, hashedPassword);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private bool IsBCryptHash(string password)
+        {
+            return !string.IsNullOrEmpty(password) &&
+                   password.Length == 60 &&
+                   (password.StartsWith("$2a$") ||
+                    password.StartsWith("$2b$") ||
+                    password.StartsWith("$2x$") ||
+                    password.StartsWith("$2y$"));
         }
         #endregion
 

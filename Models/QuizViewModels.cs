@@ -19,12 +19,6 @@ namespace Brain_Mint.Models
         public QuizAttempt LastAttempt { get; set; }
     }
 
-    public class StudentPerformance
-    {
-        public List<ScoreRecord> QuizScores { get; set; }
-        public List<ScoreRecord> AssignmentScores { get; set; }
-    }
-
     public class ScoreRecord
     {
         public string Name { get; set; }

@@ -1,6 +1,6 @@
-@model Brain_Mint.Models.StudentPerformance
-    @{
+@{
     Layout = "~/Views/Shared/_StudentLayout.cshtml";
+    ViewBag.Title = "Student Dashboard";
 }
 
 <h2>Student Dashboard</h2>
@@ -30,9 +30,9 @@
     <div class="col-md-4">
         <div class="card text-white bg-info mb-3">
             <div class="card-body">
-                <h5 class="card-title">Performance</h5>
-                <p class="card-text">View your quiz and assignment scores</p>
-                <a href="@Url.Action("Performance", "Student")" class="btn btn-light">View Performance</a>
+                <h5 class="card-title">Profile</h5>
+                <p class="card-text">View and update your profile information</p>
+                <a href="@Url.Action("Profile", "Student")" class="btn btn-light">View Profile</a>
             </div>
         </div>
     </div>
