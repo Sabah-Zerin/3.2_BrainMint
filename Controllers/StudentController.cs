@@ -22,17 +22,17 @@ namespace Brain_Mint.Controllers
             return View();
         }
 
-        // Quiz Participation
+      
         public ActionResult QuizParticipation()
         {
             if (Session["UserRole"]?.ToString() != "Student")
                 return RedirectToAction("Login", "Account");
 
-            // Redirect to the Quiz controller's Index action
+            
             return RedirectToAction("Index", "Quiz");
         }
 
-        // Assignment Participation
+        
         public ActionResult AssignmentParticipation()
         {
             if (Session["UserRole"]?.ToString() != "Student")
@@ -58,7 +58,7 @@ namespace Brain_Mint.Controllers
             return View(assignmentViewModels);
         }
 
-        // View Assignment Details for Student
+        
         public ActionResult ViewAssignment(int id)
         {
             if (Session["UserRole"]?.ToString() != "Student")
@@ -91,7 +91,7 @@ namespace Brain_Mint.Controllers
             return View(viewModel);
         }
 
-        // FIXED: Single SubmitAssignment method with proper error handling
+       
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult SubmitAssignment(SubmitAssignmentViewModel model, HttpPostedFileBase imageFile)
@@ -227,8 +227,6 @@ namespace Brain_Mint.Controllers
             return View(submission);
         }
 
-
-        // Profile
         public ActionResult Profile()
         {
             if (Session["UserRole"]?.ToString() != "Student")
@@ -245,7 +243,6 @@ namespace Brain_Mint.Controllers
             return View("stu_profile", user);
         }
 
-        // Profile - POST Method (Updated with proper validation and password hashing)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Profile(User model, string currentPassword, string newPassword, string confirmPassword)
@@ -262,7 +259,6 @@ namespace Brain_Mint.Controllers
                 return RedirectToAction("Profile");
             }
 
-            // Create a clean model state by removing password-related validation errors
             ModelState.Remove("Password");
 
             // Validate required fields
@@ -350,7 +346,7 @@ namespace Brain_Mint.Controllers
                 catch (Exception ex)
                 {
                     TempData["Error"] = "An error occurred while updating your profile. Please try again.";
-                    // Log the exception if you have logging setup
+                    
                 }
             }
 

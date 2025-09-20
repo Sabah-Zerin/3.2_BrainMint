@@ -28,14 +28,14 @@ namespace Brain_Mint.Controllers
                     return View();
                 }
 
-                // Hash the password before saving
+              
                 user.Password = HashPassword(user.Password);
 
-                // Add user to database
+                
                 db.Users.Add(user);
                 db.SaveChanges();
 
-                TempData["SignupSuccess"] = "Signup is successful! Please login.";
+                TempData["SignupSuccess"] = "Signup is successful! Please login to continue.";
                 return RedirectToAction("Login");
             }
 
@@ -63,27 +63,27 @@ namespace Brain_Mint.Controllers
                 return View();
             }
 
-            // FIXED: Check if password is valid (handles both plain text and hashed)
+            
             if (!IsPasswordValid(password, user.Password))
             {
                 ViewBag.Error = "Password is wrong.";
                 return View();
             }
 
-            // If user has plain text password, hash it now
+          
             if (!IsBCryptHash(user.Password))
             {
                 user.Password = HashPassword(password);
                 db.SaveChanges();
             }
 
-            // Store session data
+           
             Session["UserId"] = user.Id;
             Session["UserName"] = user.Name;
             Session["UserEmail"] = user.Email;
             Session["UserRole"] = user.Role;
 
-            // Log the login activity
+            
             var loginLog = new LoginLog
             {
                 UserId = user.Id,
@@ -102,7 +102,7 @@ namespace Brain_Mint.Controllers
 
             TempData["LoginSuccess"] = "Login successful!";
 
-            // Redirect to appropriate dashboard
+           
             if (user.Role == "Teacher")
                 return RedirectToAction("TeacherDashboard", "Teacher");
             else if (user.Role == "Student")
@@ -113,8 +113,8 @@ namespace Brain_Mint.Controllers
 
         public ActionResult LoginActivity()
         {
-            // Only allow admin or appropriate roles to view this
-            if (Session["UserRole"]?.ToString() != "Teacher") // or Admin
+            
+            if (Session["UserRole"]?.ToString() != "Teacher") 
             {
                 return RedirectToAction("Login");
             }
@@ -122,13 +122,13 @@ namespace Brain_Mint.Controllers
             var loginLogs = db.LoginLogs
                 .Include(l => l.User)
                 .OrderByDescending(l => l.LoginTime)
-                .Take(100) // Show last 100 logins
+                .Take(100) 
                 .ToList();
 
             return View(loginLogs);
         }
 
-        // Get currently logged in users
+        
         public ActionResult CurrentlyLoggedIn()
         {
             var currentlyLoggedIn = db.LoginLogs
@@ -140,7 +140,7 @@ namespace Brain_Mint.Controllers
             return View(currentlyLoggedIn);
         }
 
-        // FIXED: Password handling methods
+        // Password handling methods
         private string HashPassword(string password)
         {
             return BCrypt.Net.BCrypt.HashPassword(password);
@@ -154,7 +154,7 @@ namespace Brain_Mint.Controllers
             }
             catch
             {
-                return false; // If verification fails, return false
+                return false; 
             }
         }
 
@@ -170,13 +170,13 @@ namespace Brain_Mint.Controllers
                     password.StartsWith("$2y$"));
         }
 
-        // Validate password (handles both plain text and hashed passwords)
+        
         private bool IsPasswordValid(string inputPassword, string storedPassword)
         {
             if (string.IsNullOrEmpty(inputPassword) || string.IsNullOrEmpty(storedPassword))
                 return false;
 
-            // If stored password is a BCrypt hash, verify using BCrypt
+          
             if (IsBCryptHash(storedPassword))
             {
                 return VerifyPassword(inputPassword, storedPassword);
@@ -190,7 +190,7 @@ namespace Brain_Mint.Controllers
 
         public ActionResult Logout()
         {
-            // Update logout time if login log exists
+            
             if (Session["LoginLogId"] != null)
             {
                 int loginLogId = Convert.ToInt32(Session["LoginLogId"]);

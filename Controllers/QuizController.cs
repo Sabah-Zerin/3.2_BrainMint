@@ -38,7 +38,6 @@ namespace Brain_Mint.Controllers
             return View(activeQuizzes);
         }
 
-        // Take a specific quiz
         public ActionResult Take(int id)
         {
             if (Session["UserRole"]?.ToString() != "Student")
@@ -56,7 +55,7 @@ namespace Brain_Mint.Controllers
                 return RedirectToAction("Index");
             }
 
-            // Check if student has already completed this quiz
+            
             var existingAttempt = db.QuizAttempts
                 .FirstOrDefault(qa => qa.QuizId == id && qa.StudentId == studentId && qa.Status == "Completed");
 
@@ -148,7 +147,7 @@ namespace Brain_Mint.Controllers
 
                     if (isMultipleChoice)
                     {
-                        // Multiple Choice - Auto grade immediately
+                        //Auto grade immediately
                         if (!string.IsNullOrEmpty(studentAnswer) &&
                             !string.IsNullOrEmpty(question.CorrectAnswer) &&
                             studentAnswer.ToUpper() == question.CorrectAnswer.ToUpper())
@@ -178,7 +177,7 @@ namespace Brain_Mint.Controllers
                 if (hasShortAnswers)
                 {
                     quizAttempt.GradingStatus = "PendingReview";
-                    // Don't calculate final score yet, wait for teacher review
+                   
                 }
                 else
                 {
@@ -202,7 +201,6 @@ namespace Brain_Mint.Controllers
 
 
 
-        // Add this debug action to your QuizController for testing
         [HttpPost]
         public ActionResult DebugSubmitQuiz(int attemptId, FormCollection form)
         {
@@ -222,7 +220,7 @@ namespace Brain_Mint.Controllers
                 return RedirectToAction("Index");
             }
 
-            // Create a debug view to see what's being submitted
+            // debug view to see what's being submitted
             var debugInfo = new List<string>();
             debugInfo.Add("=== DEBUG INFORMATION ===");
             debugInfo.Add($"Attempt ID: {attemptId}");
@@ -283,7 +281,7 @@ namespace Brain_Mint.Controllers
             // Check if the quiz attempt is incomplete
             if (quizAttempt.Status != "Completed" || !quizAttempt.EndTime.HasValue)
             {
-                // Handle incomplete quiz attempts
+                // incomplete quiz attempts
                 TempData["Info"] = "This quiz was not completed. You can retake it if it's still available.";
                 return RedirectToAction("Index");
             }
