@@ -1,0 +1,260 @@
+@model Brain_Mint.Models.AssignmentSubmission
+@{
+    ViewBag.Title = "View Submission Result";
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+}
+
+<div class="dashboard-card">
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <h2 class="card-title mb-2">
+                <i class="fas fa-file-alt me-2 text-mint"></i>Submission Result
+            </h2>
+            <p class="mb-1">
+                <i class="fas fa-book me-2"></i><strong>Assignment:</strong> @Model.Assignment.Title
+            </p>
+            <p class="mb-1">
+                <i class="fas fa-user-tie me-2"></i><strong>Teacher:</strong> @Model.Assignment.CreatedBy.Name
+            </p>
+            <p class="mb-1">
+                <i class="fas fa-calendar me-2"></i><strong>Submitted:</strong> @Model.SubmissionDate.ToString("MMM dd, yyyy 'at' hh:mm tt")
+            </p>
+        </div>
+        <div class="text-end">
+            <span class="badge @(Model.Status == "Graded" ? "bg-success" :
+                                Model.Status == "Late" ? "bg-warning" :
+                                Model.Status == "Submitted" ? "bg-info" : "bg-secondary") fs-6">
+                @Model.Status
+            </span>
+            @if (Model.SubmissionDate > Model.Assignment.DueDate)
+            {
+                <br><span class="badge bg-danger mt-1">Late Submission</span>
+            }
+        </div>
+    </div>
+
+    <!-- Assignment Information -->
+    <div class="card mb-4">
+        <div class="card-header bg-mint text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-info-circle me-2"></i>Assignment Details
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Subject:</strong> @Model.Assignment.Subject</p>
+                    <p><strong>Due Date:</strong> @Model.Assignment.DueDate.ToString("MMM dd, yyyy 'at' hh:mm tt")</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Max Points:</strong> @Model.Assignment.MaxPoints</p>
+                    <p><strong>Submission Type:</strong> @Model.Assignment.SubmissionType</p>
+                </div>
+            </div>
+            <div class="mt-3">
+                <strong>Instructions:</strong>
+                <div class="p-3 bg-light rounded assignment-description">
+                    @Model.Assignment.Description
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grade Information -->
+    @if (Model.Status == "Graded" && Model.Points.HasValue)
+    {
+        <div class="card mb-4">
+            <div class="card-header @(Model.Points.Value >= Model.Assignment.MaxPoints * 0.8 ? "bg-success" :
+                                    Model.Points.Value >= Model.Assignment.MaxPoints * 0.7 ? "bg-info" :
+                                    Model.Points.Value >= Model.Assignment.MaxPoints * 0.6 ? "bg-warning" : "bg-danger") text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-star me-2"></i>Your Grade
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <h3 class="text-mint">@Model.Points / @Model.Assignment.MaxPoints</h3>
+                        <p class="text-muted">Points Earned</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h3 class="text-mint">@((Model.Points.Value / (double)Model.Assignment.MaxPoints * 100).ToString("F1"))%</h3>
+                        <p class="text-muted">Percentage</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h3 class="@(Model.Points.Value >= Model.Assignment.MaxPoints * 0.8 ? "text-success" :
+                                    Model.Points.Value >= Model.Assignment.MaxPoints * 0.7 ? "text-info" :
+                                    Model.Points.Value >= Model.Assignment.MaxPoints * 0.6 ? "text-warning" : "text-danger")">
+                            @(Model.Points.Value >= Model.Assignment.MaxPoints * 0.8 ? "Excellent" :
+                              Model.Points.Value >= Model.Assignment.MaxPoints * 0.7 ? "Good" :
+                              Model.Points.Value >= Model.Assignment.MaxPoints * 0.6 ? "Fair" : "Needs Improvement")
+                        </h3>
+                        <p class="text-muted">Performance</p>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.TeacherFeedback))
+                {
+                    <hr>
+                    <div class="teacher-feedback">
+                        <h6><i class="fas fa-comment-alt me-2"></i>Teacher Feedback:</h6>
+                        <div class="p-3 bg-light rounded">
+                            @Model.TeacherFeedback
+                        </div>
+                    </div>
+                }
+
+                @if (Model.GradedDate.HasValue)
+                {
+                    <hr>
+                    <small class="text-muted">
+                        <i class="fas fa-clock me-1"></i>
+                        Graded on @Model.GradedDate.Value.ToString("MMM dd, yyyy 'at' hh:mm tt")
+                    </small>
+                }
+            </div>
+        </div>
+    }
+    else if (Model.Status != "Graded")
+    {
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-hourglass-half me-2"></i>Grading Status
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <i class="fas fa-spinner fa-2x text-info mb-3"></i>
+                <h5>Your submission is being reviewed</h5>
+                <p class="text-muted">Your teacher will grade this assignment soon. Check back later for your results.</p>
+            </div>
+        </div>
+    }
+
+    <!-- Your Submission -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-file-upload me-2"></i>Your Submission
+            </h5>
+        </div>
+        <div class="card-body">
+            @if (!string.IsNullOrEmpty(Model.TextSubmission))
+            {
+                <div class="mb-4">
+                    <h6><i class="fas fa-align-left me-2"></i>Text Submission:</h6>
+                    <div class="p-3 border rounded bg-light submission-text">
+                        @Model.TextSubmission
+                    </div>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.ImagePath))
+            {
+                <div class="mb-4">
+                    <h6><i class="fas fa-image me-2"></i>Image Submission:</h6>
+                    <div class="text-center">
+                        <img src="@Url.Content("~/" + Model.ImagePath)"
+                             alt="Submission Image"
+                             class="img-fluid border rounded shadow"
+                             style="max-height: 500px;" />
+                        <br>
+                        <small class="text-muted mt-2 d-block">
+                            <i class="fas fa-file me-1"></i>
+                            @Model.OriginalFileName
+                        </small>
+                    </div>
+                </div>
+            }
+
+            @if (string.IsNullOrEmpty(Model.TextSubmission) && string.IsNullOrEmpty(Model.ImagePath))
+            {
+                <div class="text-center text-muted">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                    <p>No submission content found.</p>
+                </div>
+            }
+
+            @if (Model.LastModified.HasValue && Model.LastModified != Model.SubmissionDate)
+            {
+                <hr>
+                <small class="text-muted">
+                    <i class="fas fa-edit me-1"></i>
+                    Last modified: @Model.LastModified.Value.ToString("MMM dd, yyyy 'at' hh:mm tt")
+                </small>
+            }
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="d-flex justify-content-between">
+        <a href="@Url.Action("AssignmentParticipation", "Student")"
+           class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Assignments
+        </a>
+
+        @if (DateTime.Now <= Model.Assignment.DueDate && Model.Status != "Graded")
+        {
+            <a href="@Url.Action("ViewAssignment", "Student", new { id = Model.AssignmentId })"
+               class="btn btn-warning">
+                <i class="fas fa-edit me-2"></i>Update Submission
+            </a>
+        }
+    </div>
+</div>
+
+<style>
+    .assignment-description {
+        white-space: pre-line;
+        line-height: 1.6;
+    }
+
+    .submission-text {
+        white-space: pre-line;
+        line-height: 1.6;
+        min-height: 100px;
+    }
+
+    .teacher-feedback {
+        border-left: 4px solid var(--mint-medium);
+        padding-left: 15px;
+    }
+
+    .bg-mint {
+        background-color: var(--mint-medium) !important;
+    }
+
+    .text-mint {
+        color: var(--mint-dark) !important;
+    }
+
+    .card-header h5 {
+        margin: 0;
+    }
+
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin: 0;
+    }
+
+    .img-fluid {
+        transition: transform 0.3s ease;
+    }
+
+    .img-fluid:hover {
+        transform: scale(1.05);
+        cursor: pointer;
+    }
+
+    media (max-width: 768px) {
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn {
+            width: 100%;
+        }
+    }
+</style>

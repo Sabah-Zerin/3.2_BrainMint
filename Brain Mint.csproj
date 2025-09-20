@@ -293,6 +293,7 @@
     <Content Include="Views\Teacher\AssignmentParticipation.cshtml" />
     <Content Include="Views\Teacher\UserManagement.cshtml" />
     <Content Include="Views\Teacher\Profile.cshtml" />
+    <Content Include="Views\Student\ViewSubmissionResult.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\App_LocalResources\" />
