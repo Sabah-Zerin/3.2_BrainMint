@@ -1,202 +1,236 @@
-﻿@{
-    bool isLoggedIn = Session["UserName"] != null;
-    bool isAuthPage = ViewContext.RouteData.Values["Controller"].ToString() == "Account";
+﻿@model Brain_Mint.Models.AssignmentSubmission
+@{
+    ViewBag.Title = "View Submission Result";
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
 }
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - Brainmint</title>
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Site CSS -->
-    <link href="~/Content/Site.css" rel="stylesheet" type="text/css" />
-
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-
-    <style>
-        :root {
-            --mint-light: #a2d9ce;
-            --mint-medium: #48c9b0;
-            --mint-dark: #16a085;
-            --sky-light: #85c1e9;
-            --sky-dark: #3498db;
-            --text-dark: #2c3e50;
-            --text-light: #f8f9fa;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f4f6f9;
-            color: var(--text-dark);
-        }
-
-        /* Navbar */
-        .navbar {
-            background: linear-gradient(90deg, var(--mint-medium), var(--sky-dark));
-        }
-
-        .navbar-brand {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: white !important;
-        }
-
-        .nav-link {
-            color: white !important;
-            font-weight: 500;
-            margin-left: 10px;
-        }
-
-            .nav-link:hover {
-                text-decoration: underline;
+<div class="submission-result-container">
+    <div class="header-section d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <h2 class="page-title">
+                <i class="fas fa-file-alt me-2 text-primary"></i>Submission Result
+            </h2>
+            <p><i class="fas fa-book me-2 text-secondary"></i><strong>Assignment:</strong> @Model.Assignment.Title</p>
+            <p><i class="fas fa-user-tie me-2 text-secondary"></i><strong>Teacher:</strong> @Model.Assignment.CreatedBy.Name</p>
+            <p><i class="fas fa-calendar me-2 text-secondary"></i><strong>Submitted:</strong> @Model.SubmissionDate.ToString("MMM dd, yyyy 'at' hh:mm tt")</p>
+        </div>
+        <div class="text-end">
+            <span class="status-badge @(Model.Status == "Graded" ? "bg-success" :
+                                        Model.Status == "Late" ? "bg-warning" :
+                                        Model.Status == "Submitted" ? "bg-info" : "bg-secondary")">
+                @Model.Status
+            </span>
+            @if (Model.SubmissionDate > Model.Assignment.DueDate)
+            {
+                <br><span class="badge bg-danger mt-2">Late Submission</span>
             }
-
-        /* Auth Pages */
-        .auth-page {
-            background: linear-gradient(135deg, var(--mint-light), var(--sky-light));
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .auth-card {
-            max-width: 450px;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-        }
-
-            .auth-card:hover {
-                transform: translateY(-5px);
-            }
-
-        .auth-header {
-            background: linear-gradient(to right, var(--mint-medium), var(--sky-dark));
-            color: white;
-            padding: 1.5rem;
-            text-align: center;
-        }
-
-        .auth-title {
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 600;
-            font-size: 1.8rem;
-            margin: 0;
-        }
-
-        .auth-body {
-            padding: 2rem;
-            background: #fff;
-        }
-
-        /* Sidebar */
-        .main-content {
-            margin-left: 250px;
-            padding: 20px;
-            transition: all 0.3s;
-        }
-
-        .sidebar-collapsed .main-content {
-            margin-left: 80px;
-        }
-
-        .toggle-sidebar {
-            position: fixed;
-            left: 10px;
-            top: 70px;
-            z-index: 1000;
-            cursor: pointer;
-            background: var(--mint-medium);
-            border: none;
-            color: white;
-            border-radius: 6px;
-            padding: 8px 12px;
-        }
-
-            .toggle-sidebar:hover {
-                background: var(--sky-dark);
-            }
-
-        footer {
-            background: #fff;
-            padding: 15px;
-            border-top: 1px solid #dee2e6;
-            text-align: center;
-            font-size: 0.9rem;
-            color: #6c757d;
-        }
-    </style>
-    @RenderSection("Styles", required: false)
-</head>
-<body class="@(isAuthPage ? "auth-page" : "") @(isLoggedIn && !isAuthPage ? "has-sidebar" : "")">
-
-    <!-- Top Navbar (only when not on auth page) -->
-    @if (!isAuthPage)
-    {
-        <nav class="navbar navbar-expand-lg navbar-dark">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="@Url.Action("Index", "Home")">Brainmint</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item">@Html.ActionLink("Home", "Index", "Home", null, new { @class = "nav-link" })</li>
-                        <li class="nav-item">@Html.ActionLink("About", "About", "Home", null, new { @class = "nav-link" })</li>
-                        <li class="nav-item">@Html.ActionLink("Contact", "Contact", "Home", null, new { @class = "nav-link" })</li>
-                    </ul>
-                    <ul class="navbar-nav">
-                        @if (!isLoggedIn)
-                        {
-                            <li class="nav-item">@Html.ActionLink("Login", "Login", "Account", null, new { @class = "nav-link" })</li>
-                            <li class="nav-item">@Html.ActionLink("Sign Up", "Signup", "Account", null, new { @class = "nav-link" })</li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <span class="navbar-text text-white me-3">Hello, @Session["UserName"]</span>
-                            </li>
-                            <li class="nav-item">@Html.ActionLink("Logout", "Logout", "Account", null, new { @class = "nav-link" })</li>
-                        }
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    }
-
-    <!-- Page Body -->
-    <div class="@(isLoggedIn && !isAuthPage ? "main-content" : "container body-content mt-4")">
-        @RenderBody()
-
+        </div>
     </div>
 
-    <!-- Scripts -->
-    @Scripts.Render("~/bundles/jquery")
-    @RenderSection("scripts", required: false)
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Assignment Information -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-gradient-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Assignment Details</h5>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <p><strong>Subject:</strong> @Model.Assignment.Subject</p>
+                    <p><strong>Due Date:</strong> @Model.Assignment.DueDate.ToString("MMM dd, yyyy 'at' hh:mm tt")</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Max Points:</strong> @Model.Assignment.MaxPoints</p>
+                    <p><strong>Submission Type:</strong> @Model.Assignment.SubmissionType</p>
+                </div>
+            </div>
+            <div>
+                <strong>Instructions:</strong>
+                <div class="p-3 bg-light rounded border mt-2 assignment-description">
+                    @Model.Assignment.Description
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <script>
-        $(function () {
-            $('.toggle-sidebar').click(function () {
-                $('body').toggleClass('sidebar-collapsed');
-            });
-        });
-    </script>
-</body>
-</html>
+    <!-- Grade Information -->
+    @if (Model.Status == "Graded" && Model.Points.HasValue)
+    {
+        <div class="card shadow-sm mb-4">
+            <div class="card-header @(Model.Points.Value >= Model.Assignment.MaxPoints * 0.8 ? "bg-success" :
+                                    Model.Points.Value >= Model.Assignment.MaxPoints * 0.7 ? "bg-info" :
+                                    Model.Points.Value >= Model.Assignment.MaxPoints * 0.6 ? "bg-warning" : "bg-danger") text-white">
+                <h5 class="mb-0"><i class="fas fa-star me-2"></i>Your Grade</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center mb-3">
+                    <div class="col-md-4">
+                        <h3 class="highlight">@Model.Points / @Model.Assignment.MaxPoints</h3>
+                        <p class="text-muted">Points Earned</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h3 class="highlight">@((Model.Points.Value / (double)Model.Assignment.MaxPoints * 100).ToString("F1"))%</h3>
+                        <p class="text-muted">Percentage</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h3 class="performance @(Model.Points.Value >= Model.Assignment.MaxPoints * 0.8 ? "text-success" :
+                                                Model.Points.Value >= Model.Assignment.MaxPoints * 0.7 ? "text-info" :
+                                                Model.Points.Value >= Model.Assignment.MaxPoints * 0.6 ? "text-warning" : "text-danger")">
+                            @(Model.Points.Value >= Model.Assignment.MaxPoints * 0.8 ? "Excellent" :
+                              Model.Points.Value >= Model.Assignment.MaxPoints * 0.7 ? "Good" :
+                              Model.Points.Value >= Model.Assignment.MaxPoints * 0.6 ? "Fair" : "Needs Improvement")
+                        </h3>
+                        <p class="text-muted">Performance</p>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.TeacherFeedback))
+                {
+                    <div class="teacher-feedback p-3 bg-light rounded mb-3">
+                        <h6><i class="fas fa-comment-alt me-2"></i>Teacher Feedback</h6>
+                        <p class="mb-0">@Model.TeacherFeedback</p>
+                    </div>
+                }
+
+                @if (Model.GradedDate.HasValue)
+                {
+                    <small class="text-muted">
+                        <i class="fas fa-clock me-1"></i>Graded on @Model.GradedDate.Value.ToString("MMM dd, yyyy 'at' hh:mm tt")
+                    </small>
+                }
+            </div>
+        </div>
+    }
+    else if (Model.Status != "Graded")
+    {
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-hourglass-half me-2"></i>Grading Status</h5>
+            </div>
+            <div class="card-body text-center">
+                <i class="fas fa-spinner fa-2x text-info mb-3"></i>
+                <h5>Your submission is being reviewed</h5>
+                <p class="text-muted">Your teacher will grade this assignment soon. Check back later for results.</p>
+            </div>
+        </div>
+    }
+
+    <!-- Your Submission -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-gradient-dark text-white">
+            <h5 class="mb-0"><i class="fas fa-file-upload me-2"></i>Your Submission</h5>
+        </div>
+        <div class="card-body">
+            @if (!string.IsNullOrEmpty(Model.TextSubmission))
+            {
+                <div class="mb-4">
+                    <h6><i class="fas fa-align-left me-2"></i>Text Submission</h6>
+                    <div class="p-3 border rounded bg-light submission-text">@Model.TextSubmission</div>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.ImagePath))
+            {
+                <div class="mb-4">
+                    <h6><i class="fas fa-image me-2"></i>Image Submission</h6>
+                    <div class="text-center">
+                        <img src="@Url.Content("~/" + Model.ImagePath)" alt="Submission Image"
+                             class="img-fluid border rounded shadow-sm mb-2" style="max-height: 450px;" />
+                        <br>
+                        <small class="text-muted"><i class="fas fa-file me-1"></i>@Model.OriginalFileName</small>
+                    </div>
+                </div>
+            }
+
+            @if (string.IsNullOrEmpty(Model.TextSubmission) && string.IsNullOrEmpty(Model.ImagePath))
+            {
+                <div class="text-center text-muted">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                    <p>No submission content found.</p>
+                </div>
+            }
+
+            @if (Model.LastModified.HasValue && Model.LastModified != Model.SubmissionDate)
+            {
+                <hr>
+                <small class="text-muted"><i class="fas fa-edit me-1"></i>Last modified: @Model.LastModified.Value.ToString("MMM dd, yyyy 'at' hh:mm tt")</small>
+            }
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="d-flex justify-content-between flex-wrap gap-2">
+        <a href="@Url.Action("AssignmentParticipation", "Student")" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Assignments
+        </a>
+        @if (DateTime.Now <= Model.Assignment.DueDate && Model.Status != "Graded")
+        {
+            <a href="@Url.Action("ViewAssignment", "Student", new { id = Model.AssignmentId })" class="btn btn-warning">
+                <i class="fas fa-edit me-2"></i>Update Submission
+            </a>
+        }
+    </div>
+</div>
+
+<style>
+    .submission-result-container {
+        background: #f9fafb;
+        padding: 20px;
+        border-radius: 12px;
+    }
+
+    .page-title {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .status-badge {
+        padding: 0.6em 1em;
+        font-size: 0.95rem;
+        border-radius: 20px;
+    }
+
+    .highlight {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    .performance {
+        font-weight: 600;
+    }
+
+    .teacher-feedback {
+        border-left: 4px solid #0d6efd;
+    }
+
+    .assignment-description, .submission-text {
+        white-space: pre-line;
+        line-height: 1.6;
+    }
+
+    .img-fluid {
+        transition: transform 0.25s ease;
+    }
+
+    .img-fluid:hover {
+        transform: scale(1.03);
+    }
+
+    .bg-gradient-primary {
+        background: linear-gradient(90deg, #0d6efd, #2c7be5);
+    }
+
+    .bg-gradient-dark {
+        background: linear-gradient(90deg, #343a40, #495057);
+    }
+
+    @@media (max-width: 768px) {
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 10px;
+        }
+        .btn {
+            width: 100%;
+        }
+    }
+</style>
