@@ -1,10 +1,603 @@
-{
-  "exclude": [
-    "**/bin",
-    "**/bower_components",
-    "**/jspm_packages",
-    "**/node_modules",
-    "**/obj",
-    "**/platforms"
-  ]
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Analytics Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .chart-title {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .filter-group select, .filter-group input {
+            padding: 8px 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .filter-group select:focus, .filter-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .detailed-analysis {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .analysis-title {
+            font-size: 1.6rem;
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .student-performance-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .student-performance-table th,
+        .student-performance-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e1e5e9;
+        }
+
+        .student-performance-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .student-performance-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .performance-indicator {
+            padding: 4px 8px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .excellent { background-color: #d4edda; color: #155724; }
+        .good { background-color: #d1ecf1; color: #0c5460; }
+        .average { background-color: #fff3cd; color: #856404; }
+        .needs-improvement { background-color: #f8d7da; color: #721c24; }
+
+        .export-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+
+        .export-btn:hover {
+            background: #5a67d8;
+        }
+
+        .insights-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .insight-item {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            background: #f8f9ff;
+        }
+
+        .insight-item h4 {
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>?? Teacher Analytics Dashboard</h1>
+            <p>Comprehensive insights into your students' performance and learning progress</p>
+        </div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label>Class:</label>
+                <select id="classFilter" onchange="updateAnalytics()">
+                    <option value="all">All Classes</option>
+                    <option value="math101">Math 101</option>
+                    <option value="science102">Science 102</option>
+                    <option value="history103">History 103</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Time Period:</label>
+                <select id="periodFilter" onchange="updateAnalytics()">
+                    <option value="month">Last Month</option>
+                    <option value="quarter">Last Quarter</option>
+                    <option value="semester">Current Semester</option>
+                    <option value="year">Academic Year</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Quiz Type:</label>
+                <select id="quizFilter" onchange="updateAnalytics()">
+                    <option value="all">All Quizzes</option>
+                    <option value="homework">Homework</option>
+                    <option value="test">Tests</option>
+                    <option value="practice">Practice</option>
+                </select>
+            </div>
+            <button class="export-btn" onclick="exportData()">?? Export Report</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalStudents">247</div>
+                <div class="stat-label">Total Students</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="avgScore">84.2%</div>
+                <div class="stat-label">Average Score</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="completionRate">92.5%</div>
+                <div class="stat-label">Completion Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalQuizzes">156</div>
+                <div class="stat-label">Total Quizzes</div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h3 class="chart-title">?? Performance Trends</h3>
+                <canvas id="performanceChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3 class="chart-title">?? Score Distribution</h3>
+                <canvas id="distributionChart"></canvas>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h3 class="chart-title">?? Question Difficulty Analysis</h3>
+                <canvas id="difficultyChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3 class="chart-title">?? Time Spent Analysis</h3>
+                <canvas id="timeChart"></canvas>
+            </div>
+        </div>
+
+        <div class="detailed-analysis">
+            <h2 class="analysis-title">?? Student Performance Overview</h2>
+            <table class="student-performance-table">
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Average Score</th>
+                        <th>Quizzes Completed</th>
+                        <th>Improvement Trend</th>
+                        <th>Performance Level</th>
+                        <th>Last Activity</th>
+                    </tr>
+                </thead>
+                <tbody id="studentTableBody">
+                </tbody>
+            </table>
+        </div>
+
+        <div class="insights-panel">
+            <h2 class="analysis-title">?? AI-Generated Insights</h2>
+            <div class="insight-item">
+                <h4>?? Top Performing Topics</h4>
+                <p>Students excel in Algebra and Basic Geometry with 89% average scores. Consider advancing these students to more challenging problems.</p>
+            </div>
+            <div class="insight-item">
+                <h4>?? Areas Needing Attention</h4>
+                <p>Word problems show only 67% success rate. Recommend additional practice sessions and step-by-step problem-solving workshops.</p>
+            </div>
+            <div class="insight-item">
+                <h4>?? Engagement Pattern</h4>
+                <p>Quiz completion drops by 15% on Fridays. Consider moving important assessments to mid-week for better participation.</p>
+            </div>
+            <div class="insight-item">
+                <h4>?? Student Recognition</h4>
+                <p>Sarah Johnson and Mike Chen show consistent 95%+ performance. They could be excellent peer tutors for struggling students.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data
+        const sampleStudents = [
+            { name: "Alice Johnson", avgScore: 92.5, quizzes: 12, trend: "+5.2%", level: "excellent", lastActivity: "2 hours ago" },
+            { name: "Bob Smith", avgScore: 87.3, quizzes: 11, trend: "+2.1%", level: "good", lastActivity: "1 day ago" },
+            { name: "Carol Davis", avgScore: 79.8, quizzes: 10, trend: "-1.5%", level: "average", lastActivity: "3 hours ago" },
+            { name: "David Wilson", avgScore: 94.2, quizzes: 12, trend: "+3.7%", level: "excellent", lastActivity: "30 min ago" },
+            { name: "Emma Brown", avgScore: 82.1, quizzes: 9, trend: "+4.2%", level: "good", lastActivity: "5 hours ago" },
+            { name: "Frank Miller", avgScore: 68.4, quizzes: 8, trend: "-2.8%", level: "needs-improvement", lastActivity: "2 days ago" },
+            { name: "Grace Lee", avgScore: 90.7, quizzes: 11, trend: "+6.1%", level: "excellent", lastActivity: "1 hour ago" },
+            { name: "Henry Taylor", avgScore: 75.9, quizzes: 10, trend: "+1.8%", level: "average", lastActivity: "4 hours ago" }
+        ];
+
+        // Chart instances
+        let performanceChart, distributionChart, difficultyChart, timeChart;
+
+        // Initialize all charts
+        function initializeCharts() {
+            // Performance Trends Chart
+            const perfCtx = document.getElementById('performanceChart').getContext('2d');
+            performanceChart = new Chart(perfCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'],
+                    datasets: [{
+                        label: 'Class Average',
+                        data: [78, 82, 85, 83, 87, 84],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Top Performers',
+                        data: [88, 91, 93, 92, 95, 94],
+                        borderColor: '#38a169',
+                        backgroundColor: 'rgba(56, 161, 105, 0.1)',
+                        tension: 0.4,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, max: 100 }
+                    }
+                }
+            });
+
+            // Score Distribution Chart
+            const distCtx = document.getElementById('distributionChart').getContext('2d');
+            distributionChart = new Chart(distCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['90-100%', '80-89%', '70-79%', '60-69%', 'Below 60%'],
+                    datasets: [{
+                        data: [35, 45, 15, 4, 1],
+                        backgroundColor: [
+                            '#38a169',
+                            '#667eea',
+                            '#ed8936',
+                            '#e53e3e',
+                            '#9f7aea'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            // Question Difficulty Chart
+            const diffCtx = document.getElementById('difficultyChart').getContext('2d');
+            difficultyChart = new Chart(diffCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Basic Concepts', 'Problem Solving', 'Application', 'Analysis', 'Synthesis'],
+                    datasets: [{
+                        label: 'Success Rate %',
+                        data: [92, 78, 85, 67, 74],
+                        backgroundColor: [
+                            'rgba(56, 161, 105, 0.8)',
+                            'rgba(102, 126, 234, 0.8)',
+                            'rgba(237, 137, 54, 0.8)',
+                            'rgba(229, 62, 62, 0.8)',
+                            'rgba(159, 122, 234, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true, max: 100 }
+                    }
+                }
+            });
+
+            // Time Spent Chart
+            const timeCtx = document.getElementById('timeChart').getContext('2d');
+            timeChart = new Chart(timeCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Quiz Setup', 'Reading Questions', 'Problem Solving', 'Review', 'Submission'],
+                    datasets: [{
+                        label: 'Average Time (minutes)',
+                        data: [2, 8, 15, 5, 3],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.2)'
+                    }, {
+                        label: 'Top Performers',
+                        data: [1, 6, 12, 8, 2],
+                        borderColor: '#38a169',
+                        backgroundColor: 'rgba(56, 161, 105, 0.2)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' }
+                    }
+                }
+            });
+        }
+
+        // Populate student table
+        function populateStudentTable() {
+            const tbody = document.getElementById('studentTableBody');
+            tbody.innerHTML = '';
+
+            sampleStudents.forEach(student => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td><strong>${student.name}</strong></td>
+                    <td>${student.avgScore}%</td>
+                    <td>${student.quizzes}</td>
+                    <td style="color: ${student.trend.includes('+') ? '#38a169' : '#e53e3e'}">${student.trend}</td>
+                    <td><span class="performance-indicator ${student.level}">${student.level.replace('-', ' ').toUpperCase()}</span></td>
+                    <td>${student.lastActivity}</td>
+                `;
+            });
+        }
+
+        // Update analytics based on filters
+        function updateAnalytics() {
+            const classFilter = document.getElementById('classFilter').value;
+            const periodFilter = document.getElementById('periodFilter').value;
+            const quizFilter = document.getElementById('quizFilter').value;
+
+            // Simulate data changes based on filters
+            const stats = {
+                totalStudents: Math.floor(Math.random() * 50) + 200,
+                avgScore: (Math.random() * 20 + 75).toFixed(1) + '%',
+                completionRate: (Math.random() * 10 + 85).toFixed(1) + '%',
+                totalQuizzes: Math.floor(Math.random() * 50) + 100
+            };
+
+            // Update stat cards
+            Object.keys(stats).forEach(key => {
+                document.getElementById(key).textContent = stats[key];
+            });
+
+            // Add visual feedback
+            document.querySelectorAll('.stat-card').forEach(card => {
+                card.style.transform = 'scale(1.05)';
+                setTimeout(() => card.style.transform = 'scale(1)', 200);
+            });
+
+            console.log(`Analytics updated for: Class=${classFilter}, Period=${periodFilter}, Quiz=${quizFilter}`);
+        }
+
+        // Export functionality
+        function exportData() {
+            const data = {
+                timestamp: new Date().toISOString(),
+                filters: {
+                    class: document.getElementById('classFilter').value,
+                    period: document.getElementById('periodFilter').value,
+                    quiz: document.getElementById('quizFilter').value
+                },
+                stats: {
+                    totalStudents: document.getElementById('totalStudents').textContent,
+                    avgScore: document.getElementById('avgScore').textContent,
+                    completionRate: document.getElementById('completionRate').textContent,
+                    totalQuizzes: document.getElementById('totalQuizzes').textContent
+                },
+                students: sampleStudents
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `teacher-analytics-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            alert('?? Analytics report exported successfully!');
+        }
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+            populateStudentTable();
+
+            // Add some interactive animations
+            setTimeout(() => {
+                document.querySelectorAll('.stat-card').forEach((card, index) => {
+                    setTimeout(() => {
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateY(20px)';
+                        card.style.transition = 'all 0.5s ease';
+                        setTimeout(() => {
+                            card.style.opacity = '1';
+                            card.style.transform = 'translateY(0)';
+                        }, 50);
+                    }, index * 100);
+                });
+            }, 500);
+        });
+
+        // Add some interactivity to charts
+        function addChartInteractivity() {
+            // Add click handlers to charts for drill-down functionality
+            performanceChart.options.onClick = (event, elements) => {
+                if (elements.length > 0) {
+                    const dataIndex = elements[0].index;
+                    alert(`Detailed view for Week ${dataIndex + 1} - Feature coming soon!`);
+                }
+            };
+        }
+
+        // Simulate real-time updates
+        setInterval(() => {
+            if (Math.random() < 0.1) { // 10% chance every 5 seconds
+                const newScore = (Math.random() * 20 + 75).toFixed(1) + '%';
+                document.getElementById('avgScore').textContent = newScore;
+
+                // Add a subtle flash effect
+                const scoreElement = document.getElementById('avgScore');
+                scoreElement.style.color = '#38a169';
+                setTimeout(() => scoreElement.style.color = '#667eea', 1000);
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
