@@ -304,7 +304,7 @@
     let gradeChart, performanceChart;
 
     // Initialize dashboard
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         initializeCharts();
         renderAssignmentProgress();
         renderUpcomingDeadlines();
@@ -393,15 +393,15 @@
         const data = studentData.gradeHistory[timeRange];
         let labels;
 
-        switch(timeRange) {
+        switch (timeRange) {
             case 'week':
                 labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
                 break;
             case 'month':
-                labels = Array.from({length: data.length}, (_, i) => `Day ${i + 1}`);
+                labels = Array.from({ length: data.length }, (_, i) => `Day ${i + 1}`);
                 break;
             case 'semester':
-                labels = Array.from({length: data.length}, (_, i) => `Week ${i + 1}`);
+                labels = Array.from({ length: data.length }, (_, i) => `Week ${i + 1}`);
                 break;
         }
 
@@ -533,7 +533,7 @@
 
     // Helper functions
     function getStatusBadge(status) {
-        switch(status) {
+        switch (status) {
             case 'completed': return 'bg-success';
             case 'in-progress': return 'bg-warning';
             case 'pending': return 'bg-secondary';
@@ -542,7 +542,7 @@
     }
 
     function getProgressBarClass(status) {
-        switch(status) {
+        switch (status) {
             case 'completed': return 'bg-success';
             case 'in-progress': return 'bg-warning';
             case 'pending': return 'bg-secondary';
@@ -551,7 +551,7 @@
     }
 
     function getPriorityColor(priority) {
-        switch(priority) {
+        switch (priority) {
             case 'high': return 'danger';
             case 'medium': return 'warning';
             case 'low': return 'success';
