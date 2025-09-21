@@ -1,0 +1,709 @@
+@{
+    ViewData["Title"] = "Student Progress Dashboard";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="text-primary mb-0">
+                    <i class="fas fa-chart-line me-2"></i>Progress Dashboard
+                </h2>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary btn-sm" onclick="refreshDashboard()">
+                        <i class="fas fa-sync-alt me-1"></i>Refresh
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="exportProgress()">
+                        <i class="fas fa-download me-1"></i>Export
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overview Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-1">Overall Grade</h6>
+                            <h3 class="mb-0" id="overallGrade">87.5%</h3>
+                        </div>
+                        <i class="fas fa-trophy fa-2x opacity-50"></i>
+                    </div>
+                    <small class="opacity-75">+3.2% from last week</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-1">Completed</h6>
+                            <h3 class="mb-0" id="completedCount">12/15</h3>
+                        </div>
+                        <i class="fas fa-check-circle fa-2x opacity-50"></i>
+                    </div>
+                    <small class="opacity-75">Assignments done</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-warning text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-1">Pending</h6>
+                            <h3 class="mb-0" id="pendingCount">3</h3>
+                        </div>
+                        <i class="fas fa-clock fa-2x opacity-50"></i>
+                    </div>
+                    <small class="opacity-75">Due this week</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-1">Study Streak</h6>
+                            <h3 class="mb-0" id="studyStreak">7</h3>
+                        </div>
+                        <i class="fas fa-fire fa-2x opacity-50"></i>
+                    </div>
+                    <small class="opacity-75">Days in a row</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Grade Trends Chart -->
+        <div class="col-lg-8 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-area me-2 text-primary"></i>Grade Trends
+                    </h5>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <input type="radio" class="btn-check" name="timeRange" id="week" checked onclick="updateChart('week')">
+                        <label class="btn btn-outline-primary" for="week">Week</label>
+                        <input type="radio" class="btn-check" name="timeRange" id="month" onclick="updateChart('month')">
+                        <label class="btn btn-outline-primary" for="month">Month</label>
+                        <input type="radio" class="btn-check" name="timeRange" id="semester" onclick="updateChart('semester')">
+                        <label class="btn btn-outline-primary" for="semester">Semester</label>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <canvas id="gradeChart" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Breakdown -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-pie-chart me-2 text-success"></i>Performance Breakdown
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="performanceChart" style="max-height: 250px;"></canvas>
+                    <div class="mt-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small">Class Average</span>
+                            <span class="badge bg-secondary">82.3%</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="small">Your Average</span>
+                            <span class="badge bg-primary">87.5%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Assignment Progress -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tasks me-2 text-warning"></i>Assignment Progress
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="assignmentProgress">
+                        <!-- Dynamic content will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Deadlines -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-alt me-2 text-danger"></i>Upcoming Deadlines
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline" id="upcomingDeadlines">
+                        <!-- Dynamic content will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Study Recommendations -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lightbulb me-2 text-info"></i>Study Recommendations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row" id="studyRecommendations">
+                        <!-- Dynamic content will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Progress Modal -->
+<div class="modal fade" id="progressModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detailed Progress</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalContent">
+                <!-- Dynamic content -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="printProgress()">Print Report</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #dee2e6;
+        }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 20px;
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -24px;
+            top: 20px;
+            width: 12px;
+            height: 12px;
+            background: #007bff;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #dee2e6;
+        }
+
+        .timeline-item.urgent::before {
+            background: #dc3545;
+        }
+
+        .timeline-item.completed::before {
+            background: #28a745;
+        }
+
+    .progress-item {
+        margin-bottom: 15px;
+    }
+
+    .progress-header {
+        display: flex;
+        justify-content-between;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+
+    .recommendation-card {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+
+        .recommendation-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script>
+    // Mock data
+    const studentData = {
+        assignments: [
+            { name: "Math Assignment 1", progress: 100, grade: 92, dueDate: "2024-01-15", status: "completed" },
+            { name: "Science Quiz 1", progress: 100, grade: 88, dueDate: "2024-01-18", status: "completed" },
+            { name: "History Essay", progress: 75, grade: null, dueDate: "2024-01-25", status: "in-progress" },
+            { name: "Literature Review", progress: 45, grade: null, dueDate: "2024-01-28", status: "in-progress" },
+            { name: "Physics Lab Report", progress: 0, grade: null, dueDate: "2024-02-02", status: "pending" },
+            { name: "Chemistry Quiz", progress: 0, grade: null, dueDate: "2024-02-05", status: "pending" },
+        ],
+        gradeHistory: {
+            week: [85, 87, 89, 88, 90, 87, 89],
+            month: [82, 84, 86, 87, 88, 89, 87, 88, 90, 89, 87, 89, 88, 90, 87],
+            semester: [75, 78, 80, 82, 84, 85, 87, 88, 89, 87, 88, 89, 87, 89, 87]
+        },
+        subjects: [
+            { name: "Mathematics", grade: 92, color: "#ff6384" },
+            { name: "Science", grade: 88, color: "#36a2eb" },
+            { name: "History", grade: 85, color: "#ffce56" },
+            { name: "Literature", grade: 90, color: "#4bc0c0" },
+            { name: "Physics", grade: 86, color: "#9966ff" }
+        ]
+    };
+
+    let gradeChart, performanceChart;
+
+    // Initialize dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeCharts();
+        renderAssignmentProgress();
+        renderUpcomingDeadlines();
+        renderStudyRecommendations();
+        updateOverviewCards();
+    });
+
+    function initializeCharts() {
+        // Grade trends chart
+        const gradeCtx = document.getElementById('gradeChart').getContext('2d');
+        gradeChart = new Chart(gradeCtx, {
+            type: 'line',
+            data: {
+                labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
+                datasets: [{
+                    label: 'Your Grades',
+                    data: studentData.gradeHistory.week,
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#007bff',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5
+                }, {
+                    label: 'Class Average',
+                    data: [80, 81, 82, 81, 83, 82, 84],
+                    borderColor: '#6c757d',
+                    backgroundColor: 'rgba(108, 117, 125, 0.1)',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.4,
+                    borderDash: [5, 5]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 70,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+        // Performance breakdown chart
+        const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+        performanceChart = new Chart(performanceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: studentData.subjects.map(s => s.name),
+                datasets: [{
+                    data: studentData.subjects.map(s => s.grade),
+                    backgroundColor: studentData.subjects.map(s => s.color),
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function updateChart(timeRange) {
+        const data = studentData.gradeHistory[timeRange];
+        let labels;
+
+        switch(timeRange) {
+            case 'week':
+                labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                break;
+            case 'month':
+                labels = Array.from({length: data.length}, (_, i) => `Day ${i + 1}`);
+                break;
+            case 'semester':
+                labels = Array.from({length: data.length}, (_, i) => `Week ${i + 1}`);
+                break;
+        }
+
+        gradeChart.data.labels = labels;
+        gradeChart.data.datasets[0].data = data;
+        gradeChart.update();
+    }
+
+    function renderAssignmentProgress() {
+        const container = document.getElementById('assignmentProgress');
+        container.innerHTML = '';
+
+        studentData.assignments.forEach(assignment => {
+            const progressHtml = `
+                <div class="progress-item">
+                    <div class="progress-header">
+                        <span class="fw-bold">${assignment.name}</span>
+                        <span class="badge ${getStatusBadge(assignment.status)}">${assignment.status.replace('-', ' ')}</span>
+                    </div>
+                    <div class="progress mb-2" style="height: 8px;">
+                        <div class="progress-bar ${getProgressBarClass(assignment.status)}"
+                             style="width: ${assignment.progress}%"
+                             onclick="showAssignmentDetails('${assignment.name}')"></div>
+                    </div>
+                    <div class="d-flex justify-content-between small text-muted">
+                        <span>Progress: ${assignment.progress}%</span>
+                        <span>Due: ${new Date(assignment.dueDate).toLocaleDateString()}</span>
+                        ${assignment.grade ? `<span>Grade: ${assignment.grade}%</span>` : ''}
+                    </div>
+                </div>
+            `;
+            container.innerHTML += progressHtml;
+        });
+    }
+
+    function renderUpcomingDeadlines() {
+        const container = document.getElementById('upcomingDeadlines');
+        container.innerHTML = '';
+
+        const upcoming = studentData.assignments
+            .filter(a => a.status !== 'completed')
+            .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+            .slice(0, 5);
+
+        upcoming.forEach((assignment, index) => {
+            const dueDate = new Date(assignment.dueDate);
+            const today = new Date();
+            const daysLeft = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+            const urgentClass = daysLeft <= 3 ? 'urgent' : '';
+
+            const timelineHtml = `
+                <div class="timeline-item ${urgentClass}" onclick="showAssignmentDetails('${assignment.name}')">
+                    <h6 class="mb-1">${assignment.name}</h6>
+                    <p class="mb-2 small text-muted">Progress: ${assignment.progress}%</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge ${daysLeft <= 3 ? 'bg-danger' : 'bg-primary'}">${daysLeft} days left</span>
+                        <small class="text-muted">${dueDate.toLocaleDateString()}</small>
+                    </div>
+                </div>
+            `;
+            container.innerHTML += timelineHtml;
+        });
+    }
+
+    function renderStudyRecommendations() {
+        const container = document.getElementById('studyRecommendations');
+        const recommendations = [
+            {
+                title: "Focus on Physics Lab Report",
+                description: "You have a physics assignment due soon. Consider starting the experimental analysis.",
+                priority: "high",
+                icon: "fas fa-flask",
+                action: "Start Now"
+            },
+            {
+                title: "Review Literature Concepts",
+                description: "Your literature review is 45% complete. Focus on adding more critical analysis.",
+                priority: "medium",
+                icon: "fas fa-book",
+                action: "Continue"
+            },
+            {
+                title: "Mathematics Practice",
+                description: "Great job on math! Keep practicing similar problems to maintain your high grade.",
+                priority: "low",
+                icon: "fas fa-calculator",
+                action: "Practice"
+            }
+        ];
+
+        container.innerHTML = '';
+        recommendations.forEach(rec => {
+            const cardHtml = `
+                <div class="col-md-4">
+                    <div class="recommendation-card">
+                        <div class="d-flex align-items-start mb-2">
+                            <div class="me-3">
+                                <i class="${rec.icon} fa-2x text-${getPriorityColor(rec.priority)}"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">${rec.title}</h6>
+                                <span class="badge bg-${getPriorityColor(rec.priority)} mb-2">${rec.priority} priority</span>
+                            </div>
+                        </div>
+                        <p class="small text-muted mb-3">${rec.description}</p>
+                        <button class="btn btn-outline-${getPriorityColor(rec.priority)} btn-sm w-100"
+                                onclick="handleRecommendation('${rec.title}')">
+                            ${rec.action}
+                        </button>
+                    </div>
+                </div>
+            `;
+            container.innerHTML += cardHtml;
+        });
+    }
+
+    function updateOverviewCards() {
+        const completed = studentData.assignments.filter(a => a.status === 'completed').length;
+        const pending = studentData.assignments.filter(a => a.status === 'pending').length;
+        const totalGrades = studentData.assignments
+            .filter(a => a.grade !== null)
+            .reduce((sum, a) => sum + a.grade, 0);
+        const avgGrade = totalGrades / studentData.assignments.filter(a => a.grade !== null).length;
+
+        document.getElementById('overallGrade').textContent = `${avgGrade.toFixed(1)}%`;
+        document.getElementById('completedCount').textContent = `${completed}/${studentData.assignments.length}`;
+        document.getElementById('pendingCount').textContent = pending;
+    }
+
+    // Helper functions
+    function getStatusBadge(status) {
+        switch(status) {
+            case 'completed': return 'bg-success';
+            case 'in-progress': return 'bg-warning';
+            case 'pending': return 'bg-secondary';
+            default: return 'bg-secondary';
+        }
+    }
+
+    function getProgressBarClass(status) {
+        switch(status) {
+            case 'completed': return 'bg-success';
+            case 'in-progress': return 'bg-warning';
+            case 'pending': return 'bg-secondary';
+            default: return 'bg-primary';
+        }
+    }
+
+    function getPriorityColor(priority) {
+        switch(priority) {
+            case 'high': return 'danger';
+            case 'medium': return 'warning';
+            case 'low': return 'success';
+            default: return 'primary';
+        }
+    }
+
+    // Interactive functions
+    function showAssignmentDetails(assignmentName) {
+        const assignment = studentData.assignments.find(a => a.name === assignmentName);
+        if (!assignment) return;
+
+        const modalContent = document.getElementById('modalContent');
+        modalContent.innerHTML = `
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Assignment Details</h6>
+                    <p><strong>Name:</strong> ${assignment.name}</p>
+                    <p><strong>Due Date:</strong> ${new Date(assignment.dueDate).toLocaleDateString()}</p>
+                    <p><strong>Status:</strong> <span class="badge ${getStatusBadge(assignment.status)}">${assignment.status}</span></p>
+                    <p><strong>Progress:</strong> ${assignment.progress}%</p>
+                    ${assignment.grade ? `<p><strong>Grade:</strong> ${assignment.grade}%</p>` : ''}
+                </div>
+                <div class="col-md-6">
+                    <h6>Progress Visualization</h6>
+                    <div class="progress mb-3" style="height: 20px;">
+                        <div class="progress-bar ${getProgressBarClass(assignment.status)}"
+                             style="width: ${assignment.progress}%">${assignment.progress}%</div>
+                    </div>
+                    ${assignment.status !== 'completed' ? `
+                        <div class="d-grid">
+                            <button class="btn btn-primary" onclick="simulateProgress('${assignment.name}')">
+                                Continue Working
+                            </button>
+                        </div>
+                    ` : `
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>Assignment completed!
+                        </div>
+                    `}
+                </div>
+            </div>
+        `;
+
+        const modal = new bootstrap.Modal(document.getElementById('progressModal'));
+        modal.show();
+    }
+
+    function simulateProgress(assignmentName) {
+        const assignment = studentData.assignments.find(a => a.name === assignmentName);
+        if (!assignment || assignment.status === 'completed') return;
+
+        assignment.progress = Math.min(100, assignment.progress + Math.floor(Math.random() * 20) + 10);
+
+        if (assignment.progress === 100) {
+            assignment.status = 'completed';
+            assignment.grade = Math.floor(Math.random() * 15) + 85; // Random grade between 85-100
+        } else if (assignment.progress > 0 && assignment.status === 'pending') {
+            assignment.status = 'in-progress';
+        }
+
+        renderAssignmentProgress();
+        renderUpcomingDeadlines();
+        updateOverviewCards();
+
+        // Close modal and show success message
+        bootstrap.Modal.getInstance(document.getElementById('progressModal')).hide();
+
+        const toast = document.createElement('div');
+        toast.className = 'toast align-items-center text-white bg-success border-0 position-fixed top-0 end-0 m-3';
+        toast.setAttribute('role', 'alert');
+        toast.style.zIndex = '1055';
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    Progress updated! ${assignment.name} is now ${assignment.progress}% complete.
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        document.body.appendChild(toast);
+
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+
+        setTimeout(() => {
+            document.body.removeChild(toast);
+        }, 3000);
+    }
+
+    function handleRecommendation(title) {
+        alert(`Opening study materials for: ${title}\n\nThis would typically:\n• Open relevant course materials\n• Start a study session timer\n• Show progress tracking\n• Provide study tips`);
+    }
+
+    function refreshDashboard() {
+        const refreshBtn = document.querySelector('button[onclick="refreshDashboard()"]');
+        const originalText = refreshBtn.innerHTML;
+        refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Refreshing...';
+        refreshBtn.disabled = true;
+
+        setTimeout(() => {
+            // Simulate data refresh
+            studentData.gradeHistory.week = studentData.gradeHistory.week.map(grade =>
+                Math.max(70, Math.min(100, grade + (Math.random() - 0.5) * 4))
+            );
+
+            updateChart('week');
+            updateOverviewCards();
+
+            refreshBtn.innerHTML = originalText;
+            refreshBtn.disabled = false;
+
+            // Show success message
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3';
+            alert.style.zIndex = '1055';
+            alert.innerHTML = `
+                <i class="fas fa-check-circle me-2"></i>Dashboard refreshed successfully!
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alert);
+
+            setTimeout(() => {
+                if (document.body.contains(alert)) {
+                    document.body.removeChild(alert);
+                }
+            }, 3000);
+        }, 1500);
+    }
+
+    function exportProgress() {
+        const data = {
+            studentName: "Current Student",
+            exportDate: new Date().toLocaleDateString(),
+            overallGrade: document.getElementById('overallGrade').textContent,
+            assignments: studentData.assignments,
+            subjects: studentData.subjects
+        };
+
+        const jsonData = JSON.stringify(data, null, 2);
+        const blob = new Blob([jsonData], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `student-progress-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function printProgress() {
+        window.print();
+    }
+</script>

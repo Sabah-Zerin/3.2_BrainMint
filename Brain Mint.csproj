@@ -294,6 +294,7 @@
     <Content Include="Views\Teacher\te_profile.cshtml" />
     <Content Include="Views\Student\ViewSubmissionResult.cshtml" />
     <Content Include="Views\Student\UserManagement.cshtml" />
+    <Content Include="Views\Student\StudentProgress.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\App_LocalResources\" />
